@@ -86,7 +86,11 @@ const el = {
   taskDescricao: document.getElementById("taskDescricao"),
   taskLink: document.getElementById("taskLink"),
   toast: document.getElementById("toast"),
-  themeToggle: document.getElementById("themeToggle"),
+  temaSeletor: document.getElementById("temaSeletor"),
+  temaEditarBtn: document.getElementById("temaEditarBtn"),
+  temaEditarModal: document.getElementById("temaEditarModal"),
+  temaCoresArea: document.getElementById("temaCoresArea"),
+  temaRedefinirBtn: document.getElementById("temaRedefinirBtn"),
   viewToggle: document.getElementById("viewToggle"),
   duvidaFormWrap: document.getElementById("duvidaFormWrap"),
   duvidaListWrap: document.getElementById("duvidaListWrap"),
@@ -115,19 +119,121 @@ const el = {
 };
 
 // ---------------------------------------------------------------------------
-// Tema claro / escuro
+// Paleta de tema (portado do "personalizar paleta" do audioT original)
 // ---------------------------------------------------------------------------
-function syncThemeButton() {
-  const theme = document.documentElement.getAttribute("data-theme") || "light";
-  el.themeToggle.setAttribute("aria-checked", theme === "dark" ? "true" : "false");
+// 6 temas prontos (dia/noite/frio/deserto/tundra/ceu, definidos como bloco
+// CSS `:root[data-theme="..."]` em style.css) + "personalizado", cujas
+// cores de verdade vêm do localStorage e são aplicadas como estilo inline
+// em <html> (documentElement.style.setProperty), que tem prioridade sobre
+// o bloco CSS `:root[data-theme="personalizado"]` (esse é só um valor de
+// fallback, usado até o JS carregar). Mesma técnica de duas camadas do
+// audioT original, só que adaptada pro conjunto de variáveis daqui.
+const TEMA_VARS_PERSONALIZADO = {
+  bg: "--bg", bgAlt: "--bg-alt", surface: "--surface", surface2: "--surface-2",
+  text: "--text", textMuted: "--text-muted", border: "--border",
+  accent: "--accent", accent2: "--accent-2", accentContrast: "--accent-contrast",
+};
+const TEMA_LABELS_CORES = {
+  bg: "Fundo", bgAlt: "Fundo (alternativo)", surface: "Cartão", surface2: "Cartão (alternativo)",
+  text: "Texto", textMuted: "Texto secundário", border: "Borda",
+  accent: "Destaque", accent2: "Destaque (secundário)", accentContrast: "Texto sobre o destaque",
+};
+// = valores do tema "noite" (mesmo critério do audioT: o personalizado
+// nasce como cópia do tema escuro padrão).
+const TEMA_PADRAO_PERSONALIZADO = {
+  bg: "#0C0E14", bgAlt: "#141722", surface: "#181C29", surface2: "#11131C",
+  text: "#EEF0F8", textMuted: "#9AA0B4", border: "#262B3A",
+  accent: "#7583FF", accent2: "#9B8CFF", accentContrast: "#0A0C13",
+};
+// usado pelo botão "Redefinir cores" - paleta preto/branco/cinza neutra
+const TEMA_PRETO_BRANCO = {
+  bg: "#000000", bgAlt: "#0D0D0D", surface: "#1A1A1A", surface2: "#141414",
+  text: "#FFFFFF", textMuted: "#B3B3B3", border: "#333333",
+  accent: "#595959", accent2: "#404040", accentContrast: "#FFFFFF",
+};
+const TEMA_KEY = "theme";
+const TEMA_PERSONALIZADO_KEY = "temaPersonalizado";
+
+function carregarTemaPersonalizado() {
+  try {
+    const salvo = JSON.parse(localStorage.getItem(TEMA_PERSONALIZADO_KEY));
+    return { ...TEMA_PADRAO_PERSONALIZADO, ...(salvo || {}) };
+  } catch {
+    return { ...TEMA_PADRAO_PERSONALIZADO };
+  }
 }
-syncThemeButton();
-el.themeToggle.addEventListener("click", () => {
-  const current = document.documentElement.getAttribute("data-theme");
-  const next = current === "dark" ? "light" : "dark";
-  document.documentElement.setAttribute("data-theme", next);
-  localStorage.setItem("theme", next);
-  syncThemeButton();
+function salvarTemaPersonalizado(cores) {
+  localStorage.setItem(TEMA_PERSONALIZADO_KEY, JSON.stringify(cores));
+}
+function aplicarCoresPersonalizadas(cores) {
+  Object.entries(TEMA_VARS_PERSONALIZADO).forEach(([chave, varCss]) => {
+    document.documentElement.style.setProperty(varCss, cores[chave]);
+  });
+}
+function limparCoresInline() {
+  Object.values(TEMA_VARS_PERSONALIZADO).forEach((varCss) => {
+    document.documentElement.style.removeProperty(varCss);
+  });
+}
+
+function aplicarTema(nome) {
+  document.documentElement.setAttribute("data-theme", nome);
+  limparCoresInline();
+  if (nome === "personalizado") {
+    aplicarCoresPersonalizadas(carregarTemaPersonalizado());
+  }
+  el.temaSeletor.querySelectorAll(".tema-seg-btn").forEach((btn) => {
+    btn.classList.toggle("ativo", btn.dataset.tema === nome);
+  });
+}
+
+aplicarTema(document.documentElement.getAttribute("data-theme") || "dia");
+
+el.temaSeletor.querySelectorAll(".tema-seg-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    aplicarTema(btn.dataset.tema);
+    localStorage.setItem(TEMA_KEY, btn.dataset.tema);
+  });
+});
+
+function montarEditorTemaPersonalizado() {
+  const area = el.temaCoresArea;
+  area.innerHTML = "";
+  const cores = carregarTemaPersonalizado();
+
+  Object.keys(TEMA_VARS_PERSONALIZADO).forEach((chave) => {
+    const linha = document.createElement("div");
+    linha.className = "tema-linha-cor";
+
+    const label = document.createElement("span");
+    label.textContent = TEMA_LABELS_CORES[chave];
+
+    const input = document.createElement("input");
+    input.type = "color";
+    input.value = cores[chave];
+    input.addEventListener("input", () => {
+      cores[chave] = input.value;
+      salvarTemaPersonalizado(cores);
+      aplicarCoresPersonalizadas(cores);
+    });
+
+    linha.append(label, input);
+    area.appendChild(linha);
+  });
+}
+
+el.temaEditarBtn.addEventListener("click", () => {
+  aplicarTema("personalizado");
+  localStorage.setItem(TEMA_KEY, "personalizado");
+  montarEditorTemaPersonalizado();
+  openModal(el.temaEditarModal);
+});
+
+el.temaRedefinirBtn.addEventListener("click", () => {
+  const cores = { ...TEMA_PRETO_BRANCO };
+  salvarTemaPersonalizado(cores);
+  aplicarCoresPersonalizadas(cores);
+  montarEditorTemaPersonalizado();
 });
 
 // ---------------------------------------------------------------------------
@@ -2643,6 +2749,11 @@ function renderizarPopupPalavraTradutor(original, traduzido, idiomaOrigem) {
 
 async function abrirPopupPalavraTradutor(palavra, idiomaOrigem) {
   tradEl.popupPalavraArea.innerHTML = '<p class="trad-vazio">Carregando...</p>';
+  // esse popup é reusado pelo Mundo Aberto (ver abrirPopupObjetoMundo), que
+  // liga essa classe pra girar o popup junto com o mapa no celular - aqui
+  // (Quiz de Texto) o popup nunca deve estar girado, então garante que a
+  // classe não "vazou" de uma abertura anterior via Mundo Aberto.
+  tradEl.popupPalavraModal.classList.remove("mundo-popup-girado");
   openModal(tradEl.popupPalavraModal);
   try {
     const traduzido = (await traduzirTexto(palavra, idiomaOrigem, "pt")).toLowerCase();
@@ -2831,7 +2942,13 @@ function iniciarMundo(mapa, escala) {
       dx = (dx / distancia) * raio;
       dy = (dy / distancia) * raio;
     }
-    tradEl.mundoJoystickKnob.style.transform = `translate(${dx}px, ${dy}px)`;
+    // A bolinha é filha do bloco que já está girado 90° (ver
+    // ARQUITETURA.md), então um translate(dx,dy) "cru" giraria de novo em
+    // cima da rotação do pai e pareceria andar numa direção errada/
+    // aleatória (mesmo o personagem indo pro lado certo, calculado
+    // direto de dx/dy antes de qualquer rotação, logo abaixo). Compensa
+    // com a rotação inversa: translate(dy, -dx) em vez de (dx, dy).
+    tradEl.mundoJoystickKnob.style.transform = `translate(${dy}px, ${-dx}px)`;
 
     const zonaMorta = raio * 0.25;
     teclas.Up = dx > zonaMorta;
@@ -3099,6 +3216,13 @@ tradEl.lagoaSairBtn.addEventListener("click", fecharLagoa);
 async function abrirPopupObjetoMundo(palavraPt) {
   const idiomaDestino = tradEl.destino.value;
   tradEl.popupPalavraArea.innerHTML = '<p class="trad-vazio">Carregando...</p>';
+  // gira o popup junto com o mapa no visual celular (pedido do usuário) -
+  // some de novo em abrirPopupPalavraTradutor (Quiz de Texto), que não usa
+  // tela girada.
+  tradEl.popupPalavraModal.classList.toggle(
+    "mundo-popup-girado",
+    document.documentElement.dataset.view === "mobile"
+  );
   openModal(tradEl.popupPalavraModal);
   try {
     const traduzido = await traduzirTexto(palavraPt, "pt", idiomaDestino);

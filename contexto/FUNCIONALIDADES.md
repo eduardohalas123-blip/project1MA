@@ -167,11 +167,23 @@ depois voltou a pedido dele mesmo, ver item 26 do HISTORICO.md):
   A tela do jogo (e a da lagoa) também **força modo paisagem** — o
   conteúdo gira deitado mesmo com o celular na posição vertical, pra
   aproveitar melhor o espaço (o mapa é bem mais largo que alto). A barra
-  de cima (título/dica/botão de sair) continua sempre normal, sem virar.
+  de cima (título/dica/botão de sair) continua sempre normal, sem virar
+  — e o popup de tradução que abre ao interagir com um objeto/animal
+  também gira junto (só nesse caso; o popup do Quiz de Texto continua
+  normal).
 
 ## Tema e visual
 
-- Switch de tema claro/escuro (arrastável), salva escolha no navegador.
+- **🎨 Paleta de cores** — portado do "personalizar paleta" que existia no
+  tradutor antigo (`audioT`), agora valendo pro **mural inteiro**
+  (substituiu o switch simples de claro/escuro). 7 opções lado a lado no
+  cabeçalho: ☀️ Dia, 🌙 Noite (padrão), ❄️ Frio, 🌵 Deserto, 🌲 Tundra,
+  🌅 Céu, e 🎨 Personalizado. O botão 🖌️ ao lado abre um editor com 10
+  seletores de cor (fundo, cartão, texto, destaque etc.) que aplicam na
+  hora e salvam sozinhos — dá pra montar uma paleta 100% sua. Um botão
+  "🔄 Redefinir cores" volta o personalizado pra uma paleta neutra
+  preto/branco/cinza. Escolha salva no navegador, continua igual na
+  próxima visita.
 - Switch de visual "computador" (💻) / "celular" (📱) — força o layout
   independente do tamanho real da tela; se a pessoa nunca mexeu no
   switch, o site se adapta sozinho ao tamanho da janela.

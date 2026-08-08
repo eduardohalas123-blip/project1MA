@@ -1092,6 +1092,16 @@
   50% { transform: scale(1.08); }
 }
 
+/* Popup de palavra do objeto interagido no Mundo Aberto: gira junto com
+   o mapa no visual celular (pedido do usuário) - só quando aberto pelo
+   Mundo Aberto (classe ligada/desligada em app.js), não no popup do Quiz
+   de Texto, que fica sempre normal. É só o cartão que gira em volta do
+   próprio centro (não precisa do truque de "preencher a tela toda" do
+   jogo, já que o card já nasce centralizado pelo .modal-overlay). */
+:root[data-view="mobile"] #tradPopupPalavraModal.mundo-popup-girado .modal {
+  transform: rotate(90deg);
+}
+
 .lagoa-overlay {
   position: fixed;
   inset: 0;
@@ -1123,6 +1133,7 @@
 }
 
 .lagoa-area {
+  position: relative;
   flex: 1;
   width: 100%;
   display: flex;

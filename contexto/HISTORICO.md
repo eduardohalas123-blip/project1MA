@@ -289,6 +289,56 @@ por trás de cada decisão, pra não se perder o contexto depois.
       analógico moveu o personagem, o botão contextual apareceu perto de
       um objeto ("Interagir") e de um animal do Zoo, e tocar nele abriu
       o popup de tradução certo.
+30. **3 correções nos controles de celular do Mundo Aberto** (2026-08-08)
+    — usuário testou de verdade e reportou os problemas:
+    - **"Analógico bugado, arrasto pra esquerda e ele vai pra direção
+      aleatória (mas o personagem vai pra esquerda certinho)"**: o
+      personagem estava certo porque o cálculo de direção usa dx/dy
+      direto (sem passar por CSS). A bolinha do analógico é que estava
+      errada — ela é filha do bloco que já girou 90°, então o
+      `transform: translate(dx,dy)` dela sofria a rotação do pai de novo
+      por cima, virando uma direção visual errada. Corrigido aplicando a
+      rotação inversa só na bolinha: `translate(dy, -dx)` em vez de
+      `translate(dx, dy)`. Confirmado medindo o deslocamento visual real
+      antes/depois do arrasto via Playwright (bateu exatamente com a
+      direção do dedo depois da correção).
+    - **"Criar botão pra sair da tela da lagoa no celular"**: o botão já
+      existia (`lagoaSairBtn`) e estava na posição certa — só que ficava
+      **coberto pela própria imagem da lagoa**, porque `.lagoa-area`
+      não tinha `position: relative`. Sem isso, o elemento que gira
+      (`#lagoaImagemWrap`, `position: absolute`) usava a tela inteira
+      como referência de posição em vez de só a área abaixo da barra de
+      título, cobrindo ela também. Um `position: relative` faltando —
+      mesma classe de bug que já tinha sido evitada em
+      `.mundo-jogo-area` (essa já tinha a propriedade certa desde o
+      início).
+    - **Popup de palavra do objeto interagido também girado**: pedido
+      novo, não bug. O popup (`#tradPopupPalavraModal`, reusado do Quiz
+      de Texto) agora gira 90° junto quando aberto pelo Mundo Aberto no
+      celular — só nesse caso; uma classe (`mundo-popup-girado`) liga em
+      `abrirPopupObjetoMundo()` e desliga em `abrirPopupPalavraTradutor()`
+      pra não vazar pro popup do Quiz de Texto, que não deve girar.
+31. **Paleta de cores personalizável, portada do audioT** (2026-08-08) —
+    pedido: "um botão de personalizar a paleta igual tinha no meu tradutor
+    antigo". No `audioT` original isso valia pro app inteiro (era só
+    tradutor); aqui o mural tem várias seções e já tinha um switch simples
+    de claro/escuro — perguntei antes de mexer, e o usuário confirmou que
+    queria **site inteiro, substituindo** o switch antigo (não deixar os
+    dois sistemas coexistindo). Trocado: `#themeToggle` (switch binário)
+    virou `#temaSeletor` (7 botões: Dia/Noite/Frio/Deserto/Tundra/Céu/
+    Personalizado) + `#temaEditarBtn` (🖌️, abre editor com 10 seletores
+    de cor). Os 6 temas prontos são blocos CSS estáticos adaptados das
+    cores do `audioT` original pro conjunto maior de variáveis daqui (lá
+    eram ~10 por tema, aqui ~15 — as variáveis "extras" tipo
+    `border-strong`/sombras/cores de erro reusam os mesmos valores do
+    tema dia/noite já existente, não foram tunadas uma a uma pros 4 temas
+    novos). "Dia" e "Noite" são literalmente os antigos "light"/"dark" só
+    renomeados (mesmos valores, sem mudança visual pra quem já usava o
+    site). Testado com Playwright: os 7 botões existem, cada tema muda
+    `--bg` (e o resto) corretamente, o editor abre com 10 inputs de cor,
+    mudar uma cor aplica na hora E sobrevive a um reload da página
+    (localStorage), e o botão "Redefinir cores" volta pro preto/branco
+    neutro.
 
 ## Deploy
 
