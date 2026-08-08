@@ -1,0 +1,76 @@
+rules_version = '2';
+
+// Cole este conteúdo em: Firebase Console > Firestore Database > Regras.
+//
+// Só as duas contas listadas em isAdmin() têm poder de admin (adicionar,
+// editar, apagar tarefa, apagar comentário/dúvida, ler dúvidas). Qualquer
+// outra conta que alguém crie por fora do site não tem esses poderes,
+// mesmo estando logada.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.uid in [
+          "lKoiuGL5TEfkaDASCCSpl1227XC2",
+          "V6ErJPAiS8QPU7ZKQqX4c1Io0nA3"
+        ];
+    }
+
+    match /tarefas/{taskId} {
+      allow read: if true;
+      allow create: if isAdmin()
+        && request.resource.data.materia is string
+        && request.resource.data.prazo is string
+        && request.resource.data.descricao is string
+        && request.resource.data.materia.size() > 0
+        && request.resource.data.descricao.size() > 0;
+      allow update, delete: if isAdmin();
+
+      // Comentários de cada tarefa: qualquer um lê e comenta,
+      // só admin apaga (moderação).
+      match /comentarios/{comentarioId} {
+        allow read: if true;
+        allow create: if request.resource.data.nome is string
+          && request.resource.data.texto is string
+          && request.resource.data.nome.size() > 0
+          && request.resource.data.nome.size() < 150
+          && request.resource.data.texto.size() > 0
+          && request.resource.data.texto.size() < 1200;
+        allow update: if false;
+        allow delete: if isAdmin();
+      }
+    }
+
+    // Dúvidas: qualquer um envia. Só o admin vê as que ainda não têm
+    // resposta; depois de respondida, fica visível pra todo mundo
+    // (funciona como um mini FAQ).
+    match /duvidas/{duvidaId} {
+      allow read: if isAdmin()
+        || (resource.data.resposta is string && resource.data.resposta.size() > 0);
+      allow create: if request.resource.data.nome is string
+        && request.resource.data.duvida is string
+        && request.resource.data.nome.size() > 0
+        && request.resource.data.nome.size() < 200
+        && request.resource.data.duvida.size() > 0
+        && request.resource.data.duvida.size() < 2500;
+      allow update, delete: if isAdmin();
+    }
+
+    // Chat do versículo do dia: agrupado por data (AAAA-MM-DD) - não existe
+    // "apagar o chat" explícito, o dia seguinte já usa outra chave de
+    // documento (mensagens de hoje) e nasce vazio sozinho. Mesma política de
+    // moderação dos comentários de tarefa: qualquer um lê e comenta, só
+    // admin apaga.
+    match /versiculoComentarios/{dataId}/mensagens/{mensagemId} {
+      allow read: if true;
+      allow create: if request.resource.data.nome is string
+        && request.resource.data.texto is string
+        && request.resource.data.nome.size() > 0
+        && request.resource.data.nome.size() < 150
+        && request.resource.data.texto.size() > 0
+        && request.resource.data.texto.size() < 1200;
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+  }
+}

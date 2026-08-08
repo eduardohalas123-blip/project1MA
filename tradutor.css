@@ -1,0 +1,867 @@
+/*
+  Estilo da seção Tradutor — importado de audioT/static/styleTranslator.css,
+  mas todo reescrito escopado em #tradutorSection (com classes prefixadas
+  "trad-") pra não colidir com .card/.modal/etc. do resto do site, e usando
+  as variáveis de tema (--surface, --border, --accent...) já definidas em
+  style.css em vez de trazer o sistema de temas dia/noite/frio do tradutor
+  original — assim ele já nasce combinando com o claro/escuro do mural.
+*/
+
+/* faltava essa classe (só #tradutorSection sem ela fica sem padding/
+   max-width nenhum, e o conteúdo cola na sidebar - Mérito/Dúvidas/Horário/
+   Versículo têm cada um a sua própria classe *-section com essas regras,
+   essa é a equivalente pro Tradutor) */
+.tradutor-section {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 32px 24px 90px;
+}
+:root[data-view="mobile"] .tradutor-section {
+  padding: 24px 16px 70px;
+}
+
+#tradutorSection .trad-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+#tradutorSection .trad-idiomas-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#tradutorSection .trad-select {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0 10px;
+}
+
+/* .trad-icon-btn/.trad-estrela NÃO são escopadas em #tradutorSection de
+   propósito (ao contrário do resto deste arquivo) - são reusadas dentro dos
+   modais (favoritos/quiz/palavra do dia/etc.), que ficam fora da seção no
+   DOM (irmãos de .app-shell, mesmo padrão dos outros modais do site) */
+.trad-icon-btn {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg-alt);
+  color: var(--text);
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color .15s ease, transform .1s ease;
+}
+
+.trad-icon-btn:hover {
+  background: var(--border);
+}
+
+.trad-icon-btn:active {
+  transform: scale(0.92);
+}
+
+.trad-modal-acoes-topo {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.trad-palavra-dia-area {
+  text-align: center;
+  padding: 10px 0 4px;
+}
+
+.trad-palavra-dia-original {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.trad-palavra-dia-traduzida {
+  font-size: 1.05rem;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+#tradutorSection .trad-textarea {
+  width: 100%;
+  height: 100px;
+  resize: none;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.95rem;
+  padding: 10px;
+}
+
+#tradutorSection .trad-btn-primario {
+  display: block;
+  width: 100%;
+  height: 44px;
+  margin-bottom: 14px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: opacity .15s ease;
+}
+
+#tradutorSection .trad-btn-primario:hover {
+  opacity: 0.9;
+}
+
+#tradutorSection .trad-btn-primario:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+#tradutorSection .trad-resultado-card {
+  min-height: 90px;
+  display: flex;
+  flex-direction: column;
+}
+
+#tradutorSection .trad-resultado-topo {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+#tradutorSection .trad-resultado {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 8px 0 0;
+  padding: 4px;
+  text-align: center;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.trad-estrela {
+  color: #FFD54F;
+  font-size: 16px;
+}
+
+/* Falar + modo papagaio ------------------------------------------------- */
+
+#tradutorSection .trad-switch-linha {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+#tradutorSection .trad-switch-linha input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+#tradutorSection .trad-switch-track {
+  width: 38px;
+  height: 21px;
+  border-radius: 999px;
+  background: var(--border);
+  position: relative;
+  flex-shrink: 0;
+  transition: background-color .15s ease;
+}
+
+#tradutorSection .trad-switch-track::before {
+  content: "";
+  position: absolute;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: var(--surface);
+  top: 2px;
+  left: 2px;
+  transition: transform .15s ease;
+}
+
+#tradutorSection .trad-switch-linha input:checked + .trad-switch-track {
+  background: var(--accent);
+}
+
+#tradutorSection .trad-switch-linha input:checked + .trad-switch-track::before {
+  transform: translateX(17px);
+}
+
+#tradutorSection .trad-linha-falar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+#tradutorSection .trad-btn-secundario {
+  flex: 1;
+  height: 44px;
+  padding: 0 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color .15s ease;
+}
+
+#tradutorSection .trad-btn-secundario:hover {
+  background: var(--bg-alt);
+}
+
+#tradutorSection .trad-btn-secundario:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+#tradutorSection .trad-label-segundos {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  width: 30px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+#tradutorSection .trad-slider-segundos {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 90px;
+  flex-shrink: 0;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--border);
+  outline: none;
+  cursor: pointer;
+}
+
+#tradutorSection .trad-slider-segundos::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--surface);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .3);
+  cursor: pointer;
+}
+
+#tradutorSection .trad-slider-segundos::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--surface);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .3);
+  cursor: pointer;
+}
+
+/* Grade de ações (favoritos / flashcards / quiz) ------------------------ */
+
+#tradutorSection .trad-grid-acoes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+#tradutorSection .trad-btn-grid {
+  height: 46px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: background-color .15s ease;
+}
+
+#tradutorSection .trad-btn-grid:hover {
+  background: var(--bg-alt);
+}
+
+#tradutorSection .trad-btn-perigo {
+  display: block;
+  width: 100%;
+  height: 42px;
+  margin-top: 10px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--danger-bg);
+  color: var(--danger);
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+#tradutorSection .trad-btn-perigo:hover {
+  opacity: 0.85;
+}
+
+/* Conteúdo dos modais do tradutor (favoritos/flashcards/quiz) ----------- */
+
+.trad-modal-body {
+  max-height: 62vh;
+  overflow-y: auto;
+}
+
+.trad-favorito-bloco {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.trad-favorito-textos {
+  min-width: 0;
+}
+
+.trad-favorito-original {
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin: 0 0 2px;
+  word-wrap: break-word;
+  color: var(--text);
+}
+
+.trad-favorito-traduzido {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin: 0;
+  word-wrap: break-word;
+}
+
+.trad-favorito-remover {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: var(--border);
+  color: var(--text);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.trad-favorito-remover:hover {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.trad-vazio {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  padding: 20px 0;
+}
+
+/* Flashcards -------------------------------------------------------------- */
+
+.trad-flashcard-contador {
+  text-align: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin: 0 0 12px;
+}
+
+.trad-flashcard {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  min-height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  text-align: center;
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+
+.trad-flashcard-frente {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text);
+  word-wrap: break-word;
+}
+
+.trad-flashcard-verso {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent);
+  word-wrap: break-word;
+}
+
+.trad-flashcard-dica {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin: -8px 0 16px;
+}
+
+.trad-flashcard-nav {
+  display: flex;
+  gap: 8px;
+}
+
+.trad-flashcard-nav button {
+  flex: 1;
+  height: 40px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.trad-flashcard-nav button:hover {
+  background: var(--bg-alt);
+}
+
+/* Quiz (vocabulário e pronúncia) ------------------------------------------ */
+
+.trad-dificuldade-btn {
+  display: block;
+  width: 100%;
+  height: 60px;
+  border: none;
+  border-radius: var(--radius-lg);
+  font: inherit;
+  font-size: 1.02rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 14px;
+  color: #FFFFFF;
+}
+
+.trad-dificuldade-btn.facil { background: #58CC02; }
+.trad-dificuldade-btn.medio { background: #F5C518; color: #2B2B2B; }
+.trad-dificuldade-btn.dificil { background: #FF4B4B; }
+
+.trad-quiz-contador {
+  text-align: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin: 0 0 14px;
+}
+
+.trad-quiz-pergunta {
+  text-align: center;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 20px;
+}
+
+.trad-quiz-opcao {
+  display: block;
+  width: 100%;
+  height: 48px;
+  margin-bottom: 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+
+.trad-quiz-opcao:disabled { cursor: default; }
+.trad-quiz-opcao.certa { background: #58CC02; border-color: #58CC02; color: #fff; }
+.trad-quiz-opcao.errada { background: #FF4B4B; border-color: #FF4B4B; color: #fff; }
+.trad-quiz-opcao.correta-revelada { background: #FFA500; border-color: #FFA500; color: #fff; }
+
+.trad-quiz-avancar {
+  display: block;
+  width: 100%;
+  height: 42px;
+  margin-top: 16px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.trad-quiz-voltar {
+  display: block;
+  width: 100%;
+  height: 40px;
+  margin-top: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.trad-quiz-resultado-titulo {
+  text-align: center;
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 4px 0 12px;
+  color: var(--text);
+}
+
+.trad-quiz-resultado-info {
+  text-align: center;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.trad-quiz-erro {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--danger);
+  margin-bottom: 14px;
+}
+
+/* Pronúncia --------------------------------------------------------------- */
+
+.trad-pronuncia-topo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.trad-pronuncia-palavra {
+  text-align: center;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.trad-pronuncia-traducao {
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin: 4px 0 20px;
+}
+
+.trad-pronuncia-status {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 14px 0 4px;
+  white-space: pre-line;
+}
+
+.trad-mic-btn {
+  display: block;
+  width: 100%;
+  height: 48px;
+  margin-top: 10px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.trad-mic-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.trad-mic-btn.trad-mic-parar {
+  background: var(--danger);
+}
+
+/* Nome antes do quiz (usado no ranking) ------------------------------------ */
+
+.trad-quiz-nome-label {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0 0 10px;
+}
+
+.trad-quiz-nome-input {
+  display: block;
+  width: 100%;
+  height: 42px;
+  margin-bottom: 18px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.9rem;
+  padding: 0 12px;
+}
+
+/* Histórico de traduções ---------------------------------------------------- */
+
+.trad-historico-linha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 4px;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.85rem;
+}
+
+.trad-historico-linha:last-child {
+  border-bottom: none;
+}
+
+.trad-historico-original {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.trad-historico-seta {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.trad-historico-traduzido {
+  color: var(--text-muted);
+  text-align: right;
+}
+
+/* Ranking / histórico de quiz ------------------------------------------------ */
+
+.trad-ranking-titulo {
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  margin: 18px 0 8px;
+}
+
+.trad-ranking-titulo:first-child {
+  margin-top: 0;
+}
+
+.trad-ranking-linha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 4px;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.84rem;
+}
+
+.trad-ranking-linha:last-child {
+  border-bottom: none;
+}
+
+.trad-ranking-nome {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.trad-ranking-detalhe {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.trad-ranking-pontos {
+  color: var(--accent);
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+/* Editor de vocabulário -------------------------------------------------- */
+
+.trad-vocab-dificuldade {
+  display: flex;
+  gap: 4px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 4px;
+  margin-bottom: 12px;
+}
+
+.trad-vocab-dif-btn {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.78rem;
+  padding: 8px 4px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.trad-vocab-dif-btn.ativo {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.trad-vocab-add {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.trad-vocab-add input {
+  flex: 1;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.88rem;
+  padding: 8px 12px;
+}
+
+.trad-vocab-lista {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.trad-vocab-palavra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 4px;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.86rem;
+  color: var(--text);
+}
+
+.trad-vocab-palavra:last-child {
+  border-bottom: none;
+}
+
+.trad-vocab-palavra button {
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.trad-vocab-palavra button:hover {
+  color: var(--danger);
+}
+
+/* Quiz contra o tempo ------------------------------------------------------- */
+
+.trad-tempo-barra {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+
+.trad-tempo-barra-interna {
+  height: 100%;
+  background: var(--accent);
+  transition: width 1s linear, background-color .3s ease;
+}
+
+.trad-tempo-barra-interna.urgente {
+  background: var(--danger);
+}
+
+/* Quiz de texto (pronúncia longa) ------------------------------------------- */
+
+.trad-texto-quiz-conteudo {
+  text-align: left;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  margin: 0 0 18px;
+  white-space: pre-line;
+}
+
+.trad-palavra-certa {
+  color: #22C55E;
+}
+
+.trad-palavra-errada {
+  color: #FF4B4B;
+}
+
+.trad-palavra-clicavel {
+  cursor: pointer;
+  border-radius: 4px;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+
+.trad-palavra-clicavel:hover {
+  background: var(--bg-alt);
+}
+
+.trad-porcentagem-titulo {
+  text-align: center;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 4px;
+}

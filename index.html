@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mural 1MA</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="tradutor.css" />
+  <script>
+    (function () {
+      var saved = localStorage.getItem("theme");
+      var theme = saved || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+
+      var savedView = localStorage.getItem("viewMode");
+      var view = savedView || (window.innerWidth < 640 ? "mobile" : "desktop");
+      document.documentElement.setAttribute("data-view", view);
+    })();
+  </script>
+</head>
+<body>
+
+  <div id="setupNotice" class="setup-notice" hidden>
+    <div class="setup-notice-inner">
+      <strong>Firebase ainda não configurado.</strong>
+      Edite <code>firebase-config.js</code> com os dados do seu projeto para o mural funcionar de verdade.
+      Veja o passo a passo enviado no chat.
+    </div>
+  </div>
+
+  <img src="LogotipoAdventista.svg.webp" alt="" aria-hidden="true" class="school-watermark" />
+  <div class="credit-tag">Feito por Eduardo Halas</div>
+
+  <div class="app-shell">
+    <nav class="sidebar" aria-label="Seções">
+      <button class="sidebar-item active" data-section="muralSection" type="button">
+        <span class="icon" aria-hidden="true">📋</span>
+        <span>Mural</span>
+      </button>
+      <button class="sidebar-item" data-section="meritoSection" type="button">
+        <span class="icon" aria-hidden="true">💎</span>
+        <span>Mérito</span>
+      </button>
+      <button class="sidebar-item" data-section="duvidasSection" type="button">
+        <span class="icon" aria-hidden="true">❓</span>
+        <span>Dúvidas</span>
+      </button>
+      <button class="sidebar-item" data-section="horarioSection" type="button">
+        <span class="icon" aria-hidden="true">🗓️</span>
+        <span>Horário</span>
+      </button>
+      <button class="sidebar-item" data-section="versiculoSection" type="button">
+        <span class="icon" aria-hidden="true">📖</span>
+        <span>Versículo</span>
+      </button>
+      <button class="sidebar-item" data-section="tradutorSection" type="button">
+        <span class="icon" aria-hidden="true">🌐</span>
+        <span>Tradutor</span>
+      </button>
+    </nav>
+
+    <div class="app-viewport">
+      <header class="header">
+        <div class="header-inner">
+          <div class="brand">
+            <span class="brand-mark" aria-hidden="true">1MA</span>
+            <span class="brand-name">Mural da turma</span>
+          </div>
+          <div class="header-actions">
+            <div class="header-switches">
+              <button id="viewToggle" class="theme-switch view-switch" type="button" role="switch" aria-checked="false" aria-label="Alternar entre visual de computador e celular">
+                <span class="theme-switch-icons" aria-hidden="true"><span>💻</span><span>📱</span></span>
+                <span class="theme-switch-knob"></span>
+              </button>
+              <button id="themeToggle" class="theme-switch" type="button" role="switch" aria-checked="false" aria-label="Alternar modo escuro">
+                <span class="theme-switch-icons" aria-hidden="true"><span>☀️</span><span>🌙</span></span>
+                <span class="theme-switch-knob"></span>
+              </button>
+            </div>
+            <button id="loginBtn" class="btn btn-ghost" type="button">Entrar como Admin</button>
+            <button id="addTaskBtn" class="btn btn-primary" type="button" hidden>+ Nova tarefa</button>
+            <button id="logoutBtn" class="btn btn-ghost" type="button" hidden>Sair</button>
+          </div>
+        </div>
+      </header>
+
+      <main class="main">
+        <section id="muralSection" class="app-section">
+          <div class="section-intro mural-intro">
+            <span class="eyebrow">// mural</span>
+            <h2>Tarefas da turma</h2>
+          </div>
+          <div id="emptyState" class="empty-state" hidden>
+            <p>Nenhuma tarefa por aqui ainda.</p>
+          </div>
+          <div id="loadingState" class="loading-state">
+            <p>Carregando tarefas…</p>
+          </div>
+          <div id="filterBar" class="filter-bar" hidden></div>
+          <div id="board" class="board"></div>
+        </section>
+
+        <section id="meritoSection" class="app-section merito-section" hidden>
+          <div class="merito-intro">
+            <span class="eyebrow">// mérito</span>
+            <h2>Mérito</h2>
+            <p>Coloque suas notas do boletim em cada matéria. A média decide seu nível: <strong>9,5 ou mais</strong> é Diamante, <strong>de 9 a 9,4</strong> é Ouro, abaixo de <strong>9</strong> ainda não tem nível.</p>
+          </div>
+          <div class="merito-itinerario">
+            <span class="merito-itinerario-label">Seu itinerário:</span>
+            <button type="button" class="chip merito-itinerario-btn" data-itinerario="humanas">Humanas</button>
+            <button type="button" class="chip merito-itinerario-btn" data-itinerario="exatas">Exatas</button>
+          </div>
+          <div id="meritoGrid" class="merito-grid"></div>
+          <div id="meritoResult" class="merito-result" hidden>
+            <div id="meritoBadge" class="merito-badge"></div>
+            <p id="meritoAvgText" class="merito-avg-text"></p>
+          </div>
+        </section>
+
+        <section id="duvidasSection" class="app-section duvidas-section" hidden>
+          <div id="duvidaFormWrap">
+            <div class="merito-intro">
+              <span class="eyebrow">// dúvidas</span>
+              <h2>Tire suas dúvidas</h2>
+              <p>Escreva sua dúvida abaixo. Só o admin vê antes de responder — depois de respondida, a pergunta e a resposta ficam visíveis aqui embaixo pra todo mundo (útil pra quem tiver a mesma dúvida).</p>
+            </div>
+            <form id="duvidaForm" class="duvida-form">
+              <label for="duvidaNome">Seu nome</label>
+              <input type="text" id="duvidaNome" name="nome" required maxlength="80" placeholder="Como podemos te chamar" />
+
+              <label for="duvidaTexto">Sua dúvida</label>
+              <textarea id="duvidaTexto" name="duvida" rows="5" required maxlength="1000" placeholder="Escreva aqui o que você quer perguntar..."></textarea>
+
+              <p id="duvidaError" class="form-error" hidden></p>
+
+              <button type="submit" class="btn btn-primary">Enviar dúvida</button>
+            </form>
+
+            <div class="duvida-public-wrap">
+              <h3 class="duvida-public-title">Perguntas já respondidas</h3>
+              <div id="duvidaPublicEmpty" class="empty-state" hidden>
+                <p>Nenhuma pergunta respondida ainda.</p>
+              </div>
+              <div id="duvidaPublicList" class="duvida-list"></div>
+            </div>
+          </div>
+
+          <div id="duvidaListWrap" hidden>
+            <div class="merito-intro">
+              <span class="eyebrow">// dúvidas</span>
+              <h2>Dúvidas recebidas</h2>
+              <p>Todas as perguntas aparecem aqui. As respondidas também ficam visíveis pra turma toda.</p>
+            </div>
+            <div id="duvidaEmpty" class="empty-state" hidden>
+              <p>Nenhuma dúvida por enquanto.</p>
+            </div>
+            <div id="duvidaList" class="duvida-list"></div>
+          </div>
+        </section>
+
+        <section id="horarioSection" class="app-section horario-section" hidden>
+          <div class="merito-intro">
+            <span class="eyebrow">// horário</span>
+            <h2>Horário de aulas</h2>
+            <p>Horário da turma 1MA — válido a partir de 21/07.</p>
+          </div>
+          <div class="horario-table-wrap">
+            <table class="horario-table">
+              <thead>
+                <tr>
+                  <th>Horário</th>
+                  <th>Segunda</th>
+                  <th>Terça</th>
+                  <th>Quarta</th>
+                  <th>Quinta</th>
+                  <th>Sexta</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="horario-time">07h15</td>
+                  <td>Biologia</td>
+                  <td>Física</td>
+                  <td>Arte</td>
+                  <td>Geografia</td>
+                  <td>Física</td>
+                </tr>
+                <tr>
+                  <td class="horario-time">08h05</td>
+                  <td>Biologia</td>
+                  <td>Química</td>
+                  <td>História</td>
+                  <td>Argumentação</td>
+                  <td>Física</td>
+                </tr>
+                <tr>
+                  <td class="horario-time">08h55</td>
+                  <td>Química</td>
+                  <td>Química</td>
+                  <td>Ed. Física</td>
+                  <td>Matemática</td>
+                  <td>L. Portuguesa</td>
+                </tr>
+                <tr>
+                  <td class="horario-time">09h45</td>
+                  <td>Matemática</td>
+                  <td>Proj. de Vida</td>
+                  <td>C. Geral</td>
+                  <td>Matemática</td>
+                  <td>L. Portuguesa</td>
+                </tr>
+                <tr>
+                  <td class="horario-time">10h50</td>
+                  <td>Inglês</td>
+                  <td>Biologia</td>
+                  <td>Inglês</td>
+                  <td>Argumentação</td>
+                  <td>Geografia</td>
+                </tr>
+                <tr>
+                  <td class="horario-time">11h40</td>
+                  <td>História</td>
+                  <td>Ed. Física</td>
+                  <td>Ens. Religioso</td>
+                  <td>Ens. Religioso</td>
+                  <td>Literatura</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="versiculoSection" class="app-section versiculo-section" hidden>
+          <div class="merito-intro">
+            <span class="eyebrow">// versículo do dia</span>
+            <h2>Versículo do dia</h2>
+          </div>
+          <div class="versiculo-card">
+            <p id="versiculoTexto" class="versiculo-texto">Carregando…</p>
+            <p id="versiculoRef" class="versiculo-ref"></p>
+          </div>
+
+          <div class="versiculo-chat">
+            <p class="versiculo-chat-titulo">💬 Comentários sobre o versículo de hoje</p>
+            <div id="versiculoChatEmpty" class="comments-empty" hidden>
+              <p>Seja o primeiro a comentar sobre o versículo de hoje! (o chat reseta quando o versículo mudar amanhã)</p>
+            </div>
+            <div id="versiculoChatList" class="comments-list"></div>
+            <form id="versiculoChatForm" class="comment-form">
+              <input type="text" id="versiculoChatNome" placeholder="Seu nome" required maxlength="60" />
+              <div class="comment-input-row">
+                <textarea id="versiculoChatTexto" placeholder="O que você achou do versículo de hoje?" required maxlength="500" rows="2"></textarea>
+                <button type="submit" class="btn btn-primary comment-send">Enviar</button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <section id="tradutorSection" class="app-section tradutor-section" hidden>
+          <div class="merito-intro">
+            <span class="eyebrow">// tradutor</span>
+            <h2>Tradutor</h2>
+            <p>Traduza um texto entre 34 idiomas, com voz, favoritos, flashcards e quiz.</p>
+          </div>
+
+          <div class="trad-card">
+            <div class="trad-idiomas-row">
+              <select id="tradOrigem" class="trad-select" aria-label="Idioma de origem"></select>
+              <button id="tradTrocar" class="trad-icon-btn" type="button" title="Trocar idiomas">⇅</button>
+              <select id="tradDestino" class="trad-select" aria-label="Idioma de destino"></select>
+              <button id="tradFixarBtn" class="trad-icon-btn" type="button" title="Fixar idioma de destino no topo">📌</button>
+            </div>
+            <label class="trad-switch-linha">
+              <input type="checkbox" id="tradPapagaio">
+              <span class="trad-switch-track"></span>
+              <span>🦜 Modo Papagaio (repete sua fala em vez de traduzir)</span>
+            </label>
+          </div>
+
+          <div class="trad-card">
+            <textarea id="tradTexto" class="trad-textarea" placeholder="Digite algo para traduzir..." maxlength="1000"></textarea>
+          </div>
+
+          <button id="tradTraduzirBtn" class="trad-btn-primario" type="button">🌐 Traduzir</button>
+
+          <div class="trad-linha-falar">
+            <button id="tradFalarBtn" class="trad-btn-secundario" type="button" title="Falar (transcrever)">🎤 Falar</button>
+            <span id="tradLabelSegundos" class="trad-label-segundos">10s</span>
+            <input type="range" id="tradSliderSegundos" class="trad-slider-segundos" min="5" max="30" value="10" title="Por quanto tempo deixar o microfone aberto">
+          </div>
+
+          <div class="trad-card trad-resultado-card">
+            <div class="trad-resultado-topo">
+              <button id="tradFavoritarBtn" class="trad-icon-btn trad-estrela" type="button" title="Adicionar aos favoritos">☆</button>
+              <button id="tradOuvirBtn" class="trad-icon-btn" type="button" title="Repetir (ouvir de novo)">🔊</button>
+              <button id="tradDevagarBtn" class="trad-icon-btn" type="button" title="Ouvir devagar">🐢</button>
+              <button id="tradCopiarBtn" class="trad-icon-btn" type="button" title="Copiar tradução">📋</button>
+            </div>
+            <p id="tradResultado" class="trad-resultado">A tradução aparece aqui</p>
+          </div>
+          <audio id="tradAudioPlayer" hidden></audio>
+
+          <div class="trad-grid-acoes">
+            <button id="tradAbrirHistoricoBtn" class="trad-btn-grid" type="button">📜 Traduções</button>
+            <button id="tradAbrirHistoricoQuizBtn" class="trad-btn-grid" type="button">🏆 Hist. Quiz</button>
+            <button id="tradAbrirFavoritosBtn" class="trad-btn-grid" type="button">⭐ Favoritos</button>
+            <button id="tradAbrirFlashcardsBtn" class="trad-btn-grid" type="button">🎴 Flashcards</button>
+            <button id="tradAbrirPalavraDiaBtn" class="trad-btn-grid" type="button">📅 Palavra Dia</button>
+            <button id="tradAbrirVocabularioBtn" class="trad-btn-grid" type="button">📖 Vocabulário</button>
+            <button id="tradAbrirQuizBtn" class="trad-btn-grid" type="button">🧠 Quiz Vocabulário</button>
+            <button id="tradAbrirQuizTempoBtn" class="trad-btn-grid" type="button">⏱️ Quiz Tempo</button>
+            <button id="tradAbrirQuizPronunciaBtn" class="trad-btn-grid" type="button">🎤 Quiz Pronúncia</button>
+            <button id="tradAbrirQuizTextoBtn" class="trad-btn-grid" type="button">📄 Quiz Texto</button>
+          </div>
+
+          <button id="tradLimparHistoricosBtn" class="trad-btn-perigo" type="button">🗑️ Limpar Históricos</button>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <p>Mural da turma 1MA — atualizado em tempo real</p>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Modal: login admin -->
+  <div id="loginModal" class="modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+      <div class="modal-header">
+        <h2 id="loginTitle">Entrar como admin</h2>
+        <button class="modal-close" data-close="loginModal" aria-label="Fechar" type="button">&times;</button>
+      </div>
+      <form id="loginForm" class="modal-body">
+        <label for="loginEmail">E-mail</label>
+        <input type="email" id="loginEmail" name="email" required autocomplete="username" />
+
+        <label for="loginPassword">Senha</label>
+        <input type="password" id="loginPassword" name="password" required autocomplete="current-password" />
+
+        <p id="loginError" class="form-error" hidden></p>
+
+        <button type="submit" class="btn btn-primary btn-block">Entrar</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: nova tarefa -->
+  <div id="taskModal" class="modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="taskTitle">
+      <div class="modal-header">
+        <h2 id="taskTitle">Nova tarefa</h2>
+        <button class="modal-close" data-close="taskModal" aria-label="Fechar" type="button">&times;</button>
+      </div>
+      <form id="taskForm" class="modal-body">
+        <label for="taskMateria">Matéria</label>
+        <select id="taskMateria" name="materia" required>
+          <option value="" disabled selected>Selecione a matéria</option>
+        </select>
+
+        <label for="taskPrazo">Prazo</label>
+        <input type="date" id="taskPrazo" name="prazo" required />
+
+        <label for="taskDescricao">O que tem que fazer</label>
+        <textarea id="taskDescricao" name="descricao" rows="4" placeholder="Descreva a tarefa..." required></textarea>
+
+        <label for="taskLink">Link (opcional)</label>
+        <input type="url" id="taskLink" name="link" placeholder="https://..." />
+
+        <p id="taskError" class="form-error" hidden></p>
+
+        <button id="taskSubmitBtn" type="submit" class="btn btn-primary btn-block">Adicionar tarefa</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: comentários da tarefa -->
+  <div id="commentsModal" class="modal-overlay" hidden>
+    <div class="modal comments-modal" role="dialog" aria-modal="true" aria-labelledby="commentsTitle">
+      <div class="modal-header">
+        <h2 id="commentsTitle">Comentários</h2>
+        <button class="modal-close" data-close="commentsModal" aria-label="Fechar" type="button">&times;</button>
+      </div>
+      <div id="commentsList" class="comments-list"></div>
+      <div id="commentsEmpty" class="comments-empty" hidden>
+        <p>Nenhum comentário ainda. Seja o primeiro!</p>
+      </div>
+      <form id="commentForm" class="comment-form">
+        <input type="text" id="commentNome" placeholder="Seu nome" required maxlength="60" />
+        <div class="comment-input-row">
+          <textarea id="commentTexto" placeholder="Escreva um comentário..." required maxlength="500" rows="2"></textarea>
+          <button type="submit" class="btn btn-primary comment-send">Enviar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: histórico de traduções do tradutor -->
+  <div id="tradHistoricoModal" class="modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tradHistoricoTitle">
+      <div class="modal-header">
+        <h2 id="tradHistoricoTitle">📜 Histórico de Traduções</h2>
+        <button class="modal-close" data-close="tradHistoricoModal" aria-label="Fechar" type="button">&times;</button>
+      </div>
+      <div id="tradHistoricoArea" class="modal-body trad-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Modal: histórico e ranking dos quizzes do tradutor -->
+  <div id="tradHistoricoQuizModal" class="modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tradHistoricoQuizTitle">
+      <div class="modal-header">
+        <h2 id="tradHistoricoQuizTitle">🏆 Histórico do Quiz</h2>
+        <button class="modal-close" data-close="tradHistoricoQuizModal" aria-label="Fechar" type="button">&times;</button>
+      </div>
+      <div id="tradHistoricoQuizArea" class="modal-body trad-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Modal: palavra do dia do tradutor -->
+  <div id="tradPalavraDiaModal" class="modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tradPalavraDiaTitle">
+      <div class="modal-header">
+        <h2 id="tradPalavraDiaTitle">📅 Palavra do Dia</h2>
+        <button class="modal-close" data-close="tradPalavraDiaModal" aria-label="Fechar" type="button">&times;</button>
+      </div>
+      <div id="tradPalavraDiaArea" class="modal-body trad-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Modal: editor de vocabulário do tradutor -->
+  <div id="tradVocabularioModal" class="modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tradVocabularioTitle">
+      <div class="modal-header">
+        <h2 id="tradVocabularioTitle">📖 Vocabulário do Quiz</h2>
+        <button class="modal-close" data-close="tradVocabularioModal" aria-label="Fechar" type="button">&times;</button>
+      </div>
+      <div id="tradVocabularioArea" class="modal-body trad-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Modal: quiz contra o tempo do tradutor -->
+  <div id="tradQuizTempoModal" class="modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tradQuizTempoTitle">
+      <div class="modal-header">
+        <h2 id="tradQuizTempoTitle">⏱️ Quiz Contra o Tempo</h2>
+        <button class="modal-close" data-close="tradQuizTempoModal" aria-label="Fechar" type="button">&times;</button>
+      </div>
+      <div id="tradQuizTempoArea" class="modal-body trad-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Modal: quiz de texto (pronúncia longa) do tradutor -->
+  <div id="tradQuizTextoModal" class="modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tradQuizTextoTitle">
+      <div class="modal-header">
+        <h2 id="tradQuizTextoTitle">📄 Quiz de Texto</h2>
+        <button class="modal-close" data-close="tradQuizTextoModal" aria-label="Fechar" type="button">&times;</button>
+      </div>
+      <div id="tradQuizTextoArea" class="modal-body trad-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Modal: popup de palavra (clique numa palavra do resultado do Quiz de Texto) -->
+  <div id="tradPopupPalavraModal" class="modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tradPopupPalavraTitle">
+      <div class="modal-header">
+        <h2 id="tradPopupPalavraTitle">Palavra</h2>
+        <button class="modal-close" data-close="tradPopupPalavraModal" aria-label="Fechar" type="button">&times;</button>
+      </div>
+      <div id="tradPopupPalavraArea" class="modal-body trad-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Modal: favoritos do tradutor -->
+  <div id="tradFavoritosModal" class="modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tradFavoritosTitle">
+      <div class="modal-header">
+        <h2 id="tradFavoritosTitle">⭐ Favoritos</h2>
+        <button class="modal-close" data-close="tradFavoritosModal" aria-label="Fechar" type="button">&times;</button>
+      </div>
+      <div id="tradFavoritosArea" class="modal-body trad-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Modal: flashcards do tradutor (a partir dos favoritos) -->
+  <div id="tradFlashcardsModal" class="modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tradFlashcardsTitle">
+      <div class="modal-header">
+        <h2 id="tradFlashcardsTitle">🎴 Flashcards</h2>
+        <button class="modal-close" data-close="tradFlashcardsModal" aria-label="Fechar" type="button">&times;</button>
+      </div>
+      <div id="tradFlashcardsArea" class="modal-body trad-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Modal: quiz de vocabulário do tradutor -->
+  <div id="tradQuizModal" class="modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tradQuizTitle">
+      <div class="modal-header">
+        <h2 id="tradQuizTitle">🧠 Quiz de Vocabulário</h2>
+        <button class="modal-close" data-close="tradQuizModal" aria-label="Fechar" type="button">&times;</button>
+      </div>
+      <div id="tradQuizArea" class="modal-body trad-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Modal: quiz de pronúncia do tradutor -->
+  <div id="tradQuizPronunciaModal" class="modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tradQuizPronunciaTitle">
+      <div class="modal-header">
+        <h2 id="tradQuizPronunciaTitle">🎤 Quiz de Pronúncia</h2>
+        <button class="modal-close" data-close="tradQuizPronunciaModal" aria-label="Fechar" type="button">&times;</button>
+      </div>
+      <div id="tradQuizPronunciaArea" class="modal-body trad-modal-body"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

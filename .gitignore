@@ -1,0 +1,5 @@
+# Cópia de referência do projeto audioT (não faz parte do site do mural)
+translator/
+
+# Ambiente local
+.netlify/
