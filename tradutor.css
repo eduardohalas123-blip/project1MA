@@ -338,7 +338,7 @@
 #tradutorSection .trad-btn-mundo {
   display: block;
   width: 100%;
-  height: 42px;
+  height: 52px;
   margin-top: 12px;
   border: none;
   border-radius: var(--radius-md);
@@ -346,7 +346,7 @@
   color: var(--accent-contrast);
   font: inherit;
   font-weight: 700;
-  font-size: 0.82rem;
+  font-size: 0.95rem;
   cursor: pointer;
 }
 
