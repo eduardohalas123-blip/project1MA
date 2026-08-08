@@ -346,6 +346,19 @@ por trás de cada decisão, pra não se perder o contexto depois.
     correspondentes de `style.css` (não é só esconder - foram tirados de
     vez). Nenhuma mudança em app.js precisou (o clique nos botões já lê
     `data-tema` dinamicamente, então sumir com os botões já basta).
+33. **Nova aba "Ideias"** (2026-08-08) — pedido: uma seção nova no menu
+    lateral igual à de Dúvidas, mas pra receber ideias em vez de
+    perguntas, "os admins veem ela". Implementada como uma cópia
+    simplificada de Dúvidas: mesmo componente visual (`.duvida-card`),
+    mesmo padrão de formulário público + inbox admin, mas **sem** o
+    campo de resposta e **sem** lista pública — dúvida vira FAQ público
+    depois de respondida, mas ideia é só uma sugestão pro admin, não faz
+    sentido "responder" nem publicar. Nova coleção `ideias/{id}` no
+    Firestore, leitura restrita a admin (diferente de dúvidas, que todo
+    mundo lê as respondidas). Testado localmente — form aparece, envio
+    falha por enquanto com "Missing or insufficient permissions" (regra
+    nova, ainda não publicada no Firebase Console, mesma pendência de
+    sempre).
 
 ## Deploy
 

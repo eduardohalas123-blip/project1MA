@@ -22,9 +22,11 @@ cadastro público no site).
 2. **Mérito** — calculadora de média por matéria (Diamante ≥9,5, Ouro 9,0–9,4).
 3. **Dúvidas** — qualquer um manda uma dúvida; admin responde; dúvida
    respondida vira pública (tipo FAQ).
-4. **Horário** — tabela fixa com o horário de aula da turma.
-5. **Versículo** — versículo bíblico diferente a cada dia (client-side, sem backend).
-6. **Tradutor** — praticamente todo o projeto `audioT` (tradutor por voz/
+4. **Ideias** — caixa de sugestões pro admin (mesmo mecanismo das
+   Dúvidas, mas sem resposta nem lista pública).
+5. **Horário** — tabela fixa com o horário de aula da turma.
+6. **Versículo** — versículo bíblico diferente a cada dia (client-side, sem backend).
+7. **Tradutor** — praticamente todo o projeto `audioT` (tradutor por voz/
    texto) portado pro mural: 34 idiomas, falar/transcrever, áudio
    automático, modo papagaio, histórico, favoritos, flashcards, palavra
    do dia, editor de vocabulário, 4 modos de quiz e o mini-jogo Mundo

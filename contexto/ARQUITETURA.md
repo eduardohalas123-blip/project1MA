@@ -43,6 +43,11 @@ versiculoComentarios/{dataAAAA-MM-DD}/mensagens/{mensagemId}
 
 visitasDiarias/{dataAAAA-MM-DD}
   contagem: number
+
+ideias/{ideiaId}
+  nome: string
+  ideia: string
+  criadoEm: timestamp
 ```
 
 Ver regras de acesso completas em [FIREBASE.md](FIREBASE.md).
@@ -118,6 +123,12 @@ Guardado em `localStorage`, só no navegador de cada pessoa:
     com form de resposta), `renderDuvidasPublicas()` (só as respondidas,
     visível pra todo mundo), dois listeners separados (admin vs público)
     trocados no `onAuthStateChanged`.
+14b. **Ideias** — cópia simplificada de Dúvidas (mesmo componente visual
+    `.duvida-card`/`.duvida-list`, reusa `formatDuvidaDate()`): sem campo
+    de resposta e sem lista pública, já que é uma caixa de sugestões
+    (`ideias/{id}`) só pro admin ler. `renderIdeias()`/
+    `startIdeiasListener()`/`stopIdeiasListener()`, um único listener
+    (não dois como Dúvidas, não existe versão "pública" aqui).
 15. **Comentários por tarefa** — subcoleção, listener aberto ao abrir o modal,
     fechado ao fechar.
 15b. **Chat do versículo do dia** — `chaveDataVersiculo()` monta a chave

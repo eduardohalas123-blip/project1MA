@@ -47,6 +47,9 @@ Resumo das regras atuais:
   cria/atualiza, mas só pode subir o campo `contagem` de 1 em 1 (regra
   compara com o valor atual) — ninguém consegue zerar ou pular pra um
   número qualquer; só admin apaga.
+- `ideias/{id}`: leitura só admin (é uma caixa de sugestões, não um FAQ
+  público como dúvidas); qualquer um cria (nome/ideia validados); só
+  admin apaga.
 
 Cuidado ao ajustar limites de tamanho (`size()`): no Firestore `.size()`
 de string conta **bytes UTF-8**, não caracteres — acentos em português

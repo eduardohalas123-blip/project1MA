@@ -82,5 +82,18 @@ service cloud.firestore {
       allow update: if request.resource.data.contagem == resource.data.contagem + 1;
       allow delete: if isAdmin();
     }
+
+    // Ideias: mesmo mecanismo das dúvidas, mas sem lista pública - é uma
+    // caixa de sugestões, só o admin lê/apaga. Qualquer um envia.
+    match /ideias/{ideiaId} {
+      allow read: if isAdmin();
+      allow create: if request.resource.data.nome is string
+        && request.resource.data.ideia is string
+        && request.resource.data.nome.size() > 0
+        && request.resource.data.nome.size() < 200
+        && request.resource.data.ideia.size() > 0
+        && request.resource.data.ideia.size() < 2500;
+      allow update, delete: if isAdmin();
+    }
   }
 }

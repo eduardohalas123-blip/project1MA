@@ -46,6 +46,14 @@
 - Não existe notificação — quem perguntou precisa voltar na aba Dúvidas
   pra ver se já foi respondido (não há sistema de conta/login de aluno).
 
+## Ideias
+
+- Mesmo mecanismo das Dúvidas, mas mais simples: **caixa de sugestões**
+  só pro admin ler — não tem resposta nem lista pública.
+- Formulário público: nome + ideia.
+- Só o admin vê as ideias enviadas (numa caixa de entrada, com botão de
+  apagar cada uma); visitante comum só vê o formulário de envio.
+
 ## Horário
 
 - Tabela fixa (não vem do Firestore, é HTML estático) com o horário da

@@ -100,6 +100,14 @@ const el = {
   duvidaError: document.getElementById("duvidaError"),
   duvidaList: document.getElementById("duvidaList"),
   duvidaEmpty: document.getElementById("duvidaEmpty"),
+  ideiaFormWrap: document.getElementById("ideiaFormWrap"),
+  ideiaListWrap: document.getElementById("ideiaListWrap"),
+  ideiaForm: document.getElementById("ideiaForm"),
+  ideiaNome: document.getElementById("ideiaNome"),
+  ideiaTexto: document.getElementById("ideiaTexto"),
+  ideiaError: document.getElementById("ideiaError"),
+  ideiaList: document.getElementById("ideiaList"),
+  ideiaEmpty: document.getElementById("ideiaEmpty"),
   duvidaPublicList: document.getElementById("duvidaPublicList"),
   duvidaPublicEmpty: document.getElementById("duvidaPublicEmpty"),
   commentsModal: document.getElementById("commentsModal"),
@@ -906,6 +914,74 @@ function stopDuvidasPublicListener() {
   if (unsubscribeDuvidasPublic) {
     unsubscribeDuvidasPublic();
     unsubscribeDuvidasPublic = null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Ideias (mesmo mecanismo das Dúvidas, mas sem resposta/lista pública -
+// é uma caixa de sugestões só pro admin ler)
+// ---------------------------------------------------------------------------
+let unsubscribeIdeias = null;
+
+function renderIdeias(ideias) {
+  if (ideias.length === 0) {
+    el.ideiaEmpty.hidden = false;
+    el.ideiaList.innerHTML = "";
+    return;
+  }
+  el.ideiaEmpty.hidden = true;
+  el.ideiaList.innerHTML = "";
+
+  ideias.forEach((item) => {
+    const card = document.createElement("div");
+    card.className = "duvida-card";
+
+    const top = document.createElement("div");
+    top.className = "duvida-card-top";
+    const nome = document.createElement("strong");
+    nome.className = "duvida-nome";
+    nome.textContent = item.nome;
+    const date = document.createElement("span");
+    date.className = "duvida-date";
+    date.textContent = formatDuvidaDate(item.criadoEm);
+    top.append(nome, date);
+    card.appendChild(top);
+
+    const texto = document.createElement("p");
+    texto.className = "duvida-texto";
+    texto.textContent = item.ideia;
+    card.appendChild(texto);
+
+    const delBtn = document.createElement("button");
+    delBtn.type = "button";
+    delBtn.className = "text-btn danger";
+    delBtn.textContent = "Apagar";
+    delBtn.addEventListener("click", async () => {
+      if (!confirm("Apagar essa ideia?")) return;
+      try {
+        await deleteDoc(doc(db, "ideias", item.id));
+      } catch (error) {
+        showToast("Não foi possível apagar.");
+      }
+    });
+    card.appendChild(delBtn);
+
+    el.ideiaList.appendChild(card);
+  });
+}
+
+function startIdeiasListener() {
+  if (unsubscribeIdeias) return;
+  unsubscribeIdeias = onSnapshot(
+    query(collection(db, "ideias"), orderBy("criadoEm", "desc")),
+    (snapshot) => renderIdeias(snapshot.docs.map((d) => ({ id: d.id, ...d.data() }))),
+    (error) => console.error(error)
+  );
+}
+function stopIdeiasListener() {
+  if (unsubscribeIdeias) {
+    unsubscribeIdeias();
+    unsubscribeIdeias = null;
   }
 }
 
@@ -3450,6 +3526,11 @@ if (!isConfigured) {
       stopDuvidasListener();
       startDuvidasPublicListener();
     }
+
+    el.ideiaFormWrap.hidden = isAdmin;
+    el.ideiaListWrap.hidden = !isAdmin;
+    if (isAdmin) startIdeiasListener();
+    else stopIdeiasListener();
   });
 
   el.duvidaForm.addEventListener("submit", async (event) => {
@@ -3469,6 +3550,26 @@ if (!isConfigured) {
     } catch (error) {
       el.duvidaError.textContent = "Não foi possível enviar. Tente de novo.";
       el.duvidaError.hidden = false;
+    }
+  });
+
+  el.ideiaForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    el.ideiaError.hidden = true;
+    const nome = el.ideiaNome.value.trim();
+    const ideia = el.ideiaTexto.value.trim();
+    if (!nome || !ideia) {
+      el.ideiaError.textContent = "Preencha seu nome e a ideia.";
+      el.ideiaError.hidden = false;
+      return;
+    }
+    try {
+      await addDoc(collection(db, "ideias"), { nome, ideia, criadoEm: serverTimestamp() });
+      el.ideiaForm.reset();
+      showToast("Ideia enviada!");
+    } catch (error) {
+      el.ideiaError.textContent = "Não foi possível enviar. Tente de novo.";
+      el.ideiaError.hidden = false;
     }
   });
 

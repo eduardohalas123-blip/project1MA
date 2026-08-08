@@ -48,6 +48,10 @@
         <span class="icon" aria-hidden="true">❓</span>
         <span>Dúvidas</span>
       </button>
+      <button class="sidebar-item" data-section="ideiasSection" type="button">
+        <span class="icon" aria-hidden="true">💡</span>
+        <span>Ideias</span>
+      </button>
       <button class="sidebar-item" data-section="horarioSection" type="button">
         <span class="icon" aria-hidden="true">🗓️</span>
         <span>Horário</span>
@@ -161,6 +165,39 @@
               <p>Nenhuma dúvida por enquanto.</p>
             </div>
             <div id="duvidaList" class="duvida-list"></div>
+          </div>
+        </section>
+
+        <section id="ideiasSection" class="app-section duvidas-section" hidden>
+          <div id="ideiaFormWrap">
+            <div class="merito-intro">
+              <span class="eyebrow">// ideias</span>
+              <h2>Me dê uma ideia</h2>
+              <p>Tem alguma ideia pro mural? Escreva abaixo — só o admin vê as ideias enviadas.</p>
+            </div>
+            <form id="ideiaForm" class="duvida-form">
+              <label for="ideiaNome">Seu nome</label>
+              <input type="text" id="ideiaNome" name="nome" required maxlength="80" placeholder="Como podemos te chamar" />
+
+              <label for="ideiaTexto">Sua ideia</label>
+              <textarea id="ideiaTexto" name="ideia" rows="5" required maxlength="1000" placeholder="Escreva aqui sua ideia..."></textarea>
+
+              <p id="ideiaError" class="form-error" hidden></p>
+
+              <button type="submit" class="btn btn-primary">Enviar ideia</button>
+            </form>
+          </div>
+
+          <div id="ideiaListWrap" hidden>
+            <div class="merito-intro">
+              <span class="eyebrow">// ideias</span>
+              <h2>Ideias recebidas</h2>
+              <p>Todas as ideias enviadas pela turma aparecem aqui.</p>
+            </div>
+            <div id="ideiaEmpty" class="empty-state" hidden>
+              <p>Nenhuma ideia por enquanto.</p>
+            </div>
+            <div id="ideiaList" class="duvida-list"></div>
           </div>
         </section>
 
