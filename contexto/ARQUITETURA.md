@@ -48,6 +48,12 @@ ideias/{ideiaId}
   nome: string
   ideia: string
   criadoEm: timestamp
+
+enquetes/{enqueteId}
+  pergunta: string
+  opcoes: string[]
+  votos: { "0": number, "1": number, ... }  (mapa, uma chave por índice de opcoes)
+  criadoEm: timestamp
 ```
 
 Ver regras de acesso completas em [FIREBASE.md](FIREBASE.md).
@@ -129,6 +135,25 @@ Guardado em `localStorage`, só no navegador de cada pessoa:
     (`ideias/{id}`) só pro admin ler. `renderIdeias()`/
     `startIdeiasListener()`/`stopIdeiasListener()`, um único listener
     (não dois como Dúvidas, não existe versão "pública" aqui).
+14c. **Enquetes** — `votos` é um mapa (não array) de propósito: permite
+    incrementar atomicamente só a chave da opção votada via
+    `updateDoc(ref, { [\`votos.${indice}\`]: increment(1) })` (dot-path
+    em campo de mapa é suportado pelo Firestore; em array não dá pra
+    fazer isso). Um voto por pessoa por enquete é controlado 100%
+    client-side (`localStorage.enqueteVotos`, um JSON `{enqueteId:
+    indiceEscolhido}`) — não é à prova de gente limpando o navegador,
+    mesmo nível de confiança do resto do site. `renderEnquetes()` decide
+    por enquete, individualmente, se mostra os botões de opção (ainda
+    não votou) ou o resultado em barra (já votou) - por isso é comum uma
+    pessoa ver botão numa enquete e resultado em outra na mesma tela.
+    Formulário de criar (só admin) tem opções dinâmicas
+    (`criarLinhaOpcaoEnquete()`, mínimo 2 sempre, botão "✖" por linha só
+    remove se sobrarem mais de 2). Regra do Firestore trava a
+    atualização de voto pra não poder mudar `pergunta`/`opcoes`, só o
+    mapa `votos` (mas não valida que o incremento é exatamente +1, como
+    faz `visitasDiarias` - mapear "só uma chave de um mapa dinâmico subiu
+    1" em regra do Firestore é bem mais complexo que o caso simples do
+    contador de visitas; aceitável pro nível de confiança do site).
 15. **Comentários por tarefa** — subcoleção, listener aberto ao abrir o modal,
     fechado ao fechar.
 15b. **Chat do versículo do dia** — `chaveDataVersiculo()` monta a chave

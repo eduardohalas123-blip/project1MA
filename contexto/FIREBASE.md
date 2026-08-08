@@ -50,6 +50,10 @@ Resumo das regras atuais:
 - `ideias/{id}`: leitura só admin (é uma caixa de sugestões, não um FAQ
   público como dúvidas); qualquer um cria (nome/ideia validados); só
   admin apaga.
+- `enquetes/{id}`: leitura pública; só admin cria (valida pergunta e
+  2-6 opções); qualquer um "atualiza" pra votar, mas a regra não deixa
+  mudar `pergunta`/`opcoes` nessa atualização, só o mapa `votos`; só
+  admin apaga.
 
 Cuidado ao ajustar limites de tamanho (`size()`): no Firestore `.size()`
 de string conta **bytes UTF-8**, não caracteres — acentos em português

@@ -359,6 +359,21 @@ por trás de cada decisão, pra não se perder o contexto depois.
     falha por enquanto com "Missing or insufficient permissions" (regra
     nova, ainda não publicada no Firebase Console, mesma pendência de
     sempre).
+34. **Nova aba "Enquetes"** (2026-08-08) — pedido explícito: só admin
+    cria uma enquete, qualquer um vota, e se não tiver nenhuma criada
+    ainda avisar em vez de mostrar lista vazia. Decisão de dados: `votos`
+    é um **mapa** (`{"0": n, "1": m}`), não array - só assim dá pra
+    incrementar atomicamente uma opção sozinha via
+    `updateDoc(ref, {[\`votos.${indice}\`]: increment(1)})` (dot-path em
+    campo de mapa funciona no Firestore, em elemento de array não). Voto
+    único por pessoa controlado via `localStorage` (mesmo nível de
+    confiança do resto do site - não impede alguém de limpar o navegador
+    e votar de novo, mas ninguém pediu proteção mais forte que isso em
+    nenhuma outra parte do mural). Card mostra os botões de opção antes
+    de votar e vira barra de resultado com porcentagem depois. Testado
+    com Playwright: modal de criar abre, opções dinâmicas (mínimo 2,
+    adicionar/remover linha) funcionam, e o estado vazio mostra
+    literalmente "Nenhuma enquete ainda." como pedido.
 
 ## Deploy
 

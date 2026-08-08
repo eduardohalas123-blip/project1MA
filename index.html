@@ -52,6 +52,10 @@
         <span class="icon" aria-hidden="true">💡</span>
         <span>Ideias</span>
       </button>
+      <button class="sidebar-item" data-section="enquetesSection" type="button">
+        <span class="icon" aria-hidden="true">📊</span>
+        <span>Enquetes</span>
+      </button>
       <button class="sidebar-item" data-section="horarioSection" type="button">
         <span class="icon" aria-hidden="true">🗓️</span>
         <span>Horário</span>
@@ -199,6 +203,19 @@
             </div>
             <div id="ideiaList" class="duvida-list"></div>
           </div>
+        </section>
+
+        <section id="enquetesSection" class="app-section duvidas-section" hidden>
+          <div class="merito-intro">
+            <span class="eyebrow">// enquetes</span>
+            <h2>Enquetes</h2>
+            <p>Vote nas enquetes da turma. O resultado aparece assim que você vota.</p>
+          </div>
+          <button id="addEnqueteBtn" class="btn btn-primary" type="button" hidden>+ Nova enquete</button>
+          <div id="enqueteEmpty" class="empty-state" hidden>
+            <p>Nenhuma enquete ainda.</p>
+          </div>
+          <div id="enqueteList" class="duvida-list"></div>
         </section>
 
         <section id="horarioSection" class="app-section horario-section" hidden>
@@ -427,6 +444,28 @@
         <p id="taskError" class="form-error" hidden></p>
 
         <button id="taskSubmitBtn" type="submit" class="btn btn-primary btn-block">Adicionar tarefa</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: nova enquete (só admin) -->
+  <div id="enqueteModal" class="modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="enqueteTitle">
+      <div class="modal-header">
+        <h2 id="enqueteTitle">Nova enquete</h2>
+        <button class="modal-close" data-close="enqueteModal" aria-label="Fechar" type="button">&times;</button>
+      </div>
+      <form id="enqueteForm" class="modal-body">
+        <label for="enquetePergunta">Pergunta</label>
+        <input type="text" id="enquetePergunta" name="pergunta" required maxlength="200" placeholder="Ex: Qual dia fazer a prova?" />
+
+        <label>Opções</label>
+        <div id="enqueteOpcoesArea" class="enquete-opcoes-area"></div>
+        <button id="enqueteAddOpcaoBtn" type="button" class="text-btn">+ Adicionar opção</button>
+
+        <p id="enqueteError" class="form-error" hidden></p>
+
+        <button type="submit" class="btn btn-primary btn-block">Criar enquete</button>
       </form>
     </div>
   </div>

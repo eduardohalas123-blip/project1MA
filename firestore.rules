@@ -95,5 +95,25 @@ service cloud.firestore {
         && request.resource.data.ideia.size() < 2500;
       allow update, delete: if isAdmin();
     }
+
+    // Enquetes: só admin cria/apaga. Qualquer um vota - a atualização de
+    // voto não pode mudar a pergunta nem as opções, só o mapa de votos.
+    match /enquetes/{enqueteId} {
+      allow read: if true;
+      allow create: if isAdmin()
+        && request.resource.data.pergunta is string
+        && request.resource.data.pergunta.size() > 0
+        && request.resource.data.pergunta.size() < 300
+        && request.resource.data.opcoes is list
+        && request.resource.data.opcoes.size() >= 2
+        && request.resource.data.opcoes.size() <= 6;
+      allow update: if isAdmin()
+        || (
+          request.resource.data.pergunta == resource.data.pergunta
+          && request.resource.data.opcoes == resource.data.opcoes
+          && request.resource.data.votos is map
+        );
+      allow delete: if isAdmin();
+    }
   }
 }

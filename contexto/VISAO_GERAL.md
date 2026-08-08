@@ -24,9 +24,11 @@ cadastro público no site).
    respondida vira pública (tipo FAQ).
 4. **Ideias** — caixa de sugestões pro admin (mesmo mecanismo das
    Dúvidas, mas sem resposta nem lista pública).
-5. **Horário** — tabela fixa com o horário de aula da turma.
-6. **Versículo** — versículo bíblico diferente a cada dia (client-side, sem backend).
-7. **Tradutor** — praticamente todo o projeto `audioT` (tradutor por voz/
+5. **Enquetes** — só admin cria (pergunta + opções), qualquer um vota
+   uma vez; sem enquete nenhuma, avisa "Nenhuma enquete ainda."
+6. **Horário** — tabela fixa com o horário de aula da turma.
+7. **Versículo** — versículo bíblico diferente a cada dia (client-side, sem backend).
+8. **Tradutor** — praticamente todo o projeto `audioT` (tradutor por voz/
    texto) portado pro mural: 34 idiomas, falar/transcrever, áudio
    automático, modo papagaio, histórico, favoritos, flashcards, palavra
    do dia, editor de vocabulário, 4 modos de quiz e o mini-jogo Mundo

@@ -54,6 +54,21 @@
 - Só o admin vê as ideias enviadas (numa caixa de entrada, com botão de
   apagar cada uma); visitante comum só vê o formulário de envio.
 
+## Enquetes
+
+- **Só o admin cria** uma enquete (botão "+ Nova enquete"): pergunta +
+  lista de opções (mínimo 2, máximo 6, com botões pra adicionar/remover
+  linha no formulário).
+- **Qualquer um vota** — clica numa opção, o voto conta na hora. Depois
+  de votar, aquela enquete vira um gráfico de barras com porcentagem e
+  contagem por opção (a opção escolhida fica marcada com ✓); antes de
+  votar, aparecem só os botões das opções.
+- Um voto por pessoa por enquete, guardado no navegador (não é ligado a
+  conta/login).
+- **Se não tiver nenhuma enquete criada ainda, mostra "Nenhuma enquete
+  ainda."** em vez de uma lista vazia.
+- Admin também pode apagar uma enquete (some pra todo mundo).
+
 ## Horário
 
 - Tabela fixa (não vem do Firestore, é HTML estático) com o horário da

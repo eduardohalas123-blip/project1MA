@@ -108,6 +108,15 @@ const el = {
   ideiaError: document.getElementById("ideiaError"),
   ideiaList: document.getElementById("ideiaList"),
   ideiaEmpty: document.getElementById("ideiaEmpty"),
+  addEnqueteBtn: document.getElementById("addEnqueteBtn"),
+  enqueteEmpty: document.getElementById("enqueteEmpty"),
+  enqueteList: document.getElementById("enqueteList"),
+  enqueteModal: document.getElementById("enqueteModal"),
+  enqueteForm: document.getElementById("enqueteForm"),
+  enquetePergunta: document.getElementById("enquetePergunta"),
+  enqueteOpcoesArea: document.getElementById("enqueteOpcoesArea"),
+  enqueteAddOpcaoBtn: document.getElementById("enqueteAddOpcaoBtn"),
+  enqueteError: document.getElementById("enqueteError"),
   duvidaPublicList: document.getElementById("duvidaPublicList"),
   duvidaPublicEmpty: document.getElementById("duvidaPublicEmpty"),
   commentsModal: document.getElementById("commentsModal"),
@@ -984,6 +993,173 @@ function stopIdeiasListener() {
     unsubscribeIdeias = null;
   }
 }
+
+// ---------------------------------------------------------------------------
+// Enquetes - só admin cria, qualquer um vota uma vez (guardado no
+// localStorage pra trocar o botão de opção pelo resultado depois de
+// votar; não é à prova de gente limpando o navegador, mas é o mesmo
+// nível de confiança usado no resto do site).
+// ---------------------------------------------------------------------------
+let allEnquetes = [];
+const ENQUETE_VOTOS_KEY = "enqueteVotos";
+
+function lerVotosEnquete() {
+  try {
+    return JSON.parse(localStorage.getItem(ENQUETE_VOTOS_KEY)) || {};
+  } catch {
+    return {};
+  }
+}
+function salvarVotoEnquete(enqueteId, indice) {
+  const votos = lerVotosEnquete();
+  votos[enqueteId] = indice;
+  localStorage.setItem(ENQUETE_VOTOS_KEY, JSON.stringify(votos));
+}
+
+async function votarEnquete(enqueteId, indice) {
+  try {
+    await updateDoc(doc(db, "enquetes", enqueteId), { [`votos.${indice}`]: increment(1) });
+    salvarVotoEnquete(enqueteId, indice);
+  } catch {
+    showToast("Não foi possível registrar seu voto.");
+  }
+}
+
+function renderEnquetes() {
+  if (allEnquetes.length === 0) {
+    el.enqueteEmpty.hidden = false;
+    el.enqueteList.innerHTML = "";
+    return;
+  }
+  el.enqueteEmpty.hidden = true;
+  el.enqueteList.innerHTML = "";
+
+  const votosFeitos = lerVotosEnquete();
+
+  allEnquetes.forEach((enquete) => {
+    const card = document.createElement("div");
+    card.className = "duvida-card";
+
+    const pergunta = document.createElement("p");
+    pergunta.className = "enquete-pergunta";
+    pergunta.textContent = enquete.pergunta;
+    card.appendChild(pergunta);
+
+    const votos = enquete.votos || {};
+    const total = Object.values(votos).reduce((a, b) => a + b, 0);
+
+    const totalEl = document.createElement("span");
+    totalEl.className = "enquete-total";
+    totalEl.textContent = `${total} ${total === 1 ? "voto" : "votos"}`;
+    card.appendChild(totalEl);
+
+    const jaVotouIndice = votosFeitos[enquete.id];
+    const opcoesWrap = document.createElement("div");
+    opcoesWrap.className = "enquete-opcoes";
+
+    (enquete.opcoes || []).forEach((opcao, indice) => {
+      const contagem = votos[String(indice)] || 0;
+
+      if (jaVotouIndice === undefined) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "enquete-opcao-btn";
+        btn.textContent = opcao;
+        btn.addEventListener("click", () => votarEnquete(enquete.id, indice));
+        opcoesWrap.appendChild(btn);
+      } else {
+        const pct = total > 0 ? Math.round((contagem / total) * 100) : 0;
+        const resultado = document.createElement("div");
+        resultado.className = "enquete-resultado" + (indice === jaVotouIndice ? " votada" : "");
+
+        const barra = document.createElement("div");
+        barra.className = "enquete-resultado-barra";
+        barra.style.width = `${pct}%`;
+
+        const info = document.createElement("div");
+        info.className = "enquete-resultado-info";
+        const label = document.createElement("span");
+        label.textContent = opcao + (indice === jaVotouIndice ? " ✓" : "");
+        const pctSpan = document.createElement("span");
+        pctSpan.textContent = `${pct}% (${contagem})`;
+        info.append(label, pctSpan);
+
+        resultado.append(barra, info);
+        opcoesWrap.appendChild(resultado);
+      }
+    });
+    card.appendChild(opcoesWrap);
+
+    if (isAdmin) {
+      const delBtn = document.createElement("button");
+      delBtn.type = "button";
+      delBtn.className = "text-btn danger";
+      delBtn.textContent = "Apagar";
+      delBtn.addEventListener("click", async () => {
+        if (!confirm("Apagar essa enquete?")) return;
+        try {
+          await deleteDoc(doc(db, "enquetes", enquete.id));
+        } catch {
+          showToast("Não foi possível apagar.");
+        }
+      });
+      card.appendChild(delBtn);
+    }
+
+    el.enqueteList.appendChild(card);
+  });
+}
+
+function iniciarEnquetes() {
+  onSnapshot(
+    query(collection(db, "enquetes"), orderBy("criadoEm", "desc")),
+    (snapshot) => {
+      allEnquetes = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+      renderEnquetes();
+    },
+    (error) => console.error(error)
+  );
+}
+
+function criarLinhaOpcaoEnquete(valor = "") {
+  const row = document.createElement("div");
+  row.className = "enquete-opcao-input-row";
+
+  const input = document.createElement("input");
+  input.type = "text";
+  input.maxLength = 100;
+  input.placeholder = "Opção";
+  input.value = valor;
+
+  const removerBtn = document.createElement("button");
+  removerBtn.type = "button";
+  removerBtn.className = "text-btn danger";
+  removerBtn.textContent = "✖";
+  removerBtn.addEventListener("click", () => {
+    if (el.enqueteOpcoesArea.children.length > 2) row.remove();
+  });
+
+  row.append(input, removerBtn);
+  return row;
+}
+
+function resetarFormEnquete() {
+  el.enqueteForm.reset();
+  el.enqueteError.hidden = true;
+  el.enqueteOpcoesArea.innerHTML = "";
+  el.enqueteOpcoesArea.appendChild(criarLinhaOpcaoEnquete());
+  el.enqueteOpcoesArea.appendChild(criarLinhaOpcaoEnquete());
+}
+
+el.addEnqueteBtn.addEventListener("click", () => {
+  resetarFormEnquete();
+  openModal(el.enqueteModal);
+});
+
+el.enqueteAddOpcaoBtn.addEventListener("click", () => {
+  if (el.enqueteOpcoesArea.children.length >= 6) return;
+  el.enqueteOpcoesArea.appendChild(criarLinhaOpcaoEnquete());
+});
 
 // ---------------------------------------------------------------------------
 // Comentários (por tarefa)
@@ -3494,6 +3670,7 @@ if (!isConfigured) {
 
   iniciarChatVersiculo();
   iniciarContadorVisitas();
+  iniciarEnquetes();
 
   onSnapshot(
     query(tasksRef, orderBy("prazo", "asc")),
@@ -3531,6 +3708,9 @@ if (!isConfigured) {
     el.ideiaListWrap.hidden = !isAdmin;
     if (isAdmin) startIdeiasListener();
     else stopIdeiasListener();
+
+    el.addEnqueteBtn.hidden = !isAdmin;
+    renderEnquetes();
   });
 
   el.duvidaForm.addEventListener("submit", async (event) => {
@@ -3570,6 +3750,33 @@ if (!isConfigured) {
     } catch (error) {
       el.ideiaError.textContent = "Não foi possível enviar. Tente de novo.";
       el.ideiaError.hidden = false;
+    }
+  });
+
+  el.enqueteForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    el.enqueteError.hidden = true;
+    const pergunta = el.enquetePergunta.value.trim();
+    const opcoes = [...el.enqueteOpcoesArea.querySelectorAll("input")]
+      .map((input) => input.value.trim())
+      .filter((valor) => valor.length > 0);
+
+    if (!pergunta || opcoes.length < 2) {
+      el.enqueteError.textContent = "Preencha a pergunta e pelo menos 2 opções.";
+      el.enqueteError.hidden = false;
+      return;
+    }
+
+    const votos = {};
+    opcoes.forEach((_, indice) => { votos[indice] = 0; });
+
+    try {
+      await addDoc(collection(db, "enquetes"), { pergunta, opcoes, votos, criadoEm: serverTimestamp() });
+      closeModal(el.enqueteModal);
+      showToast("Enquete criada!");
+    } catch (error) {
+      el.enqueteError.textContent = "Não foi possível criar a enquete.";
+      el.enqueteError.hidden = false;
     }
   });
 
