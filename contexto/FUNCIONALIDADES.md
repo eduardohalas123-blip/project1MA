@@ -69,10 +69,10 @@
 
 Trazido do projeto separado `audioT` (tradutor por voz/texto do Eduardo,
 que lá tem um backend Python/Flask) pra virar uma seção do mural, 100%
-client-side (sem Firebase, sem servidor próprio) — replica quase todo o
-`audioT` original, com a única exclusão deliberada sendo o Mundo Aberto
-(mapas/lagoa/zoo/castelo — pedido explícito do usuário, eram só cenário
-do projeto antigo e não fazem sentido num mural de turma):
+client-side (sem Firebase, sem servidor próprio) — replica o `audioT`
+original quase por completo, incluindo o Mundo Aberto (mapas/lagoa/zoo/
+castelo — tinha sido excluído no port inicial por pedido do usuário, e
+depois voltou a pedido dele mesmo, ver item 26 do HISTORICO.md):
 
 - Traduz texto entre **34 idiomas** (mesma lista do `audioT`), com opção
   "Detectar automaticamente" pra origem, botão de trocar origem/destino
@@ -149,6 +149,25 @@ do projeto antigo e não fazem sentido num mural de turma):
   Google Tradutor (mesmo mecanismo não-oficial da lib `googletrans`) —
   funciona em qualquer hospedagem estática (Netlify Drop incluso), sem
   precisar de servidor.
+- **🌍 Mundo Aberto** — trazido de volta a pedido do usuário (tinha sido
+  excluído no port inicial). Mini-jogo de exploração top-down: escolhe um
+  dos 3 mapas (🏠 Casa, 🦁 Zoo, 🏰 Castelo), anda com WASD/setas (com
+  colisão de verdade contra paredes/móveis/obstáculos de cada mapa) e
+  aperta **E** perto de um objeto/animal pra abrir um popup com a
+  tradução dele pro idioma de destino atual, pronúncia automática,
+  favoritar e copiar (reaproveita o mesmo popup do clique de palavra do
+  Quiz de Texto). No mapa do Zoo, chegar perto da água mostra um botão
+  "Ver lagoa (**R**)" que abre uma tela cheia com a lagoa ampliada e 4
+  bichos marinhos clicáveis (polvo, raia, tubarão, peixe). Não é um quiz
+  com pontuação — é só um jeito lúdico de "passear" vendo vocabulário.
+  **No visual celular**, os controles mudam: aparece um **analógico** no
+  canto (arrasta o dedo pra andar, no lugar do WASD/setas) e um **botão
+  de toque contextual** com ícone de dedo (👆) no lugar das teclas E/R —
+  mostra "Interagir" ou "Ver lagoa" dependendo do que estiver por perto.
+  A tela do jogo (e a da lagoa) também **força modo paisagem** — o
+  conteúdo gira deitado mesmo com o celular na posição vertical, pra
+  aproveitar melhor o espaço (o mapa é bem mais largo que alto). A barra
+  de cima (título/dica/botão de sair) continua sempre normal, sem virar.
 
 ## Tema e visual
 
@@ -161,3 +180,7 @@ do projeto antigo e não fazem sentido num mural de turma):
 
 - Logo da escola como marca d'água nas laterais em telas largas.
 - "Feito por Eduardo Halas" fixo num canto da página.
+- **👁️ Contador de visitas de hoje** ao lado do crédito — soma 1 por
+  navegador por dia (não conta refresh repetido da mesma pessoa), guardado
+  no Firestore por data (`visitasDiarias/AAAA-MM-DD`); reseta sozinho
+  todo dia, mesma ideia do chat do versículo.

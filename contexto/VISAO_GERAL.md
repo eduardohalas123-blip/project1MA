@@ -27,8 +27,8 @@ cadastro público no site).
 6. **Tradutor** — praticamente todo o projeto `audioT` (tradutor por voz/
    texto) portado pro mural: 34 idiomas, falar/transcrever, áudio
    automático, modo papagaio, histórico, favoritos, flashcards, palavra
-   do dia, editor de vocabulário e 4 modos de quiz — tudo client-side,
-   sem backend (só ficou de fora o Mundo Aberto/mapas; ver
+   do dia, editor de vocabulário, 4 modos de quiz e o mini-jogo Mundo
+   Aberto (mapas/lagoa/zoo/castelo) — tudo client-side, sem backend (ver
    [ARQUITETURA.md](ARQUITETURA.md) e [FUNCIONALIDADES.md](FUNCIONALIDADES.md)).
 
 ## Extras de interface
@@ -54,6 +54,8 @@ cadastro público no site).
 | `firebase-config.js` | Chaves do projeto Firebase (públicas, não são segredo) |
 | `firestore.rules` | Regras de segurança do Firestore (colar no Console) |
 | `versiculos.json` | Lista de versículos bíblicos para o "Versículo do dia" |
+| `mundo-mapas.json` | Geometria dos 3 mapas do Mundo Aberto (gerado a partir de `audioT/mundo_dados.py`, ver ARQUITETURA.md) |
+| `imagesmap/` | Imagens do Mundo Aberto (mapas, sprites do personagem, badge do "E"), cópia de `audioT/static/imagesmap/` |
 | `LogotipoAdventista.svg.webp` | Logo da escola (marca d'água) |
 
 Para detalhes técnicos de arquitetura veja [ARQUITETURA.md](ARQUITETURA.md),

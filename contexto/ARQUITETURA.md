@@ -40,6 +40,9 @@ versiculoComentarios/{dataAAAA-MM-DD}/mensagens/{mensagemId}
   nome: string
   texto: string
   criadoEm: timestamp
+
+visitasDiarias/{dataAAAA-MM-DD}
+  contagem: number
 ```
 
 Ver regras de acesso completas em [FIREBASE.md](FIREBASE.md).
@@ -193,6 +196,71 @@ Guardado em `localStorage`, só no navegador de cada pessoa:
       `.trad-palavra-dia-*` já criadas pra Palavra do Dia) com botões de
       ouvir/copiar/favoritar — mesma ideia do popup de palavra que o
       `audioT` original já tinha no quiz de texto longo.
+    - **🌍 Mundo Aberto**: mini-jogo de exploração portado quase 1:1 do
+      `audioT` original (`static/app.js` linhas ~1696-2168 de lá).
+      `mundo-mapas.json` (na raiz do projeto) tem toda a geometria dos 3
+      mapas (retângulos de área caminhável/parede/obstáculo/objeto
+      interativo, ponto de spawn, zona da lagoa) — foi **gerado uma vez**
+      por um scriptzinho Python que importa `audioT/mundo_dados.py`
+      direto e faz `json.dump` (evita transcrever à mão os ~140
+      retângulos de colisão do Castelo). As 10 imagens
+      (mapas/sprites do personagem/badge do "E") vieram de
+      `audioT/static/imagesmap/` pra `imagesmap/` na raiz daqui (~7,9MB).
+      No `audioT` original essa geometria vinha de um endpoint Flask
+      (`/api/mundo/mapas`); aqui é só um `fetch("mundo-mapas.json")` —
+      mesmo padrão dos outros dados do tradutor. O motor do jogo em si
+      (`iniciarMundo()`) sempre foi 100% client-side no `audioT` (só a
+      geometria vinha do servidor), então o loop de colisão/desenho em
+      canvas (`setInterval(30ms)`, testa X/Y separado pra "deslizar" em
+      paredes, `mundoDistanciaAteCaixa()` pra achar objeto/lagoa mais
+      próximos) foi portado quase sem mudança nenhuma — só trocou
+      `el(id)`/`.oculto` (helpers do `audioT`) por `tradEl.x`/`.hidden`
+      (convenção daqui) e os 3 pontos que chamavam o backend Flask
+      (mapa, tradução do objeto, TTS, favoritos) por funções que já
+      existiam no tradutor do mural (`traduzirTexto()`, `tocarTTS()`,
+      `renderizarPopupPalavraTradutor()`/`favoritoExisteTradutor()`) — o
+      popup de objeto (tecla E ou clique num bicho da lagoa) reusa o
+      mesmo `#tradPopupPalavraModal` do Quiz de Texto, só que traduzindo
+      na direção contrária (pt → idioma de destino atual, com áudio
+      tocando sozinho ao abrir, igual ao comportamento original). O jogo
+      e a tela da lagoa (`#mundoJogoOverlay`/`#lagoaOverlay`) não usam a
+      classe `.modal-overlay` de propósito — são telas cheias com
+      teclado, e o atalho global de Esc fecha todo `.modal-overlay`
+      aberto sem rodar a limpeza do jogo (parar o `setInterval`, tirar os
+      listeners de tecla), então usar essa classe ali vazaria o loop
+      rodando escondido.
+    - **Controles de toque / paisagem forçada no visual celular** (pedido
+      do usuário depois de ver o jogo funcionando): no `:root[data-view=
+      "mobile"]`, só o *conteúdo* do jogo gira 90° (`#mundoJogoRotacionavel`,
+      que embrulha canvas + analógico + botão de interagir) — a barra de
+      cima (título/dica/✖) fica de fora da rotação de propósito, senão o
+      texto ficaria de lado e ilegível. Mesma ideia pra lagoa
+      (`#lagoaImagemWrap` gira, `.lagoa-topo` não). `ajustarRotacaoMundo()`
+      calcula o tamanho/posição via `getBoundingClientRect()` da área
+      disponível (não `100vh`/`100vw` do CSS — viewport units podem não
+      bater com o espaço visual real, tipo quando a barra de endereço do
+      navegador mobile aparece/some), e é chamado nas duas telas
+      (`comecarJogo()`/`abrirLagoa()`) e de novo em cada `resize` enquanto
+      o jogo está aberto.
+      **Pegadinha da rotação** (perdi um tempo com isso, documentando pra
+      não repetir): como só o miolo gira e não a tela toda, as posições
+      `left/top/right/bottom` do analógico e do botão de toque, escritas
+      no CSS, são coordenadas *locais* (antes de girar) — elas não
+      correspondem ao canto visual que o nome sugere. Girar 90° (sentido
+      horário, `transform-origin: top left`) faz o canto visual
+      "embaixo-esquerda" corresponder ao canto local "direita+embaixo", e
+      o canto visual "embaixo-direita" corresponder ao local
+      "direita+topo" — por isso o analógico usa `right`+`bottom` (não
+      `left`+`bottom`) e o botão de toque usa `right`+`top` (não
+      `right`+`bottom`) no CSS, mesmo os dois aparecendo visualmente
+      embaixo na tela. A mesma inversão vale pro *sentido do arrasto* do
+      analógico: empurrar o dedo pra **direita** na tela vira `Up` no
+      jogo (não `Right`), empurrar pra **baixo** vira `Right` (não
+      `Down`) — dá pra conferir de novo fazendo as contas com
+      `transform: rotate(90deg)` e a fórmula padrão de rotação 2D
+      (`x' = x·cosθ - y·senθ`, `y' = x·senθ + y·cosθ`, com θ=90°), mas o
+      jeito mais rápido de validar depois de mexer nisso é só abrir no
+      visual celular e testar arrastando de verdade.
     - Toda tela de quiz (vocabulário/tempo/pronúncia/texto) passa antes
       por `renderizarTelaNomeTradutor()`, que pede um nome (prega no
       `localStorage` como sugestão da próxima vez) — é o nome usado no

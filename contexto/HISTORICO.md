@@ -224,6 +224,71 @@ por trás de cada decisão, pra não se perder o contexto depois.
       português, pronúncia (🔊) e favoritar (⭐), mesma ideia que o
       `audioT` original já tinha (popup de palavra no quiz de texto
       longo), reaproveitando a UI já criada pra Palavra do Dia.
+27. **Contador de visitas de hoje** (2026-08-08) — usuário pediu, no meio
+    da conversa, algo tipo "avisar quando alguém novo entra no site". A
+    primeira ideia (o site criar um arquivo no computador do usuário) não
+    é possível — um site não tem como escrever arquivo na máquina de quem
+    visita (trava de segurança do navegador, não limitação de código).
+    Depois de conversar sobre alternativas (toast ao vivo, push
+    notification, script local escutando o Firestore), o usuário decidiu
+    por algo bem mais simples: um "👁️ N hoje" do lado do crédito no
+    rodapé, contando visitantes distintos do dia. Mesmo padrão do chat do
+    versículo (documento por data no Firestore, reseta sozinho o dia
+    seguinte) — `visitasDiarias/{data}` com campo `contagem`, incrementado
+    via `increment(1)` uma vez por navegador por dia (guarda a data em
+    `localStorage` pra não contar de novo em cada F5). Regra do Firestore
+    só deixa o campo subir de 1 em 1 (compara com o valor atual), pra
+    ninguém conseguir "zerar" ou pular pra um número qualquer via
+    DevTools.
+28. **Mundo Aberto de volta** (2026-08-08) — tinha sido excluído no port
+    inicial do tradutor (item 22-ish, ver seção Tradutor acima) por ser
+    "só cenário" a pedido do próprio usuário; pouco depois ele pediu de
+    volta ("kkkkk"). Portado do `audioT` original quase sem alterar a
+    lógica (o motor do jogo já era 100% client-side lá, só a geometria
+    dos mapas vinha de um endpoint Flask) — ver ARQUITETURA.md pra
+    detalhes de como a geometria foi extraída (script Python pontual que
+    importa `mundo_dados.py` direto, sem transcrever à mão) e como os 3
+    pontos que chamavam o backend Flask (mapa/tradução do objeto/TTS/
+    favoritos) foram trocados pelas funções que já existiam no tradutor
+    do mural. Testado de ponta a ponta com Playwright (headless, os 3
+    mapas: Casa/Zoo/Castelo) — modal de escolha, canvas renderizando no
+    tamanho/escala certos, personagem andando com colisão bloqueando
+    corretamente, saída limpando o loop do jogo, zero erro de JS.
+29. **Botão do Mundo Aberto redesenhado + controles de celular** (2026-08-08)
+    — dois pedidos seguidos do usuário depois de ver o jogo funcionando:
+    - Botão "🌍 Mundo Aberto" saiu do grid 2 colunas e virou um botão
+      largo próprio (`.trad-btn-mundo`), mesmo formato do "🗑️ Limpar
+      Históricos" mas com gradiente da cor de destaque em vez de vermelho
+      — pedido explícito: "parecido com o de limpar histórico, longo mas
+      de outra cor".
+    - Controles pensados pra toque no visual celular: analógico
+      (arrasta o dedo, substitui WASD/setas) + um botão único "👆
+      Interagir/Ver lagoa" contextual (substitui as teclas E/R, que não
+      existem no celular) + a tela do jogo/lagoa força modo paisagem
+      (gira 90°) mesmo com o aparelho na vertical, já que o mapa é bem
+      mais largo que alto.
+      **Pedido original era "girar a tela em 180 graus"** — perguntei
+      antes de implementar, porque 180° deixaria tudo de cabeça pra
+      baixo (não ajudaria em nada); o usuário confirmou que era 90°/modo
+      paisagem forçado mesmo, "180" foi só imprecisão de linguagem.
+      Depois de girar só a tela toda (título incluso) e ver que a barra
+      de cima ficava ilegível de lado, mudei pra girar só o conteúdo do
+      jogo (canvas+controles), deixando a barra de cima sempre normal —
+      bem melhor. Também bati a cabeça com o CSS `100vh`/`100vw` não
+      batendo com o viewport visual real num teste automatizado
+      (Playwright com emulação de celular) — troquei por medir com
+      `getBoundingClientRect()` de verdade em JS, mais robusto de
+      qualquer forma (evita o problema clássico da barra de endereço do
+      navegador mobile mudando o `100vh`). A matemática de qual canto
+      CSS local (`left`/`right`/`top`/`bottom`) corresponde a qual canto
+      visual depois de girar 90° — e por que o sentido do arrasto do
+      analógico não é "intuitivo" (empurrar pra direita na tela vira
+      "Up" no jogo) — está documentada com detalhe no ARQUITETURA.md,
+      pra não precisar rederivar da próxima vez que mexer nisso.
+      Testado com Playwright simulando toque de verdade: arrastar o
+      analógico moveu o personagem, o botão contextual apareceu perto de
+      um objeto ("Interagir") e de um animal do Zoo, e tocar nele abriu
+      o popup de tradução certo.
 
 ## Deploy
 

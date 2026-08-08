@@ -335,6 +335,25 @@
   opacity: 0.85;
 }
 
+#tradutorSection .trad-btn-mundo {
+  display: block;
+  width: 100%;
+  height: 42px;
+  margin-top: 12px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: var(--accent-contrast);
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+#tradutorSection .trad-btn-mundo:hover {
+  opacity: 0.9;
+}
+
 /* Conteúdo dos modais do tradutor (favoritos/flashcards/quiz) ----------- */
 
 .trad-modal-body {
@@ -864,4 +883,288 @@
   font-weight: 700;
   color: var(--text);
   margin: 0 0 4px;
+}
+
+/* Mundo Aberto -------------------------------------------------------------
+   Portado de audioT/static/styleTranslator.css. O jogo em si e a lagoa NÃO
+   usam .modal-overlay (são telas cheias com canvas/teclado, não diálogos
+   comuns) — por isso têm z-index próprio (bem abaixo dos 200 do
+   .modal-overlay, de propósito: o popup de palavra do objeto clicado
+   precisa aparecer POR CIMA do jogo). */
+
+.mundo-mapas-area {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mundo-mapa-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: background-color .15s ease;
+}
+
+.mundo-mapa-btn:hover {
+  background: var(--bg-alt);
+}
+
+.mundo-mapa-preview {
+  width: 100%;
+  max-width: 220px;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.mundo-mapa-nome {
+  font-size: 0.92rem;
+}
+
+.mundo-jogo-overlay {
+  position: fixed;
+  inset: 0;
+  background: #000000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 60;
+}
+.mundo-jogo-overlay[hidden] { display: none; }
+
+.mundo-jogo-topo {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 10px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  flex-wrap: wrap;
+}
+
+#mundoJogoTitulo {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.mundo-jogo-dica {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  flex: 1;
+  text-align: center;
+}
+
+.mundo-jogo-area {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+  padding: 12px;
+}
+
+.mundo-jogo-rotacionavel {
+  position: relative;
+  max-width: 100%;
+  max-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#mundoCanvas {
+  max-width: 100%;
+  max-height: 100%;
+  height: auto;
+  outline: none;
+  border-radius: var(--radius-sm);
+  display: block;
+}
+
+/* Visual celular: o mapa é largo (paisagem), então gira só o CONTEÚDO
+   (canvas+controles / imagem da lagoa) 90° pra ficar deitado, mesmo com o
+   celular na vertical - a barra de cima (título/dica/sair) continua
+   normal, sem virar de lado. Usa o "truque" padrão de bloco rotacionado:
+   o elemento nasce do tamanho certo já trocado (largura/altura), ancorado
+   no canto superior direito da área disponível, e o rotate(90deg) varre
+   ele até cobrir exatamente essa área. width/height/left aqui NÃO usam
+   100vh/100vw - o JS (ajustarRotacaoMundo em app.js) calcula em cima do
+   getBoundingClientRect() de verdade da área disponível, porque unidades
+   de viewport podem não bater com o espaço visual real (barra de
+   endereço do navegador mobile, etc). */
+:root[data-view="mobile"] .mundo-jogo-rotacionavel {
+  position: absolute;
+  top: 0;
+  max-width: none;
+  max-height: none;
+  transform-origin: top left;
+  transform: rotate(90deg);
+}
+:root[data-view="mobile"] .lagoa-imagem-wrap {
+  position: absolute;
+  top: 0;
+  max-width: none;
+  transform-origin: top left;
+  transform: rotate(90deg);
+}
+
+/* Analógico (substitui WASD/setas no toque) - fica por cima do canvas,
+   canto inferior esquerdo da área de jogo NA TELA JÁ GIRADA. Como esse
+   elemento é filho do bloco que gira 90° (.mundo-jogo-rotacionavel), o
+   canto "embaixo à esquerda" visual corresponde ao canto "direita+embaixo"
+   nas coordenadas locais (pré-rotação) - por isso `right`/`bottom` aqui,
+   não `left`/`bottom` (a matemática completa está no ARQUITETURA.md). */
+.mundo-joystick-base {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  width: 108px;
+  height: 108px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  touch-action: none;
+  z-index: 5;
+}
+.mundo-joystick-base[hidden] { display: none; }
+
+.mundo-joystick-knob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.78);
+  border: 2px solid rgba(255, 255, 255, 0.95);
+  pointer-events: none;
+}
+
+/* Botão de toque (substitui as teclas E/R) - só aparece quando tem
+   objeto/lagoa por perto, igual ao badge "E"/tooltip "Ver lagoa (R)" que
+   já aparecia desenhado no canvas pra quem usa teclado. Canto inferior
+   direito visual = canto superior direito nas coordenadas locais (mesmo
+   motivo do comentário do joystick, ver ARQUITETURA.md). */
+.mundo-botao-toque {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  background: var(--accent);
+  color: #ffffff;
+  font: inherit;
+  cursor: pointer;
+  z-index: 5;
+  animation: mundoBotaoPulsar 1.3s ease-in-out infinite;
+}
+.mundo-botao-toque[hidden] { display: none; }
+.mundo-botao-toque-icone { font-size: 1.35rem; line-height: 1; }
+.mundo-botao-toque-label { font-size: 0.6rem; font-weight: 700; }
+
+@keyframes mundoBotaoPulsar {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+.lagoa-overlay {
+  position: fixed;
+  inset: 0;
+  background: #000000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 80;
+}
+.lagoa-overlay[hidden] { display: none; }
+
+.lagoa-topo {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 10px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.lagoa-topo span {
+  flex: 1;
+  text-align: center;
+}
+
+.lagoa-area {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+  padding: 12px;
+}
+
+.lagoa-imagem-wrap {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+}
+
+#lagoaImagem {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-sm);
+}
+
+.lagoa-hotspot {
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, .9);
+  background: rgba(0, 0, 0, .35);
+  color: #ffffff;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, transform .15s;
+  padding: 0;
+}
+
+.lagoa-hotspot:hover {
+  background: var(--accent);
+  border-color: #ffffff;
+  transform: translate(-50%, -50%) scale(1.1);
 }

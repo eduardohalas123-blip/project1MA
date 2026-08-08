@@ -72,5 +72,15 @@ service cloud.firestore {
       allow update: if false;
       allow delete: if isAdmin();
     }
+
+    // Contador de visitas de hoje (👁️ ao lado do crédito): um documento por
+    // dia (AAAA-MM-DD), só pode subir de 1 em 1 - ninguém consegue "zerar"
+    // ou pular pra um número qualquer, só o dono do site apaga se precisar.
+    match /visitasDiarias/{dataId} {
+      allow read: if true;
+      allow create: if request.resource.data.contagem == 1;
+      allow update: if request.resource.data.contagem == resource.data.contagem + 1;
+      allow delete: if isAdmin();
+    }
   }
 }

@@ -43,6 +43,10 @@ Resumo das regras atuais:
   apaga). Agrupado por data — o "reset" diário do chat não é uma regra
   nem uma limpeza, é só o app sempre ler/escrever na subcoleção do dia de
   hoje; o dia seguinte usa outro caminho e começa vazio sozinho.
+- `visitasDiarias/{dataAAAA-MM-DD}`: leitura pública; qualquer um
+  cria/atualiza, mas só pode subir o campo `contagem` de 1 em 1 (regra
+  compara com o valor atual) — ninguém consegue zerar ou pular pra um
+  número qualquer; só admin apaga.
 
 Cuidado ao ajustar limites de tamanho (`size()`): no Firestore `.size()`
 de string conta **bytes UTF-8**, não caracteres — acentos em português

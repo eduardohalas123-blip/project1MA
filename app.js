@@ -18,6 +18,8 @@ import {
   query,
   orderBy,
   serverTimestamp,
+  setDoc,
+  increment,
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 // ---------------------------------------------------------------------------
@@ -108,6 +110,8 @@ const el = {
   versiculoChatForm: document.getElementById("versiculoChatForm"),
   versiculoChatNome: document.getElementById("versiculoChatNome"),
   versiculoChatTexto: document.getElementById("versiculoChatTexto"),
+  visitasHojeTag: document.getElementById("visitasHojeTag"),
+  visitasHojeNum: document.getElementById("visitasHojeNum"),
 };
 
 // ---------------------------------------------------------------------------
@@ -986,6 +990,39 @@ el.versiculoChatForm.addEventListener("submit", async (event) => {
 });
 
 // ---------------------------------------------------------------------------
+// Contador de visitas de hoje (👁️ ao lado do crédito)
+// ---------------------------------------------------------------------------
+// Mesma ideia do chat do versículo: um documento por dia
+// (visitasDiarias/AAAA-MM-DD) que soma 1 a cada visitante novo. Não existe
+// "resetar à meia-noite" de propósito - o dia seguinte usa outra chave de
+// documento e começa do zero sozinho.
+const VISITA_CONTADA_KEY = "visitaContadaEm";
+
+function chaveDataVisitas() {
+  const hoje = new Date();
+  return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}-${String(hoje.getDate()).padStart(2, "0")}`;
+}
+
+function iniciarContadorVisitas() {
+  const hojeChave = chaveDataVisitas();
+  const visitaRef = doc(db, "visitasDiarias", hojeChave);
+
+  onSnapshot(
+    visitaRef,
+    (snapshot) => {
+      el.visitasHojeNum.textContent = snapshot.exists() ? snapshot.data().contagem || 0 : 0;
+      el.visitasHojeTag.hidden = false;
+    },
+    (error) => console.error(error)
+  );
+
+  // Cada navegador só soma 1 por dia, mesmo atualizando a página várias vezes.
+  if (localStorage.getItem(VISITA_CONTADA_KEY) === hojeChave) return;
+  localStorage.setItem(VISITA_CONTADA_KEY, hojeChave);
+  setDoc(visitaRef, { contagem: increment(1) }, { merge: true }).catch((error) => console.error(error));
+}
+
+// ---------------------------------------------------------------------------
 // Tradutor
 // ---------------------------------------------------------------------------
 // Porta a parte central do projeto separado `audioT` (tradutor por voz/texto
@@ -1090,6 +1127,25 @@ const tradEl = {
   quizTextoArea: document.getElementById("tradQuizTextoArea"),
   popupPalavraModal: document.getElementById("tradPopupPalavraModal"),
   popupPalavraArea: document.getElementById("tradPopupPalavraArea"),
+  abrirMundoBtn: document.getElementById("tradAbrirMundoBtn"),
+  mundoMapasModal: document.getElementById("tradMundoMapasModal"),
+  mundoMapasArea: document.getElementById("tradMundoMapasArea"),
+  mundoJogoOverlay: document.getElementById("mundoJogoOverlay"),
+  mundoJogoArea: document.querySelector("#mundoJogoOverlay .mundo-jogo-area"),
+  mundoJogoRotacionavel: document.getElementById("mundoJogoRotacionavel"),
+  mundoJogoTitulo: document.getElementById("mundoJogoTitulo"),
+  mundoCanvas: document.getElementById("mundoCanvas"),
+  mundoSairBtn: document.getElementById("mundoSairBtn"),
+  mundoJogoDica: document.querySelector("#mundoJogoOverlay .mundo-jogo-dica"),
+  mundoJoystickBase: document.getElementById("mundoJoystickBase"),
+  mundoJoystickKnob: document.getElementById("mundoJoystickKnob"),
+  mundoBotaoInteragir: document.getElementById("mundoBotaoInteragir"),
+  mundoBotaoInteragirLabel: document.getElementById("mundoBotaoInteragirLabel"),
+  lagoaOverlay: document.getElementById("lagoaOverlay"),
+  lagoaArea: document.querySelector("#lagoaOverlay .lagoa-area"),
+  lagoaImagem: document.getElementById("lagoaImagem"),
+  lagoaImagemWrap: document.getElementById("lagoaImagemWrap"),
+  lagoaSairBtn: document.getElementById("lagoaSairBtn"),
 };
 
 // Idiomas fixados (📌) - pinados sobem pro topo dos dois selects, igual ao
@@ -2596,6 +2652,463 @@ async function abrirPopupPalavraTradutor(palavra, idiomaOrigem) {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Mundo Aberto (mini-jogo de exploração portado do audioT original)
+// ---------------------------------------------------------------------------
+// A geometria de colisão (limites/paredes/obstáculos/objetos interativos)
+// vem de `mundo-mapas.json`, gerado uma vez a partir do mundo_dados.py
+// original do audioT (mesmos retângulos, sem transcrever nada a mão) - ver
+// ARQUITETURA.md. No audioT isso vinha de um endpoint Flask; aqui é só um
+// fetch de arquivo estático, igual ao resto dos dados do tradutor
+// (tradutor-dicionario.json, versiculos.json etc.).
+let mundoCacheMapas = null;
+
+tradEl.abrirMundoBtn.addEventListener("click", async () => {
+  openModal(tradEl.mundoMapasModal);
+  const area = tradEl.mundoMapasArea;
+  area.textContent = "Carregando mapas...";
+
+  try {
+    if (!mundoCacheMapas) {
+      const resp = await fetch("mundo-mapas.json");
+      mundoCacheMapas = await resp.json();
+    }
+
+    area.innerHTML = "";
+    mundoCacheMapas.mapas.forEach((mapa) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "mundo-mapa-btn";
+      btn.innerHTML = `
+        <img class="mundo-mapa-preview" src="${mapa.arquivo}" alt="${mapa.nome}">
+        <span class="mundo-mapa-nome">${mapa.icone} ${mapa.nome}</span>
+      `;
+      btn.addEventListener("click", () => {
+        closeModal(tradEl.mundoMapasModal);
+        iniciarMundo(mapa, mapa.escala);
+      });
+      area.appendChild(btn);
+    });
+  } catch {
+    area.textContent = "Erro ao carregar mapas.";
+  }
+});
+
+// Visual celular: gira só o CONTEÚDO (canvas+controles / imagem da lagoa),
+// não a tela inteira - a barra de cima (título/dica/sair) fica sempre
+// normal. `elemento` é o bloco a girar, `area` é o container onde ele
+// deve caber depois de girado (o pai direto, já sem a barra de cima).
+// Mede com getBoundingClientRect() de verdade em vez de confiar em
+// 100vh/100vw puro no CSS, que pode não bater com o espaço visual real
+// (barra de endereço do navegador mobile aparecendo/sumindo, etc). Fora
+// do modo celular, limpa o estilo inline pro CSS assumir de novo - sem
+// isso um valor antigo "vazaria" pra próxima vez que o jogo abrir no
+// visual computador.
+function ajustarRotacaoMundo(elemento, area) {
+  if (document.documentElement.dataset.view === "mobile") {
+    const rect = area.getBoundingClientRect();
+    elemento.style.top = "0px";
+    elemento.style.left = `${rect.width}px`;
+    elemento.style.width = `${rect.height}px`;
+    elemento.style.height = `${rect.width}px`;
+  } else {
+    elemento.style.top = "";
+    elemento.style.left = "";
+    elemento.style.width = "";
+    elemento.style.height = "";
+  }
+}
+
+function mundoDistanciaAteCaixa(px, py, x1, y1, x2, y2) {
+  const cx = Math.max(x1, Math.min(px, x2));
+  const cy = Math.max(y1, Math.min(py, y2));
+  return Math.hypot(px - cx, py - cy);
+}
+
+function mundoDentroDaAreaCaminhavel(x, y, mapa) {
+  const dentroDeAlgumComodo = mapa.limites.some(
+    ([x1, y1, x2, y2]) => x >= x1 && x <= x2 && y >= y1 && y <= y2
+  );
+  if (!dentroDeAlgumComodo) return false;
+
+  const dentroDeAlgumaParede = mapa.paredes.some(
+    ([x1, y1, x2, y2]) => x >= x1 && x <= x2 && y >= y1 && y <= y2
+  );
+  if (dentroDeAlgumaParede) return false;
+
+  const dentroDeAlgumObstaculo = mapa.obstaculos.some(
+    ([x1, y1, x2, y2]) => x >= x1 && x <= x2 && y >= y1 && y <= y2
+  );
+  return !dentroDeAlgumObstaculo;
+}
+
+const MUNDO_RAIO_INTERACAO = 45;
+const MUNDO_ALTURA_PERSONAGEM = 60;
+const MUNDO_TAMANHO_BADGE_E = 34;
+const MUNDO_CAMINHO_BADGE_E = "imagesmap/Ebtt.png";
+const MUNDO_RAIO_LAGOA = 70;
+const MUNDO_MAPA_TECLAS = {
+  w: "Up", a: "Left", s: "Down", d: "Right",
+  arrowup: "Up", arrowdown: "Down", arrowleft: "Left", arrowright: "Right",
+};
+
+function iniciarMundo(mapa, escala) {
+  const overlay = tradEl.mundoJogoOverlay;
+  const canvas = tradEl.mundoCanvas;
+  const ctx = canvas.getContext("2d");
+
+  tradEl.mundoJogoTitulo.textContent = mapa.nome;
+
+  const imagemMapa = new Image();
+  const imagemBadgeE = new Image();
+  const sprites = {};
+  const direcoes = ["parado", "esquerda", "direita", "cima", "baixo"];
+  let imagensPendentes = 2 + direcoes.length;
+
+  function aoCarregarImagem() {
+    imagensPendentes -= 1;
+    if (imagensPendentes === 0) comecarJogo();
+  }
+
+  imagemMapa.onload = aoCarregarImagem;
+  imagemMapa.src = mapa.arquivo;
+
+  imagemBadgeE.onload = aoCarregarImagem;
+  imagemBadgeE.src = MUNDO_CAMINHO_BADGE_E;
+
+  direcoes.forEach((direcao) => {
+    const img = new Image();
+    img.onload = aoCarregarImagem;
+    img.src = mapa.sprites[direcao];
+    sprites[direcao] = img;
+  });
+
+  const posicao = { x: mapa.posicao_inicial[0], y: mapa.posicao_inicial[1] };
+  const teclas = { Up: false, Down: false, Left: false, Right: false };
+  let direcaoAtual = "parado";
+  let objetoProximo = null;
+  let centroLagoaProximo = null;
+  let quadroAnimacao = null;
+
+  function popupObjetoAberto() {
+    return !tradEl.popupPalavraModal.hidden;
+  }
+  function lagoaAberta() {
+    return !tradEl.lagoaOverlay.hidden;
+  }
+
+  function interagir() {
+    if (!objetoProximo || popupObjetoAberto()) return;
+    abrirPopupObjetoMundo(objetoProximo[4]);
+  }
+  function interagirComLagoa() {
+    if (!centroLagoaProximo || lagoaAberta()) return;
+    abrirLagoa(mapa);
+  }
+
+  // Controles de toque (só no visual celular) - substituem WASD/setas por
+  // um analógico e as teclas E/R por um único botão contextual. Como o
+  // overlay inteiro gira 90° em CSS no celular (ver tradutor.css), um
+  // toque "pra direita" na tela de verdade precisa virar "Up" no jogo (e
+  // não "Right") pra sensação de controle bater com o que a pessoa vê -
+  // a matemática completa do porquê está no ARQUITETURA.md.
+  const controleToqueAtivo = document.documentElement.dataset.view === "mobile";
+  let acaoBotaoToque = null;
+
+  function pararJoystick() {
+    teclas.Up = teclas.Down = teclas.Left = teclas.Right = false;
+    tradEl.mundoJoystickKnob.style.transform = "translate(0px, 0px)";
+  }
+
+  function moverJoystick(evento) {
+    const base = tradEl.mundoJoystickBase;
+    const rect = base.getBoundingClientRect();
+    const raio = rect.width / 2;
+    let dx = evento.clientX - (rect.left + raio);
+    let dy = evento.clientY - (rect.top + raio);
+    const distancia = Math.hypot(dx, dy);
+    if (distancia > raio) {
+      dx = (dx / distancia) * raio;
+      dy = (dy / distancia) * raio;
+    }
+    tradEl.mundoJoystickKnob.style.transform = `translate(${dx}px, ${dy}px)`;
+
+    const zonaMorta = raio * 0.25;
+    teclas.Up = dx > zonaMorta;
+    teclas.Down = dx < -zonaMorta;
+    teclas.Right = dy > zonaMorta;
+    teclas.Left = dy < -zonaMorta;
+  }
+
+  function aoJoystickBaixo(evento) {
+    evento.preventDefault();
+    tradEl.mundoJoystickBase.setPointerCapture(evento.pointerId);
+    moverJoystick(evento);
+  }
+
+  if (controleToqueAtivo) {
+    tradEl.mundoJogoDica.textContent = "Analógico pra mover · toque no 👆 pra interagir";
+    tradEl.mundoJoystickBase.hidden = false;
+    tradEl.mundoJoystickBase.onpointerdown = aoJoystickBaixo;
+    tradEl.mundoJoystickBase.onpointermove = moverJoystick;
+    tradEl.mundoJoystickBase.onpointerup = pararJoystick;
+    tradEl.mundoJoystickBase.onpointercancel = pararJoystick;
+    tradEl.mundoBotaoInteragir.onclick = () => acaoBotaoToque && acaoBotaoToque();
+  } else {
+    tradEl.mundoJogoDica.textContent = "WASD / setas para mover · E para interagir";
+  }
+
+  function atualizarBotaoToque() {
+    if (!controleToqueAtivo) return;
+    if (objetoProximo) {
+      acaoBotaoToque = interagir;
+      tradEl.mundoBotaoInteragirLabel.textContent = "Interagir";
+      tradEl.mundoBotaoInteragir.hidden = false;
+    } else if (centroLagoaProximo) {
+      acaoBotaoToque = interagirComLagoa;
+      tradEl.mundoBotaoInteragirLabel.textContent = "Ver lagoa";
+      tradEl.mundoBotaoInteragir.hidden = false;
+    } else {
+      acaoBotaoToque = null;
+      tradEl.mundoBotaoInteragir.hidden = true;
+    }
+  }
+
+  function aoTeclaBaixo(evento) {
+    const chave = evento.key.toLowerCase();
+    const direcao = MUNDO_MAPA_TECLAS[chave];
+
+    if (direcao) {
+      evento.preventDefault();
+      teclas[direcao] = true;
+      return;
+    }
+    if (chave === "e" && !evento.repeat) interagir();
+    if (chave === "r" && !evento.repeat) interagirComLagoa();
+  }
+
+  function aoTeclaCima(evento) {
+    const direcao = MUNDO_MAPA_TECLAS[evento.key.toLowerCase()];
+    if (direcao) {
+      evento.preventDefault();
+      teclas[direcao] = false;
+    }
+  }
+
+  document.addEventListener("keydown", aoTeclaBaixo);
+  document.addEventListener("keyup", aoTeclaCima);
+
+  const velocidade = 4;
+
+  function atualizar() {
+    let dx = 0;
+    let dy = 0;
+    if (teclas.Up) dy -= velocidade;
+    if (teclas.Down) dy += velocidade;
+    if (teclas.Left) dx -= velocidade;
+    if (teclas.Right) dx += velocidade;
+
+    // testa cada eixo separado - permite "deslizar" ao longo de uma parede
+    // em vez de travar tudo quando só uma direção bate
+    if (dx !== 0) {
+      const novoX = posicao.x + dx;
+      if (mundoDentroDaAreaCaminhavel(novoX, posicao.y, mapa)) posicao.x = novoX;
+    }
+    if (dy !== 0) {
+      const novoY = posicao.y + dy;
+      if (mundoDentroDaAreaCaminhavel(posicao.x, novoY, mapa)) posicao.y = novoY;
+    }
+
+    if (teclas.Left) direcaoAtual = "esquerda";
+    else if (teclas.Right) direcaoAtual = "direita";
+    else if (teclas.Up) direcaoAtual = "cima";
+    else if (teclas.Down) direcaoAtual = "baixo";
+    else direcaoAtual = "parado";
+
+    objetoProximo = null;
+    let menorDistancia = MUNDO_RAIO_INTERACAO;
+    for (const objeto of mapa.objetos_interativos) {
+      const [ox1, oy1, ox2, oy2] = objeto;
+      const distancia = mundoDistanciaAteCaixa(posicao.x, posicao.y, ox1, oy1, ox2, oy2);
+      if (distancia <= menorDistancia) {
+        menorDistancia = distancia;
+        objetoProximo = objeto;
+      }
+    }
+
+    // prompt "Ver lagoa (R)" - mesmo mecanismo da tecla E, mas com tecla e
+    // zona próprias, independente dos objetos da tecla E
+    centroLagoaProximo = null;
+    let menorDistanciaLagoa = MUNDO_RAIO_LAGOA;
+    for (const [x1, y1, x2, y2] of mapa.zona_lagoa || []) {
+      const distancia = mundoDistanciaAteCaixa(posicao.x, posicao.y, x1, y1, x2, y2);
+      if (distancia <= menorDistanciaLagoa) {
+        menorDistanciaLagoa = distancia;
+        centroLagoaProximo = [(x1 + x2) / 2, (y1 + y2) / 2];
+      }
+    }
+
+    atualizarBotaoToque();
+    desenhar();
+  }
+
+  function desenhar() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(imagemMapa, 0, 0, canvas.width, canvas.height);
+
+    const sprite = sprites[direcaoAtual];
+    const largura = sprite.naturalWidth * (MUNDO_ALTURA_PERSONAGEM / sprite.naturalHeight);
+    ctx.drawImage(
+      sprite,
+      posicao.x - largura / 2,
+      posicao.y - MUNDO_ALTURA_PERSONAGEM / 2,
+      largura,
+      MUNDO_ALTURA_PERSONAGEM
+    );
+
+    if (objetoProximo) {
+      const [ox1, oy1, ox2, oy2] = objetoProximo;
+      const cx = (ox1 + ox2) / 2;
+      const cy = (oy1 + oy2) / 2;
+      ctx.drawImage(
+        imagemBadgeE,
+        cx - MUNDO_TAMANHO_BADGE_E / 2,
+        cy - MUNDO_TAMANHO_BADGE_E / 2,
+        MUNDO_TAMANHO_BADGE_E,
+        MUNDO_TAMANHO_BADGE_E
+      );
+    }
+
+    if (centroLagoaProximo) {
+      const texto = "Ver lagoa (R)";
+      const [cx, cy] = centroLagoaProximo;
+
+      ctx.font = "bold 15px Segoe UI";
+      const larguraTexto = ctx.measureText(texto).width;
+      const padX = 14;
+      const padY = 9;
+      const caixaLargura = larguraTexto + padX * 2;
+      const caixaAltura = 15 + padY * 2;
+      const raio = caixaAltura / 2;
+      const esquerda = cx - caixaLargura / 2;
+      const topo = cy - caixaAltura / 2;
+
+      ctx.beginPath();
+      ctx.moveTo(esquerda + raio, topo);
+      ctx.arcTo(esquerda + caixaLargura, topo, esquerda + caixaLargura, topo + caixaAltura, raio);
+      ctx.arcTo(esquerda + caixaLargura, topo + caixaAltura, esquerda, topo + caixaAltura, raio);
+      ctx.arcTo(esquerda, topo + caixaAltura, esquerda, topo, raio);
+      ctx.arcTo(esquerda, topo, esquerda + caixaLargura, topo, raio);
+      ctx.closePath();
+
+      ctx.fillStyle = "rgba(20, 24, 30, .82)";
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "#ffffff";
+      ctx.stroke();
+
+      ctx.fillStyle = "#ffffff";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(texto, cx, cy + 1);
+    }
+  }
+
+  function aoRedimensionarJanela() {
+    ajustarRotacaoMundo(tradEl.mundoJogoRotacionavel, tradEl.mundoJogoArea);
+    if (!tradEl.lagoaOverlay.hidden) ajustarRotacaoMundo(tradEl.lagoaImagemWrap, tradEl.lagoaArea);
+  }
+
+  function comecarJogo() {
+    canvas.width = Math.round(imagemMapa.naturalWidth * escala);
+    canvas.height = Math.round(imagemMapa.naturalHeight * escala);
+
+    overlay.hidden = false;
+    ajustarRotacaoMundo(tradEl.mundoJogoRotacionavel, tradEl.mundoJogoArea);
+    window.addEventListener("resize", aoRedimensionarJanela);
+
+    canvas.focus();
+
+    // intervalo fixo de 30ms, igual ao audioT original (janela.after(30,...))
+    // - de propósito NÃO usa requestAnimationFrame, que rodaria na taxa de
+    // atualização da tela (~60fps/16ms) e faria o personagem andar rápido
+    // demais (quase o dobro da velocidade pretendida)
+    quadroAnimacao = setInterval(atualizar, 30);
+  }
+
+  function sair() {
+    if (quadroAnimacao) clearInterval(quadroAnimacao);
+    document.removeEventListener("keydown", aoTeclaBaixo);
+    document.removeEventListener("keyup", aoTeclaCima);
+    window.removeEventListener("resize", aoRedimensionarJanela);
+    tradEl.mundoJoystickBase.hidden = true;
+    tradEl.mundoBotaoInteragir.hidden = true;
+    overlay.hidden = true;
+    fecharLagoa();
+  }
+
+  tradEl.mundoSairBtn.onclick = sair;
+}
+
+function abrirLagoa(mapa) {
+  const imagem = tradEl.lagoaImagem;
+  const wrap = tradEl.lagoaImagemWrap;
+
+  function montarHotspots() {
+    wrap.querySelectorAll(".lagoa-hotspot").forEach((hotspot) => hotspot.remove());
+
+    const largura = imagem.naturalWidth;
+    const altura = imagem.naturalHeight;
+
+    (mapa.animais_lagoa || []).forEach(([x1, y1, x2, y2, palavra]) => {
+      const cx = (x1 + x2) / 2;
+      const cy = (y1 + y2) / 2;
+
+      const botao = document.createElement("button");
+      botao.type = "button";
+      botao.className = "lagoa-hotspot";
+      botao.title = palavra;
+      botao.style.left = `${(cx / largura) * 100}%`;
+      botao.style.top = `${(cy / altura) * 100}%`;
+      botao.addEventListener("click", () => abrirPopupObjetoMundo(palavra));
+      wrap.appendChild(botao);
+    });
+  }
+
+  imagem.onload = montarHotspots;
+  imagem.src = mapa.imagem_lagoa;
+  if (imagem.complete && imagem.naturalWidth > 0) montarHotspots();
+
+  tradEl.lagoaOverlay.hidden = false;
+  ajustarRotacaoMundo(tradEl.lagoaImagemWrap, tradEl.lagoaArea);
+}
+
+function fecharLagoa() {
+  tradEl.lagoaOverlay.hidden = true;
+}
+
+tradEl.lagoaSairBtn.addEventListener("click", fecharLagoa);
+
+// Reusa o mesmo popup/modal já criado pro clique de palavra do Quiz de
+// Texto (renderizarPopupPalavraTradutor) - aqui a palavra clicada é sempre
+// em português (label do objeto do mundo), então traduz na direção
+// contrária (pt -> idioma de destino atual) e toca o áudio sozinho assim
+// que abre (igual ao audioT original - lá era o comportamento padrão do
+// popup de objeto, diferente do popup de palavra do Quiz de Texto que só
+// toca se a pessoa clicar em 🔊).
+async function abrirPopupObjetoMundo(palavraPt) {
+  const idiomaDestino = tradEl.destino.value;
+  tradEl.popupPalavraArea.innerHTML = '<p class="trad-vazio">Carregando...</p>';
+  openModal(tradEl.popupPalavraModal);
+  try {
+    const traduzido = await traduzirTexto(palavraPt, "pt", idiomaDestino);
+    renderizarPopupPalavraTradutor(traduzido, palavraPt, idiomaDestino);
+    tocarTTS(traduzido, idiomaDestino);
+  } catch {
+    tradEl.popupPalavraArea.innerHTML = '<p class="trad-quiz-erro">Não foi possível traduzir essa palavra.</p>';
+  }
+}
+
 function renderizarQuizTextoTradutor(estado) {
   if (!reconhecimentoDeVozSuportado()) {
     tradEl.quizTextoArea.innerHTML = '<p class="trad-quiz-erro">Reconhecimento de voz não é suportado neste navegador. Tente no Chrome ou Edge.</p>';
@@ -2780,6 +3293,7 @@ if (!isConfigured) {
   const tasksRef = collection(db, "tarefas");
 
   iniciarChatVersiculo();
+  iniciarContadorVisitas();
 
   onSnapshot(
     query(tasksRef, orderBy("prazo", "asc")),

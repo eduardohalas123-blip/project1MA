@@ -29,7 +29,10 @@
   </div>
 
   <img src="LogotipoAdventista.svg.webp" alt="" aria-hidden="true" class="school-watermark" />
-  <div class="credit-tag">Feito por Eduardo Halas</div>
+  <div class="credit-tag">
+    Feito por Eduardo Halas
+    <span id="visitasHojeTag" class="visitas-hoje" hidden>👁️ <span id="visitasHojeNum">0</span> hoje</span>
+  </div>
 
   <div class="app-shell">
     <nav class="sidebar" aria-label="Seções">
@@ -314,6 +317,7 @@
             <button id="tradAbrirQuizTextoBtn" class="trad-btn-grid" type="button">📄 Quiz Texto</button>
           </div>
 
+          <button id="tradAbrirMundoBtn" class="trad-btn-mundo" type="button">🌍 Mundo Aberto</button>
           <button id="tradLimparHistoricosBtn" class="trad-btn-perigo" type="button">🗑️ Limpar Históricos</button>
         </section>
       </main>
@@ -469,6 +473,60 @@
         <button class="modal-close" data-close="tradPopupPalavraModal" aria-label="Fechar" type="button">&times;</button>
       </div>
       <div id="tradPopupPalavraArea" class="modal-body trad-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Modal: escolher mapa do Mundo Aberto -->
+  <div id="tradMundoMapasModal" class="modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tradMundoMapasTitle">
+      <div class="modal-header">
+        <h2 id="tradMundoMapasTitle">🌍 Mundo Aberto</h2>
+        <button class="modal-close" data-close="tradMundoMapasModal" aria-label="Fechar" type="button">&times;</button>
+      </div>
+      <div id="tradMundoMapasArea" class="modal-body trad-modal-body mundo-mapas-area">Carregando mapas...</div>
+    </div>
+  </div>
+
+  <!-- Jogo do Mundo Aberto: tela cheia própria (não é um modal comum, tem
+       canvas + controles de teclado, então fica fora do padrão .modal-overlay) -->
+  <div id="mundoJogoOverlay" class="mundo-jogo-overlay" hidden>
+    <div class="mundo-jogo-topo">
+      <span id="mundoJogoTitulo">Casa</span>
+      <span class="mundo-jogo-dica">WASD / setas para mover · E para interagir</span>
+      <button id="mundoSairBtn" class="trad-icon-btn" type="button" title="Sair do Mundo Aberto">✖</button>
+    </div>
+    <div class="mundo-jogo-area">
+      <!-- Só isso aqui dentro gira 90° no visual celular (ver tradutor.css/
+           ajustarRotacaoMundo em app.js) - a barra de cima (título/dica/
+           sair) fica sempre normal, sem virar de lado. -->
+      <div id="mundoJogoRotacionavel" class="mundo-jogo-rotacionavel">
+        <canvas id="mundoCanvas" tabindex="0"></canvas>
+
+        <!-- Controles de toque (só aparecem no visual celular) -
+             substituem WASD/setas por um analógico e a tecla E/R por um
+             botão de tocar -->
+        <div id="mundoJoystickBase" class="mundo-joystick-base" hidden>
+          <div id="mundoJoystickKnob" class="mundo-joystick-knob"></div>
+        </div>
+        <button id="mundoBotaoInteragir" class="mundo-botao-toque" type="button" hidden>
+          <span class="mundo-botao-toque-icone">👆</span>
+          <span id="mundoBotaoInteragirLabel" class="mundo-botao-toque-label">Interagir</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tela cheia da lagoa (Zoo) - fica em cima do jogo, também fora do
+       padrão .modal-overlay -->
+  <div id="lagoaOverlay" class="lagoa-overlay" hidden>
+    <div class="lagoa-topo">
+      <span>🌊 Lagoa</span>
+      <button id="lagoaSairBtn" class="trad-icon-btn" type="button" title="Fechar">✖</button>
+    </div>
+    <div class="lagoa-area">
+      <div id="lagoaImagemWrap" class="lagoa-imagem-wrap">
+        <img id="lagoaImagem" src="" alt="Lagoa">
+      </div>
     </div>
   </div>
 
