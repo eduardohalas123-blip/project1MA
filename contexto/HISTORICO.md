@@ -339,6 +339,13 @@ por trás de cada decisão, pra não se perder o contexto depois.
     mudar uma cor aplica na hora E sobrevive a um reload da página
     (localStorage), e o botão "Redefinir cores" volta pro preto/branco
     neutro.
+32. **Paleta reduzida pra 3 opções** (2026-08-08) — logo em seguida, o
+    usuário pediu pra tirar os 4 temas extras (Frio/Deserto/Tundra/Céu),
+    ficando só com Dia/Noite/Personalizado ("não preciso das outras").
+    Removidos os 4 botões do `index.html` e os 4 blocos CSS
+    correspondentes de `style.css` (não é só esconder - foram tirados de
+    vez). Nenhuma mudança em app.js precisou (o clique nos botões já lê
+    `data-tema` dinamicamente, então sumir com os botões já basta).
 
 ## Deploy
 

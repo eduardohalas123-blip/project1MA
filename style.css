@@ -66,12 +66,14 @@
 }
 /* Paletas de tema - portado do "personalizar paleta" do audioT original,
    adaptado pro conjunto maior de variáveis daqui (lá eram só 10 variáveis
-   por tema, aqui são ~15). "dia"/"noite" são os dois temas padrão do
-   mural (mesmos valores de antes, só renomeados); frio/deserto/tundra/céu
-   são novos; "personalizado" tem um valor de fallback aqui (só usado
-   antes do JS carregar) - o de verdade vem do localStorage via estilo
-   inline em <html>, sobrescrevendo este bloco (ver aplicarTema() em
-   app.js). Detalhes/decisões de design em HISTORICO.md. */
+   por tema, aqui são ~15). Só 3 opções, a pedido do usuário (o audioT
+   original tinha mais - frio/deserto/tundra/céu - mas não foram
+   portadas aqui): "dia"/"noite" são os dois temas padrão do mural
+   (mesmos valores de antes, só renomeados); "personalizado" tem um valor
+   de fallback aqui (só usado antes do JS carregar) - o de verdade vem do
+   localStorage via estilo inline em <html>, sobrescrevendo este bloco
+   (ver aplicarTema() em app.js). Detalhes/decisões de design em
+   HISTORICO.md. */
 :root[data-theme="noite"] {
   --bg: #0C0E14; --bg-alt: #141722; --surface: #181C29; --surface-2: #11131C; --text: #EEF0F8;
   --text-muted: #9AA0B4; --border: #262B3A; --border-strong: #383E50; --accent: #7583FF; --accent-2: #9B8CFF; --accent-contrast: #0A0C13;
@@ -93,50 +95,6 @@
   --shadow-lg: 0 24px 56px -18px rgba(18, 20, 28, 0.32);
   --shadow: var(--shadow-lg);
   color-scheme: light;
-}
-:root[data-theme="frio"] {
-  --bg: #EAF7FA; --bg-alt: #DCF0F5; --surface: #FFFFFF; --surface-2: #F5FDFF; --text: #00363A;
-  --text-muted: #3E7C82; --border: #BFE7EC; --border-strong: #9AD7E3; --accent: #00ACC1; --accent-2: #00889A; --accent-contrast: #FFFFFF;
-  --danger: #DC2626; --danger-bg: #FEF2F2;
-  --warning: #B45309; --warning-bg: #FFFBEB;
-  --shadow-sm: 0 1px 2px rgba(18, 20, 28, 0.06);
-  --shadow-md: 0 10px 26px -12px rgba(18, 20, 28, 0.22);
-  --shadow-lg: 0 24px 56px -18px rgba(18, 20, 28, 0.32);
-  --shadow: var(--shadow-lg);
-  color-scheme: light;
-}
-:root[data-theme="deserto"] {
-  --bg: #FFF6EC; --bg-alt: #FCEBDA; --surface: #FFFDF9; --surface-2: #FFF9F1; --text: #5A2E0A;
-  --text-muted: #8A5A2E; --border: #F3D9B8; --border-strong: #E8C295; --accent: #FF8F1F; --accent-2: #E67300; --accent-contrast: #FFFFFF;
-  --danger: #DC2626; --danger-bg: #FEF2F2;
-  --warning: #B45309; --warning-bg: #FFFBEB;
-  --shadow-sm: 0 1px 2px rgba(18, 20, 28, 0.06);
-  --shadow-md: 0 10px 26px -12px rgba(18, 20, 28, 0.22);
-  --shadow-lg: 0 24px 56px -18px rgba(18, 20, 28, 0.32);
-  --shadow: var(--shadow-lg);
-  color-scheme: light;
-}
-:root[data-theme="tundra"] {
-  --bg: #0E1712; --bg-alt: #131F19; --surface: #182620; --surface-2: #101B15; --text: #E7F1EA;
-  --text-muted: #8AA396; --border: #26362E; --border-strong: #34493D; --accent: #34D399; --accent-2: #22B47F; --accent-contrast: #062017;
-  --danger: #F87171; --danger-bg: rgba(248, 113, 113, 0.12);
-  --warning: #FBBF24; --warning-bg: rgba(251, 191, 36, 0.12);
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
-  --shadow-md: 0 10px 26px -12px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 24px 56px -18px rgba(0, 0, 0, 0.6);
-  --shadow: var(--shadow-lg);
-  color-scheme: dark;
-}
-:root[data-theme="ceu"] {
-  --bg: #445D8C; --bg-alt: #3A4F7D; --surface: #526E9E; --surface-2: #3E5586; --text: #F7FAFF;
-  --text-muted: #C3D0E8; --border: #33456B; --border-strong: #28395A; --accent: #E8A93C; --accent-2: #CC8F26; --accent-contrast: #2B1B00;
-  --danger: #F87171; --danger-bg: rgba(248, 113, 113, 0.12);
-  --warning: #FBBF24; --warning-bg: rgba(251, 191, 36, 0.12);
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
-  --shadow-md: 0 10px 26px -12px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 24px 56px -18px rgba(0, 0, 0, 0.6);
-  --shadow: var(--shadow-lg);
-  color-scheme: dark;
 }
 :root[data-theme="personalizado"] {
   /* valores de fallback (== noite) - o JS sobrescreve com estilo inline

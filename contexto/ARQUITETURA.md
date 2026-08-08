@@ -68,10 +68,12 @@ Guardado em `localStorage`, só no navegador de cada pessoa:
 2. **Elementos** — objeto `el` com todas as referências de DOM usadas no arquivo.
 3. **Paleta de tema** — portado do "personalizar paleta" do `audioT`
    original (lá era só o app inteiro, aqui virou site-wide, substituindo
-   o switch simples de claro/escuro que existia antes). 7 temas: 6
-   prontos (`:root[data-theme="dia|noite|frio|deserto|tundra|ceu"]` em
-   style.css, blocos estáticos de ~15 variáveis CSS cada) + 1
-   "personalizado", cujo valor de verdade é lido do `localStorage`
+   o switch simples de claro/escuro que existia antes). 3 temas (o
+   `audioT` original tinha mais 4 - Frio/Deserto/Tundra/Céu -, removidos
+   a pedido do usuário, que só queria claro/escuro/personalizado): 2
+   prontos (`:root[data-theme="dia|noite"]` em style.css, blocos
+   estáticos de ~15 variáveis CSS cada) + 1 "personalizado", cujo valor
+   de verdade é lido do `localStorage`
    (`temaPersonalizado`) e aplicado como **estilo inline em
    `document.documentElement`** via `aplicarCoresPersonalizadas()` — o
    bloco CSS `:root[data-theme="personalizado"]` é só o fallback antes do
