@@ -19,6 +19,11 @@
 :root[data-view="mobile"] .tradutor-section {
   padding: 24px 16px 70px;
 }
+@media (max-width: 860px) {
+  .tradutor-section { padding: 24px 16px 70px; }
+  #tradutorSection .trad-icon-btn { width: 42px; height: 42px; }
+  #tradutorSection .trad-btn-grid { height: 48px; }
+}
 
 #tradutorSection .trad-card {
   background: var(--surface);

@@ -101,6 +101,25 @@ Guardado em `localStorage`, só no navegador de cada pessoa:
 4. **Visual PC/celular** — switch que seta `data-view` no `<html>`, força
    layout via CSS (`:root[data-view="mobile"|"desktop"]`); se a pessoa nunca
    escolheu manualmente, acompanha o tamanho real da janela via `resize`.
+   Desde o redesign de 2026-08-10 (HISTORICO.md item 36), esse toggle
+   manual **não é mais a única fonte de responsividade**: `style.css` e
+   `tradutor.css` também têm `@media (max-width: 860px)` reais, que reagem
+   à largura física da janela independente do `data-view` — cobre telas
+   estreitas (tablet, notebook com janela pequena) que ficariam presas no
+   layout desktop antes disso. As regras de sidebar-vira-barra-horizontal
+   aparecem duplicadas (uma vez em `@media`, uma vez em
+   `:root[data-view="mobile"]`) de propósito: a primeira cobre qualquer
+   tela física estreita, a segunda cobre o preview manual do visual
+   celular numa tela larga. **Pegadinha de flexbox pra lembrar**: qualquer
+   elemento com `max-width` + `margin: 0 auto` dentro de um flex container
+   (`.app-shell`, `.header-actions`) precisa também de `width: 100%`
+   explícito — sem isso, margem automática desliga o `stretch` padrão do
+   flexbox e o elemento se dimensiona pelo conteúdo (shrink-to-fit) até o
+   teto do `max-width`, ignorando o espaço real disponível (foi assim que
+   a tabela do Horário "esticava" o `.app-viewport` pra 420px numa tela de
+   390px). E qualquer regra que force `display` numa classe genérica tipo
+   `.btn` precisa do `:not([hidden])`, senão sobrescreve o `[hidden]` da
+   UA stylesheet e reexibe botões que deveriam estar escondidos.
 5. **Navegação lateral** — troca qual `.app-section` fica visível.
 6. **Versículo do dia** — `fetch("versiculos.json")`, escolhe pelo dia do ano.
 7. **Mérito** — grid de notas dinâmico por itinerário, cálculo de média.

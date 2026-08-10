@@ -35,7 +35,8 @@
   --c9: #C026D3;
   --c10: #64748B;
 
-  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-heading: "Manrope", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   --font-mono: ui-monospace, "Cascadia Code", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
   color-scheme: light;
 }
@@ -110,7 +111,7 @@
   color-scheme: dark;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body {
   font-family: var(--font-body);
   background: var(--bg);
@@ -118,7 +119,7 @@ body {
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
 }
-h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; }
+h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--font-heading); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
 
 .eyebrow {
@@ -132,13 +133,16 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; }
 
 /* Visual forçado: computador ou celular, independente do aparelho real */
 :root[data-view="mobile"] .app-viewport {
+  width: 100%;
+  min-width: 0;
   max-width: 420px;
   margin: 0 auto;
   box-shadow: 0 0 0 1px var(--border), var(--shadow-lg);
   min-height: 100vh;
 }
 :root[data-view="desktop"] .app-viewport {
-  min-width: 1000px;
+  min-width: 0;
+  width: 100%;
 }
 
 /* Marca d'água do colégio (só aparece se sobrar espaço numa tela bem larga) */
@@ -259,7 +263,7 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; }
   color: var(--accent-contrast); padding: 5px 10px; border-radius: var(--radius-sm);
   letter-spacing: 0.02em; flex-shrink: 0; box-shadow: var(--shadow-sm);
 }
-.brand-name { font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.brand-name { font-family: var(--font-heading); font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .header-switches {
   display: flex; align-items: center; gap: 6px;
@@ -801,13 +805,113 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; }
 :root[data-view="mobile"] .board { padding: 8px 16px 70px; gap: 34px; }
 :root[data-view="mobile"] .cards-grid { grid-template-columns: 1fr; }
 :root[data-view="mobile"] .btn { padding: 9px 13px; font-size: 0.85rem; }
-:root[data-view="mobile"] .header-actions { flex-wrap: wrap; justify-content: flex-end; }
-:root[data-view="mobile"] .sidebar { width: 68px; padding: 16px 6px; }
-:root[data-view="mobile"] .sidebar-item { font-size: 0.62rem; }
-:root[data-view="mobile"] .sidebar-item .icon { font-size: 1.1rem; }
+:root[data-view="mobile"] .header-actions { flex-wrap: wrap; justify-content: flex-end; width: 100%; flex-shrink: 1; }
 :root[data-view="mobile"] .merito-grid { grid-template-columns: 1fr; }
 :root[data-view="mobile"] .merito-section { padding: 24px 16px 70px; }
 :root[data-view="mobile"] .merito-result { flex-direction: column; text-align: center; }
 :root[data-view="mobile"] .duvidas-section { padding: 24px 16px 70px; }
 :root[data-view="mobile"] .horario-section { padding: 24px 16px 70px; }
 :root[data-view="mobile"] .horario-table th, :root[data-view="mobile"] .horario-table td { padding: 10px 12px; font-size: 0.85rem; }
+
+/* Sidebar vira uma barra horizontal rolável em telas estreitas: ganha muito
+   espaço útil (antes uma coluna fixa de 68/88px comia ~17% da largura de um
+   celular só pra navegação). As mesmas regras aparecem duas vezes de
+   propósito: o bloco @media reage à largura real da janela (funciona mesmo
+   com data-view travado em "desktop", ex. tablet com a janela estreita); o
+   bloco data-view="mobile" cobre o preview manual do visual celular numa
+   tela larga (botão 💻/📱 no header), onde a largura real não muda. */
+:root[data-view="mobile"] .app-shell {
+  flex-direction: column;
+}
+:root[data-view="mobile"] .sidebar {
+  width: 100%;
+  min-width: 0;
+  max-width: 420px;
+  margin: 0 auto;
+  flex-direction: row;
+  align-items: center;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-right: none;
+  border-bottom: 1px solid var(--border);
+  padding: 8px 10px;
+  gap: 4px;
+}
+:root[data-view="mobile"] .sidebar-item {
+  flex-direction: row;
+  flex-shrink: 0;
+  width: auto;
+  white-space: nowrap;
+  padding: 9px 13px;
+  gap: 6px;
+  font-size: 0.78rem;
+}
+:root[data-view="mobile"] .sidebar-item .icon { font-size: 1rem; }
+:root[data-view="mobile"] .sidebar-item.active::before {
+  left: 50%; top: auto; bottom: -9px; transform: translateX(-50%);
+  width: 20px; height: 3px; border-radius: 3px 3px 0 0;
+}
+:root[data-view="mobile"] .arte-grid { grid-template-columns: 1fr; }
+:root[data-view="mobile"] .btn:not([hidden]) { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+:root[data-view="mobile"] .chip:not([hidden]) { min-height: 40px; display: inline-flex; align-items: center; }
+:root[data-view="mobile"] .text-btn { min-height: 36px; padding: 8px 12px; }
+:root[data-view="mobile"] .modal { max-width: 94vw; }
+:root[data-view="mobile"] .modal-body { padding: 18px 18px 22px; }
+:root[data-view="mobile"] .modal-header { padding: 16px 18px; }
+
+@media (max-width: 860px) {
+  .app-shell { flex-direction: column; }
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 8px 10px;
+    gap: 4px;
+  }
+  .sidebar-item {
+    flex-direction: row;
+    flex-shrink: 0;
+    width: auto;
+    white-space: nowrap;
+    padding: 9px 13px;
+    gap: 6px;
+    font-size: 0.78rem;
+  }
+  .sidebar-item .icon { font-size: 1rem; }
+  .sidebar-item.active::before {
+    left: 50%; top: auto; bottom: -9px; transform: translateX(-50%);
+    width: 20px; height: 3px; border-radius: 3px 3px 0 0;
+  }
+  .header-inner { padding: 12px 16px; flex-wrap: wrap; }
+  .header-actions { flex-wrap: wrap; justify-content: flex-end; width: 100%; flex-shrink: 1; }
+  .brand-name { display: none; }
+  .cards-grid { grid-template-columns: 1fr; }
+  .merito-grid { grid-template-columns: 1fr; }
+  .merito-result { flex-direction: column; text-align: center; }
+  .arte-grid { grid-template-columns: 1fr; }
+
+  /* Alvos de toque maiores (min. ~44px), mais fácil de acertar no celular */
+  .btn:not([hidden]) { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+  .chip:not([hidden]) { min-height: 40px; display: inline-flex; align-items: center; }
+  .text-btn { min-height: 36px; padding: 8px 12px; }
+  .comments-btn { min-height: 36px; }
+  .modal { max-width: 94vw; }
+  .modal-body { padding: 18px 18px 22px; }
+  .modal-header { padding: 16px 18px; }
+}
+
+/* Faixa intermediária (tablet / janela não maximizada): sem forçar a coluna
+   virar 1000px como antes (causava rolagem horizontal), só ajustes leves de
+   respiro pra não ficar apertado. */
+@media (min-width: 861px) and (max-width: 1180px) {
+  .header-inner, .mural-intro, .filter-bar, .board,
+  .merito-section, .duvidas-section, .horario-section,
+  .versiculo-section, .tradutor-section {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}

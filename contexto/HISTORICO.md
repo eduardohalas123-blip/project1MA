@@ -394,6 +394,63 @@ por trás de cada decisão, pra não se perder o contexto depois.
     (e depois de remover, também dá pra apagar a coleção `trabalhoArtes`
     inteira no Firebase Console, já que não serve mais pra nada).
 
+36. **Segundo redesign visual — "refaz todo o front, mais profissional,
+    ajuste melhor pro celular, mais intuitivo e versátil"** (2026-08-10) —
+    diferente do primeiro redesign (item 15), que foi uma repaginação
+    visual; esse pedido veio com foco explícito em responsividade real.
+    Diagnóstico antes de mexer: o site não tinha responsividade fluida de
+    verdade — só existia o sistema `data-view="mobile"/"desktop"`
+    (alternado manualmente pelo botão 💻/📱 no header, ou automático uma
+    vez no load via `innerWidth < 640`). Achado crítico: em telas entre
+    640px e 1088px (tablet, notebook com janela não maximizada), o site
+    ficava preso em `data-view="desktop"` mas `.app-viewport` tinha
+    `min-width: 1000px` fixo — causava rolagem horizontal. Mudanças:
+    - **Tipografia**: Google Fonts (Manrope pra títulos/marca, Inter pro
+      corpo) via `<link>` no `<head>`, substituindo a pilha de fontes de
+      sistema — dá uma cara mais "desenhada" sem mudar nenhuma estrutura.
+    - **Responsividade real**: `min-width: 1000px` do `.app-viewport`
+      removido; adicionado `@media (max-width: 860px)` que reage à
+      largura real da janela (não depende mais só do toggle manual) e
+      `@media (min-width: 861px) and (max-width: 1180px)` com respiro
+      leve pra faixa intermediária.
+    - **Sidebar horizontal no celular**: a barra lateral (nav vertical de
+      88px/68px, comia ~17% da largura útil num celular) virou uma barra
+      horizontal rolável no topo em telas estreitas — mesmas regras
+      escritas duas vezes de propósito: uma vez presa a `@media
+      (max-width: 860px)` (cobre qualquer tela física estreita,
+      independente do toggle), outra presa a `:root[data-view="mobile"]`
+      (cobre o preview manual do visual celular numa tela larga).
+    - **Alvos de toque maiores** (~44px mínimo) pra botões/chips no
+      celular, acessibilidade de toque.
+    - Três bugs pegos e corrigidos durante o teste (Playwright, larguras
+      320/390/800/1024/1440px, `document.documentElement.scrollWidth`
+      comparado à largura da viewport pra achar overflow horizontal):
+      1. `.btn:not([hidden])`/`.chip:not([hidden])` — a regra de alvo de
+         toque (`display: inline-flex`) tinha mais especificidade que o
+         `[hidden]` da UA stylesheet e reexibia botões escondidos (ex.
+         "Sair" aparecia mesmo deslogado). Sempre testar visibilidade
+         condicional depois de qualquer regra que force `display` numa
+         classe genérica como `.btn`.
+      2. `.header-actions` sem `width: 100%` — mesmo com `flex-wrap:
+         wrap`, um flex item sem largura própria não é forçado a quebrar
+         linha, só empurra a linha pra frente. `flex-wrap` sozinho não
+         basta, precisa dar uma largura pro container quebrar dentro dela.
+      3. `.app-viewport` com `margin: 0 auto` dentro de um flex container
+         (`.app-shell` virou `flex-direction: column` no celular) sem
+         `width: 100%` explícito — margem automática em item flex
+         desliga o `stretch` padrão e faz o elemento se dimensionar pelo
+         conteúdo (shrink-to-fit) até o teto do `max-width`, ignorando o
+         espaço real disponível; com uma tabela larga dentro (Horário,
+         6 colunas), o `.app-viewport` "esticava" pra 420px mesmo numa
+         tela de 390px. Corrigido com `width: 100%; min-width: 0;`
+         explícitos nos elementos flex que também têm `max-width` +
+         `margin: auto`.
+    - Testado (Playwright): Mundo Aberto (rotação 90°, analógico, escolha
+      de mapa) continua funcionando sem alteração na lógica, todas as
+      seções (Mural, Mérito, Dúvidas, Ideias, Enquetes, Horário,
+      Versículo, Tradutor, Artes) e modais abrem sem estourar a largura
+      da tela em nenhum breakpoint testado.
+
 ## Deploy
 
 - **Mudou em 2026-08-08** (item 24): o site agora tem uma Netlify
