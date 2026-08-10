@@ -68,6 +68,14 @@
         <span class="icon" aria-hidden="true">🌐</span>
         <span>Tradutor</span>
       </button>
+      <!-- TEMPORÁRIO - trabalho de artes (turma cria Instagram de artistas).
+           Usuário vai tirar essa aba depois que o trabalho acabar - ver
+           HISTORICO.md item sobre "Artes" pra remover HTML/CSS/JS/regra
+           do Firestore todos juntos quando chegar a hora. -->
+      <button class="sidebar-item" data-section="artesSection" type="button">
+        <span class="icon" aria-hidden="true">🎨</span>
+        <span>Artes</span>
+      </button>
     </nav>
 
     <div class="app-viewport">
@@ -375,6 +383,34 @@
 
           <button id="tradAbrirMundoBtn" class="trad-btn-mundo" type="button">🌍 Mundo Aberto</button>
           <button id="tradLimparHistoricosBtn" class="trad-btn-perigo" type="button">🗑️ Limpar Históricos</button>
+        </section>
+
+        <!-- TEMPORÁRIO - ver comentário no menu lateral (nav) sobre remoção -->
+        <section id="artesSection" class="app-section duvidas-section" hidden>
+          <div class="merito-intro">
+            <span class="eyebrow">// trabalho de artes</span>
+            <h2>Instagrams dos artistas</h2>
+            <p>Poste o Instagram que você criou pro seu artista: seu nome, o nome do artista e o @ que você escolheu. Todo mundo pode postar e ver os posts dos colegas.</p>
+          </div>
+          <form id="arteForm" class="duvida-form">
+            <label for="arteNome">Seu nome</label>
+            <input type="text" id="arteNome" name="nome" required maxlength="80" placeholder="Como podemos te chamar" />
+
+            <label for="arteArtista">Nome do artista</label>
+            <input type="text" id="arteArtista" name="artista" required maxlength="120" placeholder="Ex: Tarsila do Amaral" />
+
+            <label for="arteInstagram">@ do Instagram que você criou</label>
+            <input type="text" id="arteInstagram" name="instagram" required maxlength="60" placeholder="@nomedoartista" />
+
+            <p id="arteError" class="form-error" hidden></p>
+
+            <button type="submit" class="btn btn-primary">Enviar</button>
+          </form>
+
+          <div id="arteEmpty" class="empty-state" hidden>
+            <p>Ninguém postou um Instagram ainda.</p>
+          </div>
+          <div id="arteList" class="arte-grid"></div>
         </section>
       </main>
 

@@ -115,5 +115,23 @@ service cloud.firestore {
         );
       allow delete: if isAdmin();
     }
+
+    // TEMPORÁRIO - trabalho de artes (turma cria Instagram de artistas).
+    // Apagar esse bloco junto quando a seção "Artes" for removida do site
+    // (ver comentário em index.html). Público lê e cria, só admin apaga.
+    match /trabalhoArtes/{arteId} {
+      allow read: if true;
+      allow create: if request.resource.data.nome is string
+        && request.resource.data.artista is string
+        && request.resource.data.instagram is string
+        && request.resource.data.nome.size() > 0
+        && request.resource.data.nome.size() < 100
+        && request.resource.data.artista.size() > 0
+        && request.resource.data.artista.size() < 150
+        && request.resource.data.instagram.size() > 0
+        && request.resource.data.instagram.size() < 60;
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
   }
 }

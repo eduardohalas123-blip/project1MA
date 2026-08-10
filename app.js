@@ -117,6 +117,13 @@ const el = {
   enqueteOpcoesArea: document.getElementById("enqueteOpcoesArea"),
   enqueteAddOpcaoBtn: document.getElementById("enqueteAddOpcaoBtn"),
   enqueteError: document.getElementById("enqueteError"),
+  arteForm: document.getElementById("arteForm"),
+  arteNome: document.getElementById("arteNome"),
+  arteArtista: document.getElementById("arteArtista"),
+  arteInstagram: document.getElementById("arteInstagram"),
+  arteError: document.getElementById("arteError"),
+  arteEmpty: document.getElementById("arteEmpty"),
+  arteList: document.getElementById("arteList"),
   duvidaPublicList: document.getElementById("duvidaPublicList"),
   duvidaPublicEmpty: document.getElementById("duvidaPublicEmpty"),
   commentsModal: document.getElementById("commentsModal"),
@@ -1160,6 +1167,74 @@ el.enqueteAddOpcaoBtn.addEventListener("click", () => {
   if (el.enqueteOpcoesArea.children.length >= 6) return;
   el.enqueteOpcoesArea.appendChild(criarLinhaOpcaoEnquete());
 });
+
+// ---------------------------------------------------------------------------
+// Artes (TEMPORÁRIO - trabalho de artes da turma, usuário vai remover essa
+// seção inteira depois que o trabalho acabar: tirar o botão do menu lateral
+// e a seção em index.html, este bloco em app.js, o CSS ".arte-*" em
+// style.css e o `match /trabalhoArtes/{id}` em firestore.rules).
+// Público lê e cria (igual comentários de tarefa); só admin apaga.
+// ---------------------------------------------------------------------------
+let allArtes = [];
+
+function renderArtes(itens) {
+  if (itens.length === 0) {
+    el.arteEmpty.hidden = false;
+    el.arteList.innerHTML = "";
+    return;
+  }
+  el.arteEmpty.hidden = true;
+  el.arteList.innerHTML = "";
+
+  itens.forEach((item) => {
+    const card = document.createElement("div");
+    card.className = "arte-card";
+
+    const handle = document.createElement("p");
+    handle.className = "arte-card-handle";
+    handle.textContent = item.instagram;
+    card.appendChild(handle);
+
+    const artista = document.createElement("p");
+    artista.className = "arte-card-artista";
+    artista.textContent = item.artista;
+    card.appendChild(artista);
+
+    const autor = document.createElement("p");
+    autor.className = "arte-card-autor";
+    autor.textContent = `Criado por ${item.nome}`;
+    card.appendChild(autor);
+
+    if (isAdmin) {
+      const delBtn = document.createElement("button");
+      delBtn.type = "button";
+      delBtn.className = "text-btn danger";
+      delBtn.textContent = "Apagar";
+      delBtn.addEventListener("click", async () => {
+        if (!confirm("Apagar esse post?")) return;
+        try {
+          await deleteDoc(doc(db, "trabalhoArtes", item.id));
+        } catch {
+          showToast("Não foi possível apagar.");
+        }
+      });
+      card.appendChild(delBtn);
+    }
+
+    el.arteList.appendChild(card);
+  });
+}
+
+function iniciarArtes() {
+  onSnapshot(
+    query(collection(db, "trabalhoArtes"), orderBy("criadoEm", "desc")),
+    (snapshot) => {
+      allArtes = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+      renderArtes(allArtes);
+    },
+    (error) => console.error(error)
+  );
+}
 
 // ---------------------------------------------------------------------------
 // Comentários (por tarefa)
@@ -3671,6 +3746,7 @@ if (!isConfigured) {
   iniciarChatVersiculo();
   iniciarContadorVisitas();
   iniciarEnquetes();
+  iniciarArtes();
 
   onSnapshot(
     query(tasksRef, orderBy("prazo", "asc")),
@@ -3711,6 +3787,7 @@ if (!isConfigured) {
 
     el.addEnqueteBtn.hidden = !isAdmin;
     renderEnquetes();
+    renderArtes(allArtes);
   });
 
   el.duvidaForm.addEventListener("submit", async (event) => {
@@ -3777,6 +3854,29 @@ if (!isConfigured) {
     } catch (error) {
       el.enqueteError.textContent = "Não foi possível criar a enquete.";
       el.enqueteError.hidden = false;
+    }
+  });
+
+  el.arteForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    el.arteError.hidden = true;
+    const nome = el.arteNome.value.trim();
+    const artista = el.arteArtista.value.trim();
+    const instagramBruto = el.arteInstagram.value.trim().replace(/^@+/, "");
+    if (!nome || !artista || !instagramBruto) {
+      el.arteError.textContent = "Preencha todos os campos.";
+      el.arteError.hidden = false;
+      return;
+    }
+    try {
+      await addDoc(collection(db, "trabalhoArtes"), {
+        nome, artista, instagram: `@${instagramBruto}`, criadoEm: serverTimestamp(),
+      });
+      el.arteForm.reset();
+      showToast("Enviado!");
+    } catch (error) {
+      el.arteError.textContent = "Não foi possível enviar. Tente de novo.";
+      el.arteError.hidden = false;
     }
   });
 

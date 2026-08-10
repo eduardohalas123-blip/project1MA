@@ -713,6 +713,21 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; }
 .enquete-opcao-input-row input { flex: 1; }
 .enquete-opcao-input-row .text-btn { flex-shrink: 0; padding: 6px 10px; }
 
+/* Artes (TEMPORÁRIO - trabalho de artes, ver comentário no index.html) */
+.arte-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.arte-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md);
+  padding: 16px 18px; box-shadow: var(--shadow-sm);
+  display: flex; flex-direction: column; gap: 4px;
+}
+.arte-card-handle { font-weight: 800; font-size: 1.05rem; color: var(--accent); word-break: break-word; }
+.arte-card-artista { font-size: 0.92rem; color: var(--text); }
+.arte-card-autor { font-size: 0.78rem; color: var(--text-muted); margin-top: 6px; }
+.arte-card .text-btn.danger { align-self: flex-start; margin-top: 6px; }
+
 /* Horário */
 .horario-section { max-width: 900px; margin: 0 auto; padding: 32px 24px 90px; }
 .horario-table-wrap {

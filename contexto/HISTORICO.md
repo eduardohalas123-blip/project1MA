@@ -374,6 +374,25 @@ por trás de cada decisão, pra não se perder o contexto depois.
     com Playwright: modal de criar abre, opções dinâmicas (mínimo 2,
     adicionar/remover linha) funcionam, e o estado vazio mostra
     literalmente "Nenhuma enquete ainda." como pedido.
+35. **Aba "Artes" — TEMPORÁRIA, pra remover depois** (2026-08-09) — pedido
+    pra um trabalho específico da escola (a turma cria um Instagram
+    fictício pra um artista cada). Diferente de Ideias/Enquetes: aqui é
+    **público lê e cria** (igual comentário de tarefa), sem gate de
+    admin nenhum pra postar - só apagar é admin. Cada post tem nome de
+    quem criou, nome do artista e o @ escolhido (normalizado: tira @ que
+    a pessoa digitou e recoloca um só, então "@x", "x", "@@x" viram todos
+    "@x"). **O usuário avisou que essa aba é temporária e vai tirar
+    depois** que o trabalho acabar - por isso ficou tudo bem marcado com
+    comentários "TEMPORÁRIO" nos 4 lugares que precisam ser removidos
+    juntos quando chegar a hora:
+    - `index.html`: botão do menu lateral + `<section id="artesSection">`
+    - `style.css`: bloco `.arte-*`
+    - `app.js`: bloco inteiro `// Artes (TEMPORÁRIO...)` + as 3 linhas
+      que conectam nele (`iniciarArtes()`, `renderArtes(allArtes)` no
+      `onAuthStateChanged`, `el.arteForm.addEventListener`)
+    - `firestore.rules`: `match /trabalhoArtes/{arteId}`
+    (e depois de remover, também dá pra apagar a coleção `trabalhoArtes`
+    inteira no Firebase Console, já que não serve mais pra nada).
 
 ## Deploy
 
