@@ -29,8 +29,14 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 16px;
+  padding: 18px;
   margin-bottom: 14px;
+  box-shadow: 0 2px 10px -6px color-mix(in srgb, var(--accent) 20%, transparent);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+#tradutorSection .trad-card:focus-within {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  box-shadow: 0 8px 22px -12px color-mix(in srgb, var(--accent) 40%, transparent);
 }
 
 #tradutorSection .trad-idiomas-row {
@@ -73,7 +79,9 @@
 }
 
 .trad-icon-btn:hover {
-  background: var(--border);
+  background: color-mix(in srgb, var(--accent) 14%, var(--bg-alt));
+  border-color: var(--accent);
+  transform: translateY(-1px);
 }
 
 .trad-icon-btn:active {
@@ -119,22 +127,25 @@
 #tradutorSection .trad-btn-primario {
   display: block;
   width: 100%;
-  height: 44px;
+  height: 46px;
   margin-bottom: 14px;
   border: none;
   border-radius: var(--radius-md);
-  background: var(--accent);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
   color: var(--accent-contrast);
   font: inherit;
   font-weight: 700;
   font-size: 0.95rem;
   cursor: pointer;
-  transition: opacity .15s ease;
+  box-shadow: 0 12px 24px -10px color-mix(in srgb, var(--accent) 70%, transparent);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity .15s ease;
 }
 
 #tradutorSection .trad-btn-primario:hover {
-  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: 0 16px 30px -10px color-mix(in srgb, var(--accent) 70%, transparent);
 }
+#tradutorSection .trad-btn-primario:active { transform: translateY(0); }
 
 #tradutorSection .trad-btn-primario:disabled {
   opacity: 0.6;
@@ -142,9 +153,17 @@
 }
 
 #tradutorSection .trad-resultado-card {
+  position: relative;
   min-height: 90px;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--accent) 4%, var(--surface));
+}
+#tradutorSection .trad-resultado-card::before {
+  content: "";
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
 }
 
 #tradutorSection .trad-resultado-topo {
@@ -213,7 +232,8 @@
 }
 
 #tradutorSection .trad-switch-linha input:checked + .trad-switch-track {
-  background: var(--accent);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
 #tradutorSection .trad-switch-linha input:checked + .trad-switch-track::before {
@@ -232,7 +252,7 @@
   height: 44px;
   padding: 0 16px;
   border-radius: var(--radius-md);
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border-strong);
   background: var(--surface);
   color: var(--text);
   font: inherit;
@@ -240,11 +260,13 @@
   font-size: 0.85rem;
   cursor: pointer;
   white-space: nowrap;
-  transition: background-color .15s ease;
+  transition: background-color .15s ease, border-color .15s ease, color .15s ease;
 }
 
 #tradutorSection .trad-btn-secundario:hover {
-  background: var(--bg-alt);
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 #tradutorSection .trad-btn-secundario:disabled {
@@ -305,28 +327,44 @@
 }
 
 #tradutorSection .trad-btn-grid {
-  height: 46px;
+  --grid-color: var(--accent);
+  height: 48px;
   border-radius: var(--radius-md);
-  border: 1px solid var(--border);
-  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--grid-color) 25%, var(--border));
+  border-top: 3px solid var(--grid-color);
+  background: color-mix(in srgb, var(--grid-color) 5%, var(--surface));
   color: var(--text);
   font: inherit;
   font-weight: 700;
   font-size: 0.82rem;
   cursor: pointer;
-  transition: background-color .15s ease;
+  transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease;
 }
 
 #tradutorSection .trad-btn-grid:hover {
-  background: var(--bg-alt);
+  transform: translateY(-2px);
+  background: color-mix(in srgb, var(--grid-color) 10%, var(--surface));
+  box-shadow: 0 10px 20px -12px color-mix(in srgb, var(--grid-color) 60%, transparent);
 }
+/* Cicla pelas cores da paleta pra ficar mais vivo, sem significado real
+   por trás - são 10 botões de ação, não categorias. */
+#tradutorSection .trad-btn-grid:nth-child(10n+1) { --grid-color: var(--c1); }
+#tradutorSection .trad-btn-grid:nth-child(10n+2) { --grid-color: var(--c9); }
+#tradutorSection .trad-btn-grid:nth-child(10n+3) { --grid-color: var(--c6); }
+#tradutorSection .trad-btn-grid:nth-child(10n+4) { --grid-color: var(--c13); }
+#tradutorSection .trad-btn-grid:nth-child(10n+5) { --grid-color: var(--c4); }
+#tradutorSection .trad-btn-grid:nth-child(10n+6) { --grid-color: var(--c8); }
+#tradutorSection .trad-btn-grid:nth-child(10n+7) { --grid-color: var(--c11); }
+#tradutorSection .trad-btn-grid:nth-child(10n+8) { --grid-color: var(--c2); }
+#tradutorSection .trad-btn-grid:nth-child(10n+9) { --grid-color: var(--c7); }
+#tradutorSection .trad-btn-grid:nth-child(10n+10) { --grid-color: var(--c14); }
 
 #tradutorSection .trad-btn-perigo {
   display: block;
   width: 100%;
   height: 42px;
   margin-top: 10px;
-  border: none;
+  border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent);
   border-radius: var(--radius-md);
   background: var(--danger-bg);
   color: var(--danger);
@@ -334,10 +372,12 @@
   font-weight: 700;
   font-size: 0.82rem;
   cursor: pointer;
+  transition: background-color .15s ease, transform .15s ease;
 }
 
 #tradutorSection .trad-btn-perigo:hover {
-  opacity: 0.85;
+  background: color-mix(in srgb, var(--danger) 18%, var(--danger-bg));
+  transform: translateY(-1px);
 }
 
 #tradutorSection .trad-btn-mundo {
@@ -353,11 +393,15 @@
   font-weight: 700;
   font-size: 0.95rem;
   cursor: pointer;
+  box-shadow: 0 12px 26px -10px color-mix(in srgb, var(--accent) 65%, transparent);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 #tradutorSection .trad-btn-mundo:hover {
-  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px -10px color-mix(in srgb, var(--accent) 65%, transparent);
 }
+#tradutorSection .trad-btn-mundo:active { transform: translateY(0); }
 
 /* Conteúdo dos modais do tradutor (favoritos/flashcards/quiz) ----------- */
 

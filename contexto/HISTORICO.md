@@ -559,6 +559,31 @@ por trás de cada decisão, pra não se perder o contexto depois.
     de fundo do chip atrás do emoji (mesma cor que já era usada no
     quadrado antes), não o emoji em si.
 
+41. **Reforço visual no Tradutor** (2026-08-10) — continuação do mesmo
+    pedido de "melhorar o design", agora na seção Tradutor
+    (`tradutor.css`), que ainda estava com o estilo antigo (antes do
+    redesign, esse arquivo já tinha sua própria nota dizendo que foi
+    "reescrito escopado em #tradutorSection... usando as variáveis de
+    tema já definidas em style.css" - só não tinha recebido o reforço
+    visual mais recente). Mudanças, só CSS, nada de HTML/JS:
+    - `.trad-card` (idiomas, texto, resultado): sombra tingida de accent,
+      destaque ao focar (`:focus-within`).
+    - `.trad-resultado-card`: barra gradiente no topo, igual ao
+      `.versiculo-card` e ao cabeçalho do site.
+    - `.trad-btn-primario` (Traduzir): virou gradiente accent→accent-2
+      com sombra e elevação no hover, igual ao `.btn-primary` do resto
+      do site (antes era cor sólida + só opacity no hover).
+    - **Grade de 10 botões de ação** (Traduções/Favoritos/Flashcards/
+      etc): cada um ganhou uma cor do topo, ciclando pela paleta de
+      matérias via `:nth-child(10n+N)` - mesma técnica do mosaico de
+      Artes (item 39), sem significado de categoria real, só pra dar
+      vida visual a uma grade que antes era toda branca/cinza igual.
+    - Botão Mundo Aberto, botão Falar, ícones circulares e o switch do
+      Modo Papagaio: sombra/hover/glow ajustados pra combinar.
+    - Retestado (Playwright): sem overflow em nenhuma largura, Mundo
+      Aberto (escolha de mapa + jogo) continua funcionando sem alteração
+      de lógica.
+
 ## Deploy
 
 - **Mudou em 2026-08-08** (item 24): o site agora tem uma Netlify
