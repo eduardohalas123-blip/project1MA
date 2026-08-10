@@ -36,13 +36,13 @@ const SUBJECTS = [
   { name: "Educação Física", color: "var(--c8)" },
   { name: "Arte", color: "var(--c9)" },
   { name: "Ensino Religioso", color: "var(--c10)" },
-  { name: "Geografia", color: "var(--c1)" },
-  { name: "Argumentação", color: "var(--c2)" },
-  { name: "Língua Portuguesa", color: "var(--c3)" },
-  { name: "Literatura", color: "var(--c4)" },
-  { name: "Simulados", color: "var(--c5)" },
+  { name: "Geografia", color: "var(--c11)" },
+  { name: "Argumentação", color: "var(--c12)" },
+  { name: "Língua Portuguesa", color: "var(--c13)" },
+  { name: "Literatura", color: "var(--c14)" },
+  { name: "Simulados", color: "var(--c15)" },
 ];
-const FALLBACK_PALETTE = ["var(--c1)", "var(--c2)", "var(--c3)", "var(--c4)", "var(--c5)", "var(--c6)", "var(--c7)", "var(--c8)", "var(--c9)", "var(--c10)"];
+const FALLBACK_PALETTE = ["var(--c1)", "var(--c2)", "var(--c3)", "var(--c4)", "var(--c5)", "var(--c6)", "var(--c7)", "var(--c8)", "var(--c9)", "var(--c10)", "var(--c11)", "var(--c12)", "var(--c13)", "var(--c14)", "var(--c15)"];
 
 // Categorias extras que só existem no Mural (não entram no Mérito, já que não são matéria com nota).
 const MURAL_ONLY_CATEGORIES = [

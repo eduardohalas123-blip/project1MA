@@ -24,16 +24,26 @@
   --radius-md: 12px;
   --radius-lg: 18px;
 
-  --c1: #4C6FFF;
-  --c2: #8B5CF6;
-  --c3: #EC4899;
-  --c4: #F59E0B;
-  --c5: #10B981;
-  --c6: #06B6D4;
-  --c7: #F97316;
-  --c8: #14B8A6;
-  --c9: #C026D3;
-  --c10: #64748B;
+  /* Paleta de matérias - 15 cores, uma por matéria de SUBJECTS em app.js,
+     sem repetir nenhuma (antes só tinha 10 e ficava repetindo em ciclo -
+     5 matérias acabavam com a mesma cor de outras 5). Cada uma tem
+     contraste mínimo de ~2.9:1 com branco (usado no chip ativo do filtro
+     do Mural). */
+  --c1: #DC2626;  /* vermelho   - Biologia */
+  --c2: #EA580C;  /* laranja    - Química */
+  --c3: #D97706;  /* âmbar      - Matemática */
+  --c4: #CA8A04;  /* amarelo    - Inglês */
+  --c5: #65A30D;  /* lima       - História */
+  --c6: #16A34A;  /* verde      - Física */
+  --c7: #059669;  /* esmeralda  - Projeto de Vida */
+  --c8: #0D9488;  /* teal       - Educação Física */
+  --c9: #0891B2;  /* ciano      - Arte */
+  --c10: #2563EB; /* azul       - Ensino Religioso */
+  --c11: #4F46E5; /* índigo     - Geografia */
+  --c12: #7C3AED; /* violeta    - Argumentação */
+  --c13: #C026D3; /* fúcsia     - Língua Portuguesa */
+  --c14: #DB2777; /* pink       - Literatura */
+  --c15: #E11D48; /* rosa       - Simulados */
 
   --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   --font-heading: "Manrope", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
@@ -176,7 +186,7 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--fon
   height: auto;
   opacity: 0.92;
   pointer-events: none;
-  z-index: 1;
+  z-index: 5;
   filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.15));
 }
 @media (min-width: 1500px) {
@@ -191,8 +201,8 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--fon
   font-family: var(--font-mono);
   font-size: 0.72rem;
   color: var(--text-muted);
-  opacity: 0.75;
-  z-index: 1;
+  opacity: 0.85;
+  z-index: 5;
   pointer-events: none;
   display: flex;
   align-items: center;
@@ -200,6 +210,13 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--fon
 }
 .visitas-hoje {
   font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+  padding: 3px 9px;
+  border-radius: 999px;
+  opacity: 1;
 }
 :root[data-view="mobile"] .credit-tag { display: none; }
 :root[data-view="mobile"] .school-watermark { display: none; }
@@ -279,7 +296,7 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--fon
   content: "";
   display: block;
   height: 3px;
-  background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--c3, var(--accent)));
+  background: linear-gradient(90deg, var(--accent), var(--accent-2), #ec4899);
 }
 .header-inner {
   max-width: 1100px; margin: 0 auto; padding: 18px 24px;

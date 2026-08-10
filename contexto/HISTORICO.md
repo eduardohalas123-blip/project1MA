@@ -491,6 +491,40 @@ por trás de cada decisão, pra não se perder o contexto depois.
     - Retestado nas mesmas 5 larguras (320–1440px) via Playwright depois:
       nenhuma regressão de overflow horizontal.
 
+38. **Cor diferente pra cada matéria** (2026-08-10) — usuário reparou que
+    várias matérias tinham a mesma cor no Mural (bolinha/borda do card).
+    Causa: só existiam 10 cores (`--c1`...`--c10`) pra 15 matérias em
+    `SUBJECTS` (app.js), então repetia em ciclo (Geografia= mesma cor de
+    Biologia, Argumentação= mesma de Química, etc). Corrigido: paleta
+    expandida pra `--c1`...`--c15` (uma cor por matéria, sem repetir),
+    gerada com espaçamento de matiz ~24° e mirando contraste mínimo
+    ~2.9:1 com texto branco (usado no chip ativo do filtro) - ver
+    comentário em `style.css` junto da paleta pra detalhes/motivo de cada
+    escolha. `SUBJECTS` em `app.js` reatribuído pra usar `--c1`...`--c15`
+    em ordem, sem ciclo. A faixa gradiente do cabeçalho (item 37) usava
+    `var(--c3)` como terceiro tom "de brinde" - como `--c3` mudou de
+    significado agora, trocado por uma cor fixa (`#ec4899`) só pra essa
+    faixa, sem depender da paleta de matérias.
+    - **Bug encontrado no processo** ("achei que você esqueceu do olho"):
+      o contador de visitas 👁️ (`.credit-tag`, canto inferior direito)
+      sumiu de vista depois do reforço visual do item 37. Causa: o
+      `position:relative; z-index:1` que dei no `.app-shell` pra ele
+      ficar acima do glow de fundo (item 37) empatou de z-index com o
+      `.credit-tag` (que já era `z-index:1`) - em empate, quem vem depois
+      no HTML pinta por cima, e `.app-shell` vem depois de `.credit-tag`
+      no `body`. Resultado: o board de tarefas cobria o contador mesmo
+      sem querer (mas cliques continuavam passando direto, já que
+      `.credit-tag` tem `pointer-events:none` - por isso não dava pra
+      notar testando clique, só visualmente). Corrigido subindo
+      `.credit-tag` e `.school-watermark` pra `z-index:5`. Também
+      aproveitado pra destacar o número do contador com um selo
+      colorido, já que ele tinha ficado "esquecido" visualmente (texto
+      cinza opaco 0.75) no meio do resto do site mais ousado.
+      **Lição**: `elementFromPoint()` não serve pra checar sobreposição
+      visual de elementos com `pointer-events:none` - ele pula esses
+      elementos e retorna o que receberia o clique, não o que está
+      pintado por cima. Pra isso, tirar print e olhar (ou ler pixel).
+
 ## Deploy
 
 - **Mudou em 2026-08-08** (item 24): o site agora tem uma Netlify
