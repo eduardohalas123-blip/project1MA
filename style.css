@@ -713,24 +713,32 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--fon
 .duvida-form input:focus, .duvida-form textarea:focus { outline: none; border-color: var(--accent); }
 .duvida-form .btn { margin-top: 18px; align-self: flex-start; }
 
-.duvida-list { display: flex; flex-direction: column; gap: 12px; }
+.duvida-list { display: flex; flex-direction: column; gap: 14px; }
 .duvida-card {
-  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md);
-  padding: 16px 18px; display: flex; flex-direction: column; gap: 8px;
-  transition: box-shadow 0.15s ease;
+  background: color-mix(in srgb, var(--accent) 4%, var(--surface));
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px; display: flex; flex-direction: column; gap: 9px;
+  box-shadow: 0 2px 8px -4px color-mix(in srgb, var(--accent) 20%, transparent);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
-.duvida-card:hover { box-shadow: var(--shadow-sm); }
+.duvida-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 32px -18px color-mix(in srgb, var(--accent) 45%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+}
 .duvida-card-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
-.duvida-nome { font-weight: 700; font-size: 0.95rem; }
+.duvida-nome { font-family: var(--font-heading); font-weight: 800; font-size: 0.98rem; }
 .duvida-date { font-size: 0.78rem; color: var(--text-muted); font-variant-numeric: tabular-nums; flex-shrink: 0; }
 .duvida-texto { font-size: 0.95rem; color: var(--text); white-space: pre-wrap; }
 .duvida-card .text-btn.danger { align-self: flex-end; }
 
 .duvida-resposta {
-  background: color-mix(in srgb, var(--accent) 8%, var(--surface-2));
-  border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--border));
-  border-radius: var(--radius-sm);
-  padding: 10px 12px;
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface-2));
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border));
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
 }
 .duvida-resposta strong { display: block; font-size: 0.78rem; color: var(--accent); margin-bottom: 4px; }
 .duvida-resposta p { font-size: 0.92rem; color: var(--text); white-space: pre-wrap; }
@@ -749,33 +757,36 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--fon
 
 /* Enquetes */
 #addEnqueteBtn { margin-bottom: 20px; }
-.enquete-pergunta { font-weight: 700; font-size: 1rem; color: var(--text); }
+.enquete-pergunta { font-family: var(--font-heading); font-weight: 800; font-size: 1.08rem; color: var(--text); }
 .enquete-total { font-size: 0.78rem; color: var(--text-muted); }
-.enquete-opcoes { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+.enquete-opcoes { display: flex; flex-direction: column; gap: 9px; margin-top: 4px; }
 
 .enquete-opcao-btn {
-  text-align: left; padding: 10px 14px; border-radius: var(--radius-sm);
-  border: 1px solid var(--border); background: var(--surface-2); color: var(--text);
-  cursor: pointer; font: inherit; font-size: 0.92rem;
-  transition: border-color 0.15s ease, background-color 0.15s ease;
+  text-align: left; padding: 11px 15px; border-radius: var(--radius-md);
+  border: 1.5px solid var(--border); background: var(--surface-2); color: var(--text);
+  cursor: pointer; font: inherit; font-weight: 600; font-size: 0.92rem;
+  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
 }
-.enquete-opcao-btn:hover { border-color: var(--accent); background: var(--bg-alt); }
+.enquete-opcao-btn:hover { border-color: var(--accent); background: var(--bg-alt); transform: translateY(-1px); }
 
 .enquete-resultado {
-  position: relative; border-radius: var(--radius-sm); overflow: hidden;
-  border: 1px solid var(--border); background: var(--surface-2);
+  position: relative; border-radius: var(--radius-md); overflow: hidden;
+  border: 1.5px solid var(--border); background: var(--surface-2);
 }
 .enquete-resultado-barra {
   position: absolute; inset: 0; width: 0%;
-  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 30%, transparent), color-mix(in srgb, var(--accent-2) 30%, transparent));
   transition: width 0.4s ease;
 }
 .enquete-resultado-info {
   position: relative; display: flex; justify-content: space-between; align-items: center;
-  gap: 10px; padding: 10px 14px; font-size: 0.9rem; color: var(--text);
+  gap: 10px; padding: 11px 15px; font-size: 0.9rem; color: var(--text);
 }
-.enquete-resultado.votada .enquete-resultado-info { font-weight: 700; }
-.enquete-resultado.votada { border-color: var(--accent); }
+.enquete-resultado.votada .enquete-resultado-info { font-weight: 800; }
+.enquete-resultado.votada {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
 
 .enquete-opcoes-area { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
 .enquete-opcao-input-row { display: flex; gap: 8px; align-items: center; }
@@ -788,11 +799,38 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--fon
   gap: 16px; margin-top: 28px;
 }
 .arte-card {
-  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md);
-  padding: 16px 18px; box-shadow: var(--shadow-sm);
-  display: flex; flex-direction: column; gap: 4px;
+  --arte-color: var(--c1);
+  background: color-mix(in srgb, var(--arte-color) 6%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--arte-color) 24%, var(--border));
+  border-top: 4px solid var(--arte-color);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  box-shadow: 0 2px 8px -4px color-mix(in srgb, var(--arte-color) 25%, transparent);
+  display: flex; flex-direction: column; gap: 5px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-.arte-card-handle { font-weight: 800; font-size: 1.05rem; color: var(--accent); word-break: break-word; }
+.arte-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 32px -18px color-mix(in srgb, var(--arte-color) 55%, transparent);
+}
+/* Cicla pelas 15 cores da paleta de matérias, dá uma cara de mosaico
+   colorido sem precisar de categoria real (artes não tem "matéria") */
+.arte-card:nth-child(15n+1) { --arte-color: var(--c1); }
+.arte-card:nth-child(15n+2) { --arte-color: var(--c2); }
+.arte-card:nth-child(15n+3) { --arte-color: var(--c3); }
+.arte-card:nth-child(15n+4) { --arte-color: var(--c4); }
+.arte-card:nth-child(15n+5) { --arte-color: var(--c5); }
+.arte-card:nth-child(15n+6) { --arte-color: var(--c6); }
+.arte-card:nth-child(15n+7) { --arte-color: var(--c7); }
+.arte-card:nth-child(15n+8) { --arte-color: var(--c8); }
+.arte-card:nth-child(15n+9) { --arte-color: var(--c9); }
+.arte-card:nth-child(15n+10) { --arte-color: var(--c10); }
+.arte-card:nth-child(15n+11) { --arte-color: var(--c11); }
+.arte-card:nth-child(15n+12) { --arte-color: var(--c12); }
+.arte-card:nth-child(15n+13) { --arte-color: var(--c13); }
+.arte-card:nth-child(15n+14) { --arte-color: var(--c14); }
+.arte-card:nth-child(15n+15) { --arte-color: var(--c15); }
+.arte-card-handle { font-family: var(--font-heading); font-weight: 800; font-size: 1.08rem; color: var(--arte-color); word-break: break-word; }
 .arte-card-artista { font-size: 0.92rem; color: var(--text); }
 .arte-card-autor { font-size: 0.78rem; color: var(--text-muted); margin-top: 6px; }
 .arte-card .text-btn.danger { align-self: flex-start; margin-top: 6px; }

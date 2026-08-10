@@ -525,6 +525,26 @@ por trás de cada decisão, pra não se perder o contexto depois.
       elementos e retorna o que receberia o clique, não o que está
       pintado por cima. Pra isso, tirar print e olhar (ou ler pixel).
 
+39. **Consistência visual: Dúvidas/Ideias/Enquetes/Artes ganham o mesmo
+    tratamento do Mural** (2026-08-10) — usuário perguntou "dá pra
+    melhorar mais o design?", recomendei isso (essas seções ainda estavam
+    com o estilo antigo, mais simples, destoando do Mural/Mérito/
+    Versículo) e revisar o tema Noite. Mudanças, só `style.css`:
+    - `.duvida-card` (usado em Dúvidas, Ideias e Enquetes - todas
+      compartilham a classe `duvida-list`/`duvida-card`): borda esquerda
+      cor de accent, cantos mais arredondados, sombra tingida, hover com
+      elevação - mesma linguagem visual dos cards do Mural.
+    - `.enquete-opcao-btn`/`.enquete-resultado`: barra de resultado agora
+      em gradiente (accent→accent-2) em vez de cor sólida, borda mais
+      grossa na opção votada.
+    - `.arte-card`: ganhou uma cor por post, ciclando pelas 15 cores de
+      `--c1`...`--c15` via `:nth-child(15n+N)` em CSS puro (sem precisar
+      de matéria/categoria real - Artes não tem isso, mas fica com cara
+      de mosaico colorido igual ao Mural).
+    - Tema Noite revisado visualmente em todas as seções (não só a claro)
+      depois de tanta mudança de cor/glow/gradiente recente - sem achar
+      problema de contraste, ficou bom nos dois temas.
+
 ## Deploy
 
 - **Mudou em 2026-08-08** (item 24): o site agora tem uma Netlify
