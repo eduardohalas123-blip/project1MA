@@ -451,6 +451,46 @@ por trás de cada decisão, pra não se perder o contexto depois.
       Versículo, Tradutor, Artes) e modais abrem sem estourar a largura
       da tela em nenhum breakpoint testado.
 
+37. **"Não vi muita diferença" — reforço visual em cima do item 36**
+    (2026-08-10) — o redesign do item 36 focou em responsividade real
+    (bugs de mobile/tablet), invisível numa janela de desktop normal; a
+    única mudança visível ali era a troca de fonte. Usuário pediu mais
+    impacto visual, confirmado por pergunta (cores fortes + cabeçalho +
+    cards + tipografia + "extremamente profissional"). Mudanças, todas
+    em `style.css`, sem tocar HTML/JS estrutural:
+    - **Glow de fundo**: `body::before` com dois radiais sutis
+      (`color-mix` com `--accent`/`--accent-2`) atrás de tudo, tira o
+      "chapado cinza". Precisou `position:relative; z-index:1` no
+      `.app-shell` (e outros elementos fixos sem z-index próprio) pra não
+      ficar por baixo do glow — pseudo-elemento com z-index:0 pinta por
+      cima de conteúdo estático sem z-index, regra de stacking context
+      do CSS.
+    - **Cabeçalho**: faixa gradiente de 3px no topo (`::before`), marca
+      "1MA" maior com mais sombra, nome da turma em Manrope 800.
+    - **Eyebrow** (`// mural`, `// mérito`...) virou badge/pílula colorida
+      em vez de texto mono solto; títulos de seção de 1.7rem → 2.35rem.
+    - **Sidebar**: item ativo ganhou fundo em gradiente (antes era só uma
+      tinta de 13% de opacidade) com sombra colorida.
+    - **`.subject-dot`** (bolinha ao lado do nome da matéria no Mural)
+      virou um chip quadrado arredondado de 34px com brilho e sombra
+      colorida — precisou de **1 linha nova em `app.js`**
+      (`colorForSubject`, função que monta o `<span class="subject-dot">`):
+      além do `style="background:${color}"` que já existia, passou a
+      setar `color:${color}` também, pra CSS poder usar `currentColor`
+      nas sombras/realces (`background` sozinho não dá acesso à cor via
+      `currentColor`, só `color` dá).
+    - **Cards do Mural**: borda esquerda mais grossa (4px→5px), cantos
+      mais arredondados, sombra tingida da cor da matéria, hover mais
+      pronunciado (`translateY(-4px) scale(1.012)`).
+    - **Botões**: `.btn-primary` com raio maior e sombra mais forte;
+      `.btn-ghost` trocou de cinza neutro pra destacar com a cor de
+      accent no hover.
+    - **Badge do Mérito** e **card do Versículo** ganharam sombra colorida
+      e (versículo) uma barra gradiente no topo, mesma linguagem visual
+      do cabeçalho.
+    - Retestado nas mesmas 5 larguras (320–1440px) via Playwright depois:
+      nenhuma regressão de overflow horizontal.
+
 ## Deploy
 
 - **Mudou em 2026-08-08** (item 24): o site agora tem uma Netlify

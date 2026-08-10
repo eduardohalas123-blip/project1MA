@@ -620,7 +620,7 @@ function renderBoard() {
     const header = document.createElement("div");
     header.className = "subject-section-header";
     header.innerHTML = `
-      <span class="subject-dot" style="background:${color}"></span>
+      <span class="subject-dot" style="background:${color}; color:${color}"></span>
       <span class="subject-name">${escapeHtml(materia)}</span>
       <span class="subject-count">${items.length} ${items.length === 1 ? "tarefa" : "tarefas"}</span>
     `;

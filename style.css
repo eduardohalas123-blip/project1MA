@@ -118,17 +118,37 @@ body {
   color: var(--text);
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
+  position: relative;
 }
+/* Glow de cor no fundo - tira o "chapado cinza" sem comprometer legibilidade
+   (bem sutil, radial, fixo, atrás de tudo, não faz parte do fluxo) */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(900px 600px at 8% -8%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 60%),
+    radial-gradient(700px 500px at 100% 0%, color-mix(in srgb, var(--accent-2) 13%, transparent), transparent 55%);
+}
+.app-shell, .credit-tag, .school-watermark, .modal-overlay, .toast, .setup-notice { position: relative; z-index: 1; }
 h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--font-heading); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
 
 .eyebrow {
-  display: block;
+  display: inline-flex;
+  align-items: center;
   font-family: var(--font-mono);
-  font-size: 0.76rem;
+  font-weight: 700;
+  font-size: 0.72rem;
   color: var(--accent);
-  letter-spacing: 0.02em;
-  margin-bottom: 10px;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  padding: 4px 12px;
+  border-radius: 999px;
+  letter-spacing: 0.03em;
+  margin-bottom: 14px;
 }
 
 /* Visual forçado: computador ou celular, independente do aparelho real */
@@ -222,9 +242,11 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--fon
 .sidebar-item:hover { background: var(--bg-alt); color: var(--text); }
 .sidebar-item:hover .icon { transform: translateY(-1px); }
 .sidebar-item.active {
-  background: color-mix(in srgb, var(--accent) 13%, transparent);
-  color: var(--accent);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: var(--accent-contrast);
+  box-shadow: 0 8px 16px -8px color-mix(in srgb, var(--accent) 65%, transparent);
 }
+.sidebar-item.active .icon { transform: translateY(-1px) scale(1.08); }
 .sidebar-item.active::before {
   content: "";
   position: absolute; left: -10px; top: 50%; transform: translateY(-50%);
@@ -251,19 +273,32 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--fon
   background: color-mix(in srgb, var(--bg) 82%, transparent);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 0 0 color-mix(in srgb, var(--accent) 20%, transparent);
+}
+.header::before {
+  content: "";
+  display: block;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--c3, var(--accent)));
 }
 .header-inner {
-  max-width: 1100px; margin: 0 auto; padding: 15px 24px;
+  max-width: 1100px; margin: 0 auto; padding: 18px 24px;
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
 }
-.brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .brand-mark {
-  font-weight: 800; font-size: 0.92rem;
+  font-family: var(--font-heading);
+  font-weight: 800; font-size: 1.05rem;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  color: var(--accent-contrast); padding: 5px 10px; border-radius: var(--radius-sm);
-  letter-spacing: 0.02em; flex-shrink: 0; box-shadow: var(--shadow-sm);
+  color: var(--accent-contrast); padding: 8px 14px; border-radius: var(--radius-md);
+  letter-spacing: 0.02em; flex-shrink: 0;
+  box-shadow: 0 8px 18px -8px color-mix(in srgb, var(--accent) 70%, transparent);
 }
-.brand-name { font-family: var(--font-heading); font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.brand-name {
+  font-family: var(--font-heading); font-weight: 800; font-size: 1.08rem;
+  color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  letter-spacing: -0.01em;
+}
 .header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .header-switches {
   display: flex; align-items: center; gap: 6px;
@@ -342,19 +377,19 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--fon
 
 /* Buttons */
 .btn {
-  border: none; cursor: pointer; border-radius: var(--radius-sm); padding: 10px 16px;
-  font-size: 0.9rem; font-weight: 600; font-family: inherit;
+  border: none; cursor: pointer; border-radius: var(--radius-md); padding: 11px 18px;
+  font-size: 0.9rem; font-weight: 700; font-family: inherit;
   transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
 .btn-primary {
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   color: var(--accent-contrast);
-  box-shadow: 0 10px 22px -10px color-mix(in srgb, var(--accent) 65%, transparent);
+  box-shadow: 0 12px 24px -10px color-mix(in srgb, var(--accent) 70%, transparent);
 }
-.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 14px 26px -10px color-mix(in srgb, var(--accent) 65%, transparent); }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 30px -10px color-mix(in srgb, var(--accent) 70%, transparent); }
 .btn-primary:active { transform: translateY(0); }
-.btn-ghost { background: var(--surface); color: var(--text-muted); border: 1px solid var(--border); }
-.btn-ghost:hover { color: var(--text); border-color: var(--border-strong); background: var(--bg-alt); }
+.btn-ghost { background: var(--surface); color: var(--text); border: 1.5px solid var(--border-strong); }
+.btn-ghost:hover { color: var(--accent); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
 .btn-block { width: 100%; margin-top: 8px; }
 
 /* Main / states */
@@ -372,15 +407,15 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--fon
 /* Section intro (usado em Mural, Mérito, Dúvidas, Horário) */
 .section-intro { max-width: 700px; margin: 0 auto 32px; }
 .section-intro h2 {
-  font-size: 1.7rem; font-weight: 800; margin-bottom: 10px;
+  font-size: 2.35rem; font-weight: 800; margin-bottom: 12px; line-height: 1.1;
 }
-.section-intro p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.65; }
+.section-intro p { color: var(--text-muted); font-size: 0.98rem; line-height: 1.65; }
 .section-intro strong { color: var(--text); }
 .mural-intro { max-width: 1100px; padding: 32px 24px 0; margin-bottom: -8px; }
 :root[data-view="mobile"] .mural-intro { padding: 24px 16px 0; }
 .merito-intro { max-width: 700px; margin: 0 auto 32px; }
-.merito-intro h2 { font-size: 1.7rem; font-weight: 800; margin-bottom: 10px; }
-.merito-intro p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.65; }
+.merito-intro h2 { font-size: 2.35rem; font-weight: 800; margin-bottom: 12px; line-height: 1.1; }
+.merito-intro p { color: var(--text-muted); font-size: 0.98rem; line-height: 1.65; }
 .merito-intro strong { color: var(--text); }
 
 /* Filter bar */
@@ -400,7 +435,7 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--fon
   background: var(--chip-color, var(--accent));
   border-color: var(--chip-color, var(--accent));
   color: #fff;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 8px 16px -8px color-mix(in srgb, var(--chip-color, var(--accent)) 70%, transparent);
 }
 
 /* Board */
@@ -408,9 +443,19 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--fon
   max-width: 1100px; margin: 0 auto; padding: 8px 24px 90px;
   display: flex; flex-direction: column; gap: 44px;
 }
-.subject-section-header { display: flex; align-items: baseline; gap: 10px; margin-bottom: 16px; }
-.subject-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 18%, transparent); }
-.subject-name { font-weight: 700; font-size: 1.15rem; }
+.subject-section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.subject-dot {
+  position: relative;
+  width: 34px; height: 34px; border-radius: 11px; flex-shrink: 0;
+  overflow: hidden;
+  box-shadow: 0 6px 14px -6px color-mix(in srgb, currentColor 70%, transparent);
+}
+.subject-dot::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at 32% 28%, rgba(255,255,255,0.55) 0%, transparent 60%);
+}
+.subject-name { font-family: var(--font-heading); font-weight: 800; font-size: 1.25rem; }
 .subject-count { color: var(--text-muted); font-size: 0.88rem; font-variant-numeric: tabular-nums; }
 
 .cards-grid {
@@ -420,20 +465,21 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--fon
 }
 
 .card {
-  background: color-mix(in srgb, var(--subject-color, var(--border)) 6%, var(--surface));
-  border: 1px solid color-mix(in srgb, var(--subject-color, var(--border)) 22%, var(--border));
-  border-left: 4px solid var(--subject-color, var(--border));
-  border-radius: var(--radius-md);
-  padding: 18px 18px 16px;
+  background: color-mix(in srgb, var(--subject-color, var(--border)) 7%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--subject-color, var(--border)) 24%, var(--border));
+  border-left: 5px solid var(--subject-color, var(--border));
+  border-radius: var(--radius-lg);
+  padding: 20px 20px 17px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  box-shadow: 0 2px 8px -4px color-mix(in srgb, var(--subject-color, transparent) 25%, transparent);
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 .card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-md);
-  border-color: color-mix(in srgb, var(--subject-color, var(--border)) 45%, var(--border));
+  transform: translateY(-4px) scale(1.012);
+  box-shadow: 0 20px 34px -16px color-mix(in srgb, var(--subject-color, var(--text)) 45%, transparent);
+  border-color: color-mix(in srgb, var(--subject-color, var(--border)) 50%, var(--border));
 }
 .card.is-complete { opacity: 0.58; }
 .card.is-complete:hover { opacity: 0.85; }
@@ -621,19 +667,21 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--fon
 
 .merito-result {
   max-width: 700px; margin: 32px auto 0;
-  display: flex; align-items: center; gap: 18px;
+  display: flex; align-items: center; gap: 20px;
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
-  padding: 22px 26px; box-shadow: var(--shadow-sm);
+  padding: 24px 28px;
+  box-shadow: 0 20px 40px -24px color-mix(in srgb, var(--accent) 50%, transparent), var(--shadow-sm);
 }
 .merito-result[hidden] { display: none; }
 .merito-badge {
-  font-size: 2.3rem; width: 68px; height: 68px; flex-shrink: 0;
+  font-size: 2.5rem; width: 76px; height: 76px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  border-radius: 50%; background: var(--bg-alt);
-  box-shadow: inset 0 0 0 1px var(--border);
+  border-radius: 50%;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 16%, var(--bg-alt)), var(--bg-alt));
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--accent) 35%, var(--border));
 }
-.merito-avg-text { font-size: 0.95rem; color: var(--text-muted); }
-.merito-avg-text strong { color: var(--text); font-size: 1.1rem; }
+.merito-avg-text { font-size: 0.98rem; color: var(--text-muted); }
+.merito-avg-text strong { font-family: var(--font-heading); color: var(--text); font-size: 1.25rem; }
 
 /* Dúvidas */
 .duvidas-section { max-width: 700px; margin: 0 auto; padding: 32px 24px 90px; }
@@ -758,8 +806,15 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--fon
 .versiculo-section { max-width: 700px; margin: 0 auto; padding: 32px 24px 90px; }
 .versiculo-card {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
-  padding: 44px 36px; text-align: center; box-shadow: var(--shadow-sm);
+  padding: 44px 36px; text-align: center;
+  box-shadow: 0 24px 48px -30px color-mix(in srgb, var(--accent) 60%, transparent), var(--shadow-sm);
   position: relative;
+  overflow: hidden;
+}
+.versiculo-card::after {
+  content: "";
+  position: absolute; top: 0; left: 0; right: 0; height: 4px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
 }
 .versiculo-card::before {
   content: "“";
