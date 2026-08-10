@@ -545,6 +545,20 @@ por trás de cada decisão, pra não se perder o contexto depois.
       depois de tanta mudança de cor/glow/gradiente recente - sem achar
       problema de contraste, ficou bom nos dois temas.
 
+40. **Quadrado colorido vira emoji da matéria** (2026-08-10) — usuário não
+    gostou do chip liso ao lado do nome da matéria no Mural, pediu emoji
+    combinando com a matéria, com a cor da matéria. Cada item de
+    `SUBJECTS`/`MURAL_ONLY_CATEGORIES` (app.js) ganhou um campo `emoji`
+    (🧬 Biologia, 🧪 Química, 🔢 Matemática, 🔤 Inglês, 🏛️ História, ⚛️
+    Física, 🎯 Projeto de Vida, ⚽ Ed. Física, 🎨 Arte, ✝️ Ensino
+    Religioso, 🗺️ Geografia, 🗣️ Argumentação, ✍️ Língua Portuguesa, 📚
+    Literatura, 🎓 Simulados, 📢 Aviso), nova função `emojiForSubject()`.
+    **Limitação técnica explicada ao usuário**: emoji não pode ser
+    recolorido via CSS `color` (são glifos coloridos do próprio sistema,
+    não respeitam `currentColor`) - por isso "cor da matéria" virou a cor
+    de fundo do chip atrás do emoji (mesma cor que já era usada no
+    quadrado antes), não o emoji em si.
+
 ## Deploy
 
 - **Mudou em 2026-08-08** (item 24): o site agora tem uma Netlify

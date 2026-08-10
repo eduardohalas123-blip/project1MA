@@ -26,27 +26,28 @@ import {
 // Matérias conhecidas e suas cores. Edite à vontade para bater com sua turma.
 // ---------------------------------------------------------------------------
 const SUBJECTS = [
-  { name: "Biologia", color: "var(--c1)" },
-  { name: "Química", color: "var(--c2)" },
-  { name: "Matemática", color: "var(--c3)" },
-  { name: "Inglês", color: "var(--c4)" },
-  { name: "História", color: "var(--c5)" },
-  { name: "Física", color: "var(--c6)" },
-  { name: "Projeto de Vida", color: "var(--c7)" },
-  { name: "Educação Física", color: "var(--c8)" },
-  { name: "Arte", color: "var(--c9)" },
-  { name: "Ensino Religioso", color: "var(--c10)" },
-  { name: "Geografia", color: "var(--c11)" },
-  { name: "Argumentação", color: "var(--c12)" },
-  { name: "Língua Portuguesa", color: "var(--c13)" },
-  { name: "Literatura", color: "var(--c14)" },
-  { name: "Simulados", color: "var(--c15)" },
+  { name: "Biologia", color: "var(--c1)", emoji: "🧬" },
+  { name: "Química", color: "var(--c2)", emoji: "🧪" },
+  { name: "Matemática", color: "var(--c3)", emoji: "🔢" },
+  { name: "Inglês", color: "var(--c4)", emoji: "🔤" },
+  { name: "História", color: "var(--c5)", emoji: "🏛️" },
+  { name: "Física", color: "var(--c6)", emoji: "⚛️" },
+  { name: "Projeto de Vida", color: "var(--c7)", emoji: "🎯" },
+  { name: "Educação Física", color: "var(--c8)", emoji: "⚽" },
+  { name: "Arte", color: "var(--c9)", emoji: "🎨" },
+  { name: "Ensino Religioso", color: "var(--c10)", emoji: "✝️" },
+  { name: "Geografia", color: "var(--c11)", emoji: "🗺️" },
+  { name: "Argumentação", color: "var(--c12)", emoji: "🗣️" },
+  { name: "Língua Portuguesa", color: "var(--c13)", emoji: "✍️" },
+  { name: "Literatura", color: "var(--c14)", emoji: "📚" },
+  { name: "Simulados", color: "var(--c15)", emoji: "🎓" },
 ];
 const FALLBACK_PALETTE = ["var(--c1)", "var(--c2)", "var(--c3)", "var(--c4)", "var(--c5)", "var(--c6)", "var(--c7)", "var(--c8)", "var(--c9)", "var(--c10)", "var(--c11)", "var(--c12)", "var(--c13)", "var(--c14)", "var(--c15)"];
+const FALLBACK_EMOJI = "📘";
 
 // Categorias extras que só existem no Mural (não entram no Mérito, já que não são matéria com nota).
 const MURAL_ONLY_CATEGORIES = [
-  { name: "Aviso", color: "var(--warning)" },
+  { name: "Aviso", color: "var(--warning)", emoji: "📢" },
 ];
 
 function getMuralSubjectList() {
@@ -59,6 +60,11 @@ function colorForSubject(name) {
   let hash = 0;
   for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
   return FALLBACK_PALETTE[hash % FALLBACK_PALETTE.length];
+}
+
+function emojiForSubject(name) {
+  const known = getMuralSubjectList().find((s) => s.name.toLowerCase() === name.toLowerCase());
+  return known ? known.emoji : FALLBACK_EMOJI;
 }
 
 // ---------------------------------------------------------------------------
@@ -614,13 +620,14 @@ function renderBoard() {
       return a.prazo.localeCompare(b.prazo);
     });
     const color = colorForSubject(materia);
+    const emoji = emojiForSubject(materia);
 
     const section = document.createElement("section");
 
     const header = document.createElement("div");
     header.className = "subject-section-header";
     header.innerHTML = `
-      <span class="subject-dot" style="background:${color}; color:${color}"></span>
+      <span class="subject-dot" style="background:${color}; color:${color}">${emoji}</span>
       <span class="subject-name">${escapeHtml(materia)}</span>
       <span class="subject-count">${items.length} ${items.length === 1 ? "tarefa" : "tarefas"}</span>
     `;
