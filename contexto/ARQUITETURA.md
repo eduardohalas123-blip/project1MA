@@ -113,7 +113,15 @@ Guardado em `localStorage`, só no navegador de cada pessoa:
    390px). E qualquer regra que force `display` numa classe genérica tipo
    `.btn` precisa do `:not([hidden])`, senão sobrescreve o `[hidden]` da
    UA stylesheet e reexibe botões que deveriam estar escondidos.
-5. **Navegação lateral** — troca qual `.app-section` fica visível.
+5. **Navegação lateral** — troca qual `.app-section` fica visível, com uma
+   revelação circular (`clip-path` animado, ver HISTORICO.md item 47):
+   `trocarSecaoComRevelacao()` sobrepõe a seção nova por cima da atual
+   (`position:absolute` + classe `.vt-revelando`) e deixa um
+   `@keyframes` abrir o círculo a partir do item clicado; ao terminar
+   (`animationend`), a seção antiga vira `hidden`. Auto-curativo contra
+   cliques rápidos demais (limpa qualquer `vt-revelando` órfão de um
+   clique anterior antes de começar um novo). `prefers-reduced-motion`
+   pula direto pra `trocarSecaoAtiva()` (troca instantânea, sem overlay).
 6. **Versículo do dia** — `fetch("versiculos.json")`, escolhe pelo dia do ano.
 7. **Mérito** — grid de notas dinâmico por itinerário, cálculo de média.
    `getMeritoSubjectNames()` monta a lista a partir de `SUBJECTS` +

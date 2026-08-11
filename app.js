@@ -190,10 +190,14 @@ window.addEventListener("resize", () => {
 // ---------------------------------------------------------------------------
 // Navegação lateral
 // ---------------------------------------------------------------------------
-// Troca de seção com "circular reveal" (View Transitions API) - o conteúdo
-// novo cresce por cima do antigo a partir do item clicado, inspirado num
-// vídeo que o usuário mandou. Em navegador sem suporte (ou com "reduzir
-// movimento" ativado), cai pro fade simples que já existia via CSS.
+// Troca de seção com "revelação circular" - a seção nova entra por cima da
+// atual (position:absolute) já com o clip-path fechado, e um círculo abre
+// a partir do item clicado até cobrir tudo, inspirado num vídeo que o
+// usuário mandou. Feito manualmente com clip-path + @keyframes (não com a
+// View Transitions API - ela tenta "morfar" automaticamente o tamanho do
+// conteúdo antigo pro novo, o que distorcia/fantasmava o texto durante a
+// animação, sem controle fino o bastante pra evitar isso). Em "reduzir
+// movimento", cai pro fade simples que já existia via CSS.
 const sidebarItems = document.querySelectorAll(".sidebar-item");
 const appSections = document.querySelectorAll(".app-section");
 const mainEl = document.querySelector("main.main");
@@ -203,6 +207,55 @@ function trocarSecaoAtiva(targetId) {
   appSections.forEach((section) => { section.hidden = section.id !== targetId; });
 }
 
+function trocarSecaoComRevelacao(item, targetId) {
+  const novaSecao = document.getElementById(targetId);
+  if (!mainEl || !novaSecao) {
+    trocarSecaoAtiva(targetId);
+    return;
+  }
+
+  // Se um clique anterior ainda estava no meio da revelação (clicou rápido
+  // demais entre abas, antes dos 0.65s acabarem), encerra ele na hora -
+  // sem isso, sobrava mais de uma seção "vazando" com vt-revelando/
+  // position:absolute presa, porque o addEventListener("animationend") de
+  // baixo só sabe fechar a seção que ERA a atual no momento daquele clique.
+  appSections.forEach((s) => {
+    if (s !== novaSecao) {
+      s.classList.remove("vt-revelando");
+      s.style.pointerEvents = "";
+    }
+  });
+
+  const secaoAtual = Array.from(appSections).find((s) => s !== novaSecao && !s.hidden);
+  if (!secaoAtual) {
+    trocarSecaoAtiva(targetId);
+    return;
+  }
+  // Garante que não sobra nenhuma outra seção visível além dessas duas,
+  // mesmo se um clique anterior tiver deixado alguma "esquecida" acesa.
+  appSections.forEach((s) => { if (s !== novaSecao && s !== secaoAtual) s.hidden = true; });
+
+  const rect = item.getBoundingClientRect();
+  const mainRect = mainEl.getBoundingClientRect();
+  const x = rect.left + rect.width / 2 - mainRect.left;
+  const y = rect.top + rect.height / 2 - mainRect.top;
+  // Raio até o canto mais distante do painel, pra o círculo cobrir tudo
+  // exatamente quando a animação termina (nem sobrar, nem faltar).
+  const raio = Math.hypot(Math.max(x, mainRect.width - x), Math.max(y, mainRect.height - y));
+  mainEl.style.setProperty("--vt-x", `${x}px`);
+  mainEl.style.setProperty("--vt-y", `${y}px`);
+  mainEl.style.setProperty("--vt-r", `${raio}px`);
+
+  secaoAtual.style.pointerEvents = "none";
+  novaSecao.hidden = false;
+  novaSecao.classList.add("vt-revelando");
+  novaSecao.addEventListener("animationend", () => {
+    novaSecao.classList.remove("vt-revelando");
+    secaoAtual.hidden = true;
+    secaoAtual.style.pointerEvents = "";
+  }, { once: true });
+}
+
 sidebarItems.forEach((item) => {
   item.addEventListener("click", () => {
     if (item.classList.contains("active")) return;
@@ -210,20 +263,8 @@ sidebarItems.forEach((item) => {
     item.classList.add("active");
     const targetId = item.dataset.section;
 
-    if (!reduzMovimento && document.startViewTransition && mainEl) {
-      const rect = item.getBoundingClientRect();
-      const mainRect = mainEl.getBoundingClientRect();
-      const x = rect.left + rect.width / 2 - mainRect.left;
-      const y = rect.top + rect.height / 2 - mainRect.top;
-      // Raio até o canto mais distante do painel, pra o círculo cobrir tudo
-      // exatamente quando a animação termina (nem sobrar, nem faltar).
-      const raio = Math.hypot(Math.max(x, mainRect.width - x), Math.max(y, mainRect.height - y));
-      document.documentElement.style.setProperty("--vt-x", `${x}px`);
-      document.documentElement.style.setProperty("--vt-y", `${y}px`);
-      document.documentElement.style.setProperty("--vt-r", `${raio}px`);
-      document.documentElement.classList.add("vt-nav");
-      const transition = document.startViewTransition(() => trocarSecaoAtiva(targetId));
-      transition.finished.finally(() => document.documentElement.classList.remove("vt-nav"));
+    if (!reduzMovimento) {
+      trocarSecaoComRevelacao(item, targetId);
     } else {
       trocarSecaoAtiva(targetId);
     }
