@@ -608,6 +608,34 @@ por trás de cada decisão, pra não se perder o contexto depois.
       revertido - tirado o `:nth-child` que ciclava pela paleta,
       `--grid-color` volta a ser só `var(--accent)` pra todos, uma cor só.
 
+43. **Transições suaves + polimento livre** (2026-08-10) — pedido: "os
+    ícones da lateral não têm problema" (não mexer nisso), "adicione as
+    transições suaves e melhore mais o que você achar melhor" (carta
+    branca pro resto). Tudo só CSS, sem mudar HTML/JS:
+    - **Troca de seção pelo menu lateral**: antes era instantâneo
+      (`hidden` liga/desliga `display:none` na hora). Agora usa
+      `@starting-style` + `transition-behavior: allow-discrete` (CSS
+      moderno, suportado no Chromium usado pra testar - Chrome/Edge
+      117+, Safari 17.4+, Firefox 129+) pra animar fade + leve
+      deslocamento vertical mesmo trocando `display`. Sem suporte no
+      navegador, cai de volta pro instantâneo de sempre (degrada bem,
+      não quebra).
+    - Mesma técnica aplicada em **modais** (fade + leve escala/subida,
+      `cubic-bezier` com uma pontinha de "bounce") e no **toast**.
+    - **Cards** (Mural, Dúvidas/Ideias/Enquetes, Artes) ganharam uma
+      entrada sutil (`@keyframes entrada-card`, fade + sobe 10px, 0.35s)
+      toda vez que são criados no DOM.
+    - **Spinner** de carregamento no lugar do texto sozinho ("Carregando
+      tarefas…") - anel girando na cor de accent.
+    - `prefers-reduced-motion: reduce` (já existia pra `transition-
+      duration`) passou a zerar `animation-duration` também - as
+      animações novas (spinner, entrada de card) respeitam a preferência
+      de acessibilidade do sistema, não só as transitions antigas.
+    - Testado (Playwright): capturada a opacidade no meio da transição
+      (ex. ~80ms após clicar numa seção) pra confirmar que a animação
+      roda de verdade, não só que o resultado final está certo. Sem
+      overflow em nenhuma largura, sem erro de console.
+
 ## Deploy
 
 - **Mudou em 2026-08-08** (item 24): o site agora tem uma Netlify

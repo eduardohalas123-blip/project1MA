@@ -146,6 +146,11 @@ body::before {
 h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--font-heading); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
 
+@keyframes entrada-card {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .eyebrow {
   display: inline-flex;
   align-items: center;
@@ -270,7 +275,26 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--fon
   width: 3px; height: 22px; border-radius: 0 3px 3px 0;
   background: var(--accent);
 }
-.app-section[hidden] { display: none; }
+/* Transição suave ao trocar de seção pelo menu lateral. Usa
+   @starting-style + transition-behavior:allow-discrete (CSS moderno) pra
+   animar até a troca de display:none - em navegador sem suporte, cai de
+   volta pro comportamento instantâneo de sempre, sem quebrar nada. */
+.app-section {
+  transition: opacity 0.28s ease, transform 0.28s ease, display 0.28s allow-discrete;
+  opacity: 1;
+  transform: translateY(0);
+}
+.app-section[hidden] {
+  display: none;
+  opacity: 0;
+  transform: translateY(10px);
+}
+@starting-style {
+  .app-section:not([hidden]) {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
 
 /* Setup notice */
 .setup-notice { background: var(--warning-bg); border-bottom: 1px solid var(--warning); }
@@ -420,6 +444,19 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--fon
   content: "🗂️";
   display: block; font-size: 2.4rem; margin-bottom: 14px; opacity: 0.7;
 }
+.loading-state::before {
+  content: "";
+  display: block;
+  width: 34px; height: 34px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  border: 3px solid color-mix(in srgb, var(--accent) 20%, transparent);
+  border-top-color: var(--accent);
+  animation: girar-spinner 0.7s linear infinite;
+}
+@keyframes girar-spinner {
+  to { transform: rotate(360deg); }
+}
 
 /* Section intro (usado em Mural, Mérito, Dúvidas, Horário) */
 .section-intro { max-width: 700px; margin: 0 auto 32px; }
@@ -491,6 +528,7 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--fon
   gap: 10px;
   box-shadow: 0 2px 8px -4px color-mix(in srgb, var(--subject-color, transparent) 25%, transparent);
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  animation: entrada-card 0.35s ease backwards;
 }
 .card:hover {
   transform: translateY(-4px) scale(1.012);
@@ -559,12 +597,24 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--fon
   backdrop-filter: blur(3px);
   display: flex; align-items: center; justify-content: center;
   padding: 20px; z-index: 200;
+  transition: opacity 0.2s ease, display 0.2s allow-discrete;
+  opacity: 1;
 }
-.modal-overlay[hidden] { display: none; }
+.modal-overlay[hidden] { display: none; opacity: 0; }
+@starting-style {
+  .modal-overlay:not([hidden]) { opacity: 0; }
+}
 .modal {
   background: var(--surface); border-radius: var(--radius-lg); width: 100%; max-width: 440px;
   border: 1px solid var(--border);
   box-shadow: var(--shadow-lg); max-height: 90vh; overflow-y: auto;
+  transition: transform 0.22s cubic-bezier(0.34, 1.35, 0.64, 1), opacity 0.2s ease;
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+.modal-overlay[hidden] .modal { transform: scale(0.94) translateY(10px); opacity: 0; }
+@starting-style {
+  .modal-overlay:not([hidden]) .modal { transform: scale(0.94) translateY(10px); opacity: 0; }
 }
 .modal-header {
   display: flex; align-items: center; justify-content: space-between;
@@ -644,12 +694,17 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--fon
 
 /* Toast */
 .toast {
-  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(0);
   background: var(--text); color: var(--bg); padding: 12px 20px; border-radius: var(--radius-sm);
   font-size: 0.88rem; font-weight: 600; box-shadow: var(--shadow-lg); z-index: 300;
   max-width: 90vw; text-align: center;
+  transition: opacity 0.22s ease, transform 0.22s ease, display 0.22s allow-discrete;
+  opacity: 1;
 }
-.toast[hidden] { display: none; }
+.toast[hidden] { display: none; opacity: 0; transform: translateX(-50%) translateY(10px); }
+@starting-style {
+  .toast:not([hidden]) { opacity: 0; transform: translateX(-50%) translateY(10px); }
+}
 
 /* Mérito */
 .merito-section { max-width: 1100px; margin: 0 auto; padding: 32px 24px 90px; }
@@ -721,6 +776,7 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--fon
   padding: 18px 20px; display: flex; flex-direction: column; gap: 9px;
   box-shadow: 0 2px 8px -4px color-mix(in srgb, var(--accent) 20%, transparent);
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  animation: entrada-card 0.35s ease backwards;
 }
 .duvida-card:hover {
   transform: translateY(-3px);
@@ -807,6 +863,7 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--fon
   box-shadow: 0 2px 8px -4px color-mix(in srgb, var(--arte-color) 25%, transparent);
   display: flex; flex-direction: column; gap: 5px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  animation: entrada-card 0.35s ease backwards;
 }
 .arte-card:hover {
   transform: translateY(-4px);
@@ -905,7 +962,7 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--fon
 .versiculo-chat .comments-list { max-height: 320px; }
 
 @media (prefers-reduced-motion: reduce) {
-  * { transition-duration: 0.01ms !important; }
+  * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
 }
 
 :root[data-view="mobile"] .brand-name { display: none; }
