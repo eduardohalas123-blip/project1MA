@@ -655,6 +655,32 @@ por trás de cada decisão, pra não se perder o contexto depois.
     - Retestado nas 5 larguras de sempre, sem overflow, sem erro de
       console.
 
+45. **Toggle animado de céu (dia/noite)** (2026-08-11) — usuário mandou um
+    vídeo (reel de "Animated Toggle Switch") com 4 variações de switch
+    animado; pediu a de cima à direita: fundo ciano com nuvens deslizando
+    de um lado, vira fundo azul-marinho com estrelas e lua do outro.
+    Extraí frames do vídeo com `ffmpeg` (`fps=2`) pra examinar o design
+    antes de implementar, em vez de adivinhar.
+    - Trocou os 2 botões segmentados ☀️/🌙 (`.tema-seg-btn`) por **um
+      switch único** (`#temaCeuToggle`, `role="switch"`), reaproveitando
+      a mesma função `aplicarTema()`/`localStorage` já existente - só
+      muda a interface, não a lógica de tema por trás. O botão 🎨
+      "Personalizado" continua separado (não cabe num switch de 2
+      estados).
+    - CSS puro (sem imagem): fundo em gradiente ciano→azul-marinho
+      conforme `aria-checked`, "sol" (bolinha creme) desliza pra
+      "lua" (bolinha clara com sombra interna simulando cratera via
+      `box-shadow: inset`), 2 nuvenzinhas (feitas de 2 círculos
+      sobrepostos) que somem no modo noite, 3 estrelinhas que aparecem
+      só no modo noite.
+    - `aplicarTema()` agora também atualiza `aria-checked` do toggle;
+      se o tema virar "personalizado", o toggle simplesmente mostra
+      como se estivesse em "dia" (só reflete `noite` de verdade,
+      não tenta representar um terceiro estado).
+    - Testado: clique alterna `data-theme` corretamente, "Personalizado"
+      continua funcionando do lado, editor de cores personalizado abre
+      normal, sem overflow em nenhuma largura testada.
+
 ## Deploy
 
 - **Mudou em 2026-08-08** (item 24): o site agora tem uma Netlify

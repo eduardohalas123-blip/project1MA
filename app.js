@@ -93,6 +93,7 @@ const el = {
   taskLink: document.getElementById("taskLink"),
   toast: document.getElementById("toast"),
   temaSeletor: document.getElementById("temaSeletor"),
+  temaCeuToggle: document.getElementById("temaCeuToggle"),
   temaEditarBtn: document.getElementById("temaEditarBtn"),
   temaEditarModal: document.getElementById("temaEditarModal"),
   temaCoresArea: document.getElementById("temaCoresArea"),
@@ -215,6 +216,7 @@ function aplicarTema(nome) {
   el.temaSeletor.querySelectorAll(".tema-seg-btn").forEach((btn) => {
     btn.classList.toggle("ativo", btn.dataset.tema === nome);
   });
+  el.temaCeuToggle.setAttribute("aria-checked", nome === "noite" ? "true" : "false");
 }
 
 aplicarTema(document.documentElement.getAttribute("data-theme") || "dia");
@@ -224,6 +226,14 @@ el.temaSeletor.querySelectorAll(".tema-seg-btn").forEach((btn) => {
     aplicarTema(btn.dataset.tema);
     localStorage.setItem(TEMA_KEY, btn.dataset.tema);
   });
+});
+
+// Toggle "céu" dia/noite - mesmo mecanismo dos .tema-seg-btn (aplicarTema +
+// salva no localStorage), só que alterna entre os dois em vez de fixo.
+el.temaCeuToggle.addEventListener("click", () => {
+  const novoTema = document.documentElement.getAttribute("data-theme") === "noite" ? "dia" : "noite";
+  aplicarTema(novoTema);
+  localStorage.setItem(TEMA_KEY, novoTema);
 });
 
 function montarEditorTemaPersonalizado() {

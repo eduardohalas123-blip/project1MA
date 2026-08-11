@@ -96,8 +96,14 @@
                 <span class="theme-switch-knob"></span>
               </button>
               <div id="temaSeletor" class="tema-seletor" role="group" aria-label="Escolher paleta de cores">
-                <button type="button" class="tema-seg-btn" data-tema="dia" title="Dia">☀️</button>
-                <button type="button" class="tema-seg-btn" data-tema="noite" title="Noite">🌙</button>
+                <button id="temaCeuToggle" class="tema-ceu-toggle" type="button" role="switch" aria-checked="false" aria-label="Alternar entre tema claro e escuro" title="Dia / Noite">
+                  <span class="tema-ceu-nuvem tema-ceu-nuvem-1" aria-hidden="true"></span>
+                  <span class="tema-ceu-nuvem tema-ceu-nuvem-2" aria-hidden="true"></span>
+                  <span class="tema-ceu-estrela tema-ceu-estrela-1" aria-hidden="true"></span>
+                  <span class="tema-ceu-estrela tema-ceu-estrela-2" aria-hidden="true"></span>
+                  <span class="tema-ceu-estrela tema-ceu-estrela-3" aria-hidden="true"></span>
+                  <span class="tema-ceu-knob" aria-hidden="true"></span>
+                </button>
                 <button type="button" class="tema-seg-btn" data-tema="personalizado" title="Personalizado">🎨</button>
               </div>
               <button id="temaEditarBtn" class="trad-icon-btn" type="button" title="Editar tema personalizado">🖌️</button>
