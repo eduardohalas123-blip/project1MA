@@ -92,12 +92,7 @@ const el = {
   taskDescricao: document.getElementById("taskDescricao"),
   taskLink: document.getElementById("taskLink"),
   toast: document.getElementById("toast"),
-  temaSeletor: document.getElementById("temaSeletor"),
   temaCeuToggle: document.getElementById("temaCeuToggle"),
-  temaEditarBtn: document.getElementById("temaEditarBtn"),
-  temaEditarModal: document.getElementById("temaEditarModal"),
-  temaCoresArea: document.getElementById("temaCoresArea"),
-  temaRedefinirBtn: document.getElementById("temaRedefinirBtn"),
   viewToggle: document.getElementById("viewToggle"),
   duvidaFormWrap: document.getElementById("duvidaFormWrap"),
   duvidaListWrap: document.getElementById("duvidaListWrap"),
@@ -150,130 +145,22 @@ const el = {
 };
 
 // ---------------------------------------------------------------------------
-// Paleta de tema (portado do "personalizar paleta" do audioT original)
+// Tema dia/noite
 // ---------------------------------------------------------------------------
-// 6 temas prontos (dia/noite/frio/deserto/tundra/ceu, definidos como bloco
-// CSS `:root[data-theme="..."]` em style.css) + "personalizado", cujas
-// cores de verdade vêm do localStorage e são aplicadas como estilo inline
-// em <html> (documentElement.style.setProperty), que tem prioridade sobre
-// o bloco CSS `:root[data-theme="personalizado"]` (esse é só um valor de
-// fallback, usado até o JS carregar). Mesma técnica de duas camadas do
-// audioT original, só que adaptada pro conjunto de variáveis daqui.
-const TEMA_VARS_PERSONALIZADO = {
-  bg: "--bg", bgAlt: "--bg-alt", surface: "--surface", surface2: "--surface-2",
-  text: "--text", textMuted: "--text-muted", border: "--border",
-  accent: "--accent", accent2: "--accent-2", accentContrast: "--accent-contrast",
-};
-const TEMA_LABELS_CORES = {
-  bg: "Fundo", bgAlt: "Fundo (alternativo)", surface: "Cartão", surface2: "Cartão (alternativo)",
-  text: "Texto", textMuted: "Texto secundário", border: "Borda",
-  accent: "Destaque", accent2: "Destaque (secundário)", accentContrast: "Texto sobre o destaque",
-};
-// = valores do tema "noite" (mesmo critério do audioT: o personalizado
-// nasce como cópia do tema escuro padrão).
-const TEMA_PADRAO_PERSONALIZADO = {
-  bg: "#0C0E14", bgAlt: "#141722", surface: "#181C29", surface2: "#11131C",
-  text: "#EEF0F8", textMuted: "#9AA0B4", border: "#262B3A",
-  accent: "#7583FF", accent2: "#9B8CFF", accentContrast: "#0A0C13",
-};
-// usado pelo botão "Redefinir cores" - paleta preto/branco/cinza neutra
-const TEMA_PRETO_BRANCO = {
-  bg: "#000000", bgAlt: "#0D0D0D", surface: "#1A1A1A", surface2: "#141414",
-  text: "#FFFFFF", textMuted: "#B3B3B3", border: "#333333",
-  accent: "#595959", accent2: "#404040", accentContrast: "#FFFFFF",
-};
 const TEMA_KEY = "theme";
-const TEMA_PERSONALIZADO_KEY = "temaPersonalizado";
-
-function carregarTemaPersonalizado() {
-  try {
-    const salvo = JSON.parse(localStorage.getItem(TEMA_PERSONALIZADO_KEY));
-    return { ...TEMA_PADRAO_PERSONALIZADO, ...(salvo || {}) };
-  } catch {
-    return { ...TEMA_PADRAO_PERSONALIZADO };
-  }
-}
-function salvarTemaPersonalizado(cores) {
-  localStorage.setItem(TEMA_PERSONALIZADO_KEY, JSON.stringify(cores));
-}
-function aplicarCoresPersonalizadas(cores) {
-  Object.entries(TEMA_VARS_PERSONALIZADO).forEach(([chave, varCss]) => {
-    document.documentElement.style.setProperty(varCss, cores[chave]);
-  });
-}
-function limparCoresInline() {
-  Object.values(TEMA_VARS_PERSONALIZADO).forEach((varCss) => {
-    document.documentElement.style.removeProperty(varCss);
-  });
-}
 
 function aplicarTema(nome) {
   document.documentElement.setAttribute("data-theme", nome);
-  limparCoresInline();
-  if (nome === "personalizado") {
-    aplicarCoresPersonalizadas(carregarTemaPersonalizado());
-  }
-  el.temaSeletor.querySelectorAll(".tema-seg-btn").forEach((btn) => {
-    btn.classList.toggle("ativo", btn.dataset.tema === nome);
-  });
   el.temaCeuToggle.setAttribute("aria-checked", nome === "noite" ? "true" : "false");
 }
 
 aplicarTema(document.documentElement.getAttribute("data-theme") || "dia");
 
-el.temaSeletor.querySelectorAll(".tema-seg-btn").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    aplicarTema(btn.dataset.tema);
-    localStorage.setItem(TEMA_KEY, btn.dataset.tema);
-  });
-});
-
-// Toggle "céu" dia/noite - mesmo mecanismo dos .tema-seg-btn (aplicarTema +
-// salva no localStorage), só que alterna entre os dois em vez de fixo.
+// Toggle "céu" dia/noite - inspirado num vídeo que o usuário mandou.
 el.temaCeuToggle.addEventListener("click", () => {
   const novoTema = document.documentElement.getAttribute("data-theme") === "noite" ? "dia" : "noite";
   aplicarTema(novoTema);
   localStorage.setItem(TEMA_KEY, novoTema);
-});
-
-function montarEditorTemaPersonalizado() {
-  const area = el.temaCoresArea;
-  area.innerHTML = "";
-  const cores = carregarTemaPersonalizado();
-
-  Object.keys(TEMA_VARS_PERSONALIZADO).forEach((chave) => {
-    const linha = document.createElement("div");
-    linha.className = "tema-linha-cor";
-
-    const label = document.createElement("span");
-    label.textContent = TEMA_LABELS_CORES[chave];
-
-    const input = document.createElement("input");
-    input.type = "color";
-    input.value = cores[chave];
-    input.addEventListener("input", () => {
-      cores[chave] = input.value;
-      salvarTemaPersonalizado(cores);
-      aplicarCoresPersonalizadas(cores);
-    });
-
-    linha.append(label, input);
-    area.appendChild(linha);
-  });
-}
-
-el.temaEditarBtn.addEventListener("click", () => {
-  aplicarTema("personalizado");
-  localStorage.setItem(TEMA_KEY, "personalizado");
-  montarEditorTemaPersonalizado();
-  openModal(el.temaEditarModal);
-});
-
-el.temaRedefinirBtn.addEventListener("click", () => {
-  const cores = { ...TEMA_PRETO_BRANCO };
-  salvarTemaPersonalizado(cores);
-  aplicarCoresPersonalizadas(cores);
-  montarEditorTemaPersonalizado();
 });
 
 // ---------------------------------------------------------------------------

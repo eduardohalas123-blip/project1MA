@@ -197,17 +197,11 @@ depois voltou a pedido dele mesmo, ver item 26 do HISTORICO.md):
 
 ## Tema e visual
 
-- **🎨 Paleta de cores** — portado do "personalizar paleta" que existia no
-  tradutor antigo (`audioT`), agora valendo pro **mural inteiro**
-  (substituiu o switch simples de claro/escuro). 3 opções lado a lado no
-  cabeçalho: ☀️ Dia, 🌙 Noite (padrão) e 🎨 Personalizado — o `audioT`
-  original tinha mais 4 temas prontos (Frio/Deserto/Tundra/Céu), mas o
-  usuário pediu só esses 3. O botão 🖌️ ao lado abre um editor com 10
-  seletores de cor (fundo, cartão, texto, destaque etc.) que aplicam na
-  hora e salvam sozinhos — dá pra montar uma paleta 100% sua. Um botão
-  "🔄 Redefinir cores" volta o personalizado pra uma paleta neutra
-  preto/branco/cinza. Escolha salva no navegador, continua igual na
-  próxima visita.
+- **Tema dia/noite** — switch animado de céu no cabeçalho (nuvens/sol de
+  dia, estrelas/lua de noite, ver HISTORICO.md item 45). Existiu também um
+  modo "🎨 Personalizado" (portado do `audioT`, com editor de 10 cores),
+  removido a pedido do usuário em 2026-08-11 — só dia/noite agora. Escolha
+  salva no navegador, continua igual na próxima visita.
 - Switch de visual "computador" (💻) / "celular" (📱) — força o layout
   independente do tamanho real da tela; se a pessoa nunca mexeu no
   switch, o site se adapta sozinho ao tamanho da janela.

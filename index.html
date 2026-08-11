@@ -13,6 +13,7 @@
   <script>
     (function () {
       var saved = localStorage.getItem("theme");
+      if (saved === "personalizado") { saved = "noite"; localStorage.setItem("theme", "noite"); localStorage.removeItem("temaPersonalizado"); }
       var theme = saved || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "noite" : "dia");
       document.documentElement.setAttribute("data-theme", theme);
 
@@ -95,18 +96,14 @@
                 <span class="theme-switch-icons" aria-hidden="true"><span>💻</span><span>📱</span></span>
                 <span class="theme-switch-knob"></span>
               </button>
-              <div id="temaSeletor" class="tema-seletor" role="group" aria-label="Escolher paleta de cores">
-                <button id="temaCeuToggle" class="tema-ceu-toggle" type="button" role="switch" aria-checked="false" aria-label="Alternar entre tema claro e escuro" title="Dia / Noite">
-                  <span class="tema-ceu-nuvem tema-ceu-nuvem-1" aria-hidden="true"></span>
-                  <span class="tema-ceu-nuvem tema-ceu-nuvem-2" aria-hidden="true"></span>
-                  <span class="tema-ceu-estrela tema-ceu-estrela-1" aria-hidden="true"></span>
-                  <span class="tema-ceu-estrela tema-ceu-estrela-2" aria-hidden="true"></span>
-                  <span class="tema-ceu-estrela tema-ceu-estrela-3" aria-hidden="true"></span>
-                  <span class="tema-ceu-knob" aria-hidden="true"></span>
-                </button>
-                <button type="button" class="tema-seg-btn" data-tema="personalizado" title="Personalizado">🎨</button>
-              </div>
-              <button id="temaEditarBtn" class="trad-icon-btn" type="button" title="Editar tema personalizado">🖌️</button>
+              <button id="temaCeuToggle" class="tema-ceu-toggle" type="button" role="switch" aria-checked="false" aria-label="Alternar entre tema claro e escuro" title="Dia / Noite">
+                <span class="tema-ceu-nuvem tema-ceu-nuvem-1" aria-hidden="true"></span>
+                <span class="tema-ceu-nuvem tema-ceu-nuvem-2" aria-hidden="true"></span>
+                <span class="tema-ceu-estrela tema-ceu-estrela-1" aria-hidden="true"></span>
+                <span class="tema-ceu-estrela tema-ceu-estrela-2" aria-hidden="true"></span>
+                <span class="tema-ceu-estrela tema-ceu-estrela-3" aria-hidden="true"></span>
+                <span class="tema-ceu-knob" aria-hidden="true"></span>
+              </button>
             </div>
             <button id="loginBtn" class="btn btn-ghost" type="button">Entrar como Admin</button>
             <button id="addTaskBtn" class="btn btn-primary" type="button" hidden>+ Nova tarefa</button>
@@ -427,20 +424,6 @@
       <footer class="footer">
         <p>Mural da turma 1MA — atualizado em tempo real</p>
       </footer>
-    </div>
-  </div>
-
-  <!-- Modal: editor de tema personalizado -->
-  <div id="temaEditarModal" class="modal-overlay" hidden>
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="temaEditarTitle">
-      <div class="modal-header">
-        <h2 id="temaEditarTitle">🎨 Editar tema personalizado</h2>
-        <button class="modal-close" data-close="temaEditarModal" aria-label="Fechar" type="button">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div id="temaCoresArea" class="tema-cores-area"></div>
-        <button id="temaRedefinirBtn" class="btn btn-ghost btn-block" type="button">🔄 Redefinir cores</button>
-      </div>
     </div>
   </div>
 

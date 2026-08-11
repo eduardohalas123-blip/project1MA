@@ -71,10 +71,7 @@ Ver regras de acesso completas em [FIREBASE.md](FIREBASE.md).
 
 Guardado em `localStorage`, só no navegador de cada pessoa:
 
-- `theme` — nome do tema ativo: "dia"/"noite"/"frio"/"deserto"/"tundra"/
-  "ceu"/"personalizado"
-- `temaPersonalizado` — JSON com as 10 cores do tema "personalizado"
-  (chaves em `TEMA_VARS_PERSONALIZADO`, app.js)
+- `theme` — nome do tema ativo: "dia" ou "noite"
 - `viewMode` — "mobile" ou "desktop" (visual forçado)
 - `meritoGrades` — notas digitadas no Mérito (JSON por matéria)
 - `meritoItinerario` — "humanas" ou "exatas"
@@ -86,27 +83,14 @@ Guardado em `localStorage`, só no navegador de cada pessoa:
    (hoje só "Aviso" — aparece no Mural mas não no Mérito),
    `getMuralSubjectList()`, `colorForSubject()`.
 2. **Elementos** — objeto `el` com todas as referências de DOM usadas no arquivo.
-3. **Paleta de tema** — portado do "personalizar paleta" do `audioT`
-   original (lá era só o app inteiro, aqui virou site-wide, substituindo
-   o switch simples de claro/escuro que existia antes). 3 temas (o
-   `audioT` original tinha mais 4 - Frio/Deserto/Tundra/Céu -, removidos
-   a pedido do usuário, que só queria claro/escuro/personalizado): 2
-   prontos (`:root[data-theme="dia|noite"]` em style.css, blocos
-   estáticos de ~15 variáveis CSS cada) + 1 "personalizado", cujo valor
-   de verdade é lido do `localStorage`
-   (`temaPersonalizado`) e aplicado como **estilo inline em
-   `document.documentElement`** via `aplicarCoresPersonalizadas()` — o
-   bloco CSS `:root[data-theme="personalizado"]` é só o fallback antes do
-   JS carregar. `aplicarTema(nome)` seta `data-theme`, chama
-   `limparCoresInline()` (importante ao trocar PRA um tema pronto, senão
-   sobra cor personalizada "vazando" por cima) e marca o botão ativo.
-   Editor (`montarEditorTemaPersonalizado()`) gera 10
-   `<input type="color">` (só um subconjunto das ~15 variáveis do tema —
-   as "derivadas"/secundárias tipo `border-strong`, sombras, cores de
-   erro/aviso não são editáveis, pra não sobrecarregar o editor) que
-   aplicam e salvam a cada `input` (não precisa de botão "salvar"). Botão
-   "Redefinir cores" troca só a paleta pra preto/branco/cinza neutro
-   (`TEMA_PRETO_BRANCO`).
+3. **Paleta de tema** — só "dia" e "noite" (`:root[data-theme="dia|noite"]`
+   em style.css, blocos estáticos de ~15 variáveis CSS cada). Alternados
+   pelo toggle animado de céu no cabeçalho (`#temaCeuToggle`, ver item 45
+   do HISTORICO.md). `aplicarTema(nome)` seta `data-theme` e sincroniza o
+   `aria-checked` do toggle. Existiu um modo "personalizado" (paleta
+   editável por `<input type="color">`, portado do `audioT` original) —
+   removido a pedido do usuário em 2026-08-11 (HISTORICO.md) por ser
+   redundante com os dois temas prontos.
 4. **Visual PC/celular** — switch que seta `data-view` no `<html>`, força
    layout via CSS (`:root[data-view="mobile"|"desktop"]`); se a pessoa nunca
    escolheu manualmente, acompanha o tamanho real da janela via `resize`.

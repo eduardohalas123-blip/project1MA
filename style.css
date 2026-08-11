@@ -75,15 +75,8 @@
     color-scheme: dark;
   }
 }
-/* Paletas de tema - portado do "personalizar paleta" do audioT original,
-   adaptado pro conjunto maior de variáveis daqui (lá eram só 10 variáveis
-   por tema, aqui são ~15). Só 3 opções, a pedido do usuário (o audioT
-   original tinha mais - frio/deserto/tundra/céu - mas não foram
-   portadas aqui): "dia"/"noite" são os dois temas padrão do mural
-   (mesmos valores de antes, só renomeados); "personalizado" tem um valor
-   de fallback aqui (só usado antes do JS carregar) - o de verdade vem do
-   localStorage via estilo inline em <html>, sobrescrevendo este bloco
-   (ver aplicarTema() em app.js). Detalhes/decisões de design em
+/* Paletas de tema - "dia" e "noite", alternados pelo toggle de céu no
+   cabeçalho (ver aplicarTema() em app.js). Detalhes/decisões de design em
    HISTORICO.md. */
 :root[data-theme="noite"] {
   --bg: #0C0E14; --bg-alt: #141722; --surface: #181C29; --surface-2: #11131C; --text: #EEF0F8;
@@ -107,20 +100,6 @@
   --shadow: var(--shadow-lg);
   color-scheme: light;
 }
-:root[data-theme="personalizado"] {
-  /* valores de fallback (== noite) - o JS sobrescreve com estilo inline
-     assim que carrega, usando o que estiver salvo no localStorage */
-  --bg: #0C0E14; --bg-alt: #141722; --surface: #181C29; --surface-2: #11131C; --text: #EEF0F8;
-  --text-muted: #9AA0B4; --border: #262B3A; --border-strong: #383E50; --accent: #7583FF; --accent-2: #9B8CFF; --accent-contrast: #0A0C13;
-  --danger: #F87171; --danger-bg: rgba(248, 113, 113, 0.12);
-  --warning: #FBBF24; --warning-bg: rgba(251, 191, 36, 0.12);
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
-  --shadow-md: 0 10px 26px -12px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 24px 56px -18px rgba(0, 0, 0, 0.6);
-  --shadow: var(--shadow-lg);
-  color-scheme: dark;
-}
-
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 html { scrollbar-color: color-mix(in srgb, var(--accent) 55%, var(--bg-alt)) transparent; scrollbar-width: thin; }
 ::-webkit-scrollbar { width: 11px; height: 11px; }
@@ -393,28 +372,8 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--fon
   transform: translateX(23px);
 }
 
-/* Seletor de paleta (substitui o switch simples de claro/escuro) - 7
-   botões pequenos num grupo, ver contexto/HISTORICO.md pra origem
-   (portado do "personalizar paleta" do audioT original). */
-.tema-seletor {
-  display: flex; align-items: center; gap: 2px;
-}
-.tema-seg-btn {
-  width: 26px; height: 26px;
-  display: flex; align-items: center; justify-content: center;
-  border: none; border-radius: 999px;
-  background: transparent;
-  font-size: 13px; line-height: 1;
-  cursor: pointer;
-  transition: background-color 0.15s ease, transform 0.15s ease;
-}
-.tema-seg-btn:hover { background: var(--surface); }
-.tema-seg-btn.ativo { background: var(--surface); box-shadow: var(--shadow-sm); transform: scale(1.08); }
-
 /* Toggle "céu" dia/noite - inspirado num vídeo que o usuário mandou
-   (toggle switch animado com nuvens/sol de dia, estrelas/lua de noite).
-   Troca só entre os temas "dia" e "noite"; "personalizado" continua no
-   botão 🎨 ao lado, que não faz parte de um switch de 2 estados. */
+   (toggle switch animado com nuvens/sol de dia, estrelas/lua de noite). */
 .tema-ceu-toggle {
   position: relative;
   width: 52px; height: 26px;
@@ -478,23 +437,6 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--fon
 .tema-ceu-estrela-3 { left: 21px; top: 9px; }
 .tema-ceu-toggle[aria-checked="true"] .tema-ceu-estrela { opacity: 1; }
 .tema-ceu-toggle:hover { box-shadow: inset 0 0 0 1px rgba(255,255,255,0.25), 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent); }
-
-.tema-cores-area {
-  display: flex; flex-direction: column; gap: 10px;
-  max-height: 60vh; overflow-y: auto;
-  margin-bottom: 14px;
-}
-.tema-linha-cor {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-}
-.tema-linha-cor span { font-size: 0.88rem; color: var(--text); }
-.tema-linha-cor input[type="color"] {
-  width: 44px; height: 30px;
-  padding: 2px;
-  border: 1px solid var(--border); border-radius: var(--radius-sm);
-  background: var(--surface);
-  cursor: pointer;
-}
 
 /* Buttons */
 .btn {

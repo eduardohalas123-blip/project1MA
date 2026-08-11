@@ -681,6 +681,30 @@ por trás de cada decisão, pra não se perder o contexto depois.
       continua funcionando do lado, editor de cores personalizado abre
       normal, sem overflow em nenhuma largura testada.
 
+46. **Remoção do modo "Personalizado"** (2026-08-11) — usuário pediu pra
+    tirar o modo de personalizar cores ("tire o modo de personalizar as
+    cor"). Removido por completo: botão 🎨 "Personalizado", botão 🖌️
+    "Editar tema", modal `#temaEditarModal` com os 10 seletores de cor, e
+    toda a lógica em `app.js` (`TEMA_VARS_PERSONALIZADO`,
+    `TEMA_PADRAO_PERSONALIZADO`, `TEMA_PRETO_BRANCO`,
+    `carregarTemaPersonalizado()`, `salvarTemaPersonalizado()`,
+    `aplicarCoresPersonalizadas()`, `limparCoresInline()`,
+    `montarEditorTemaPersonalizado()`) e o bloco CSS
+    `:root[data-theme="personalizado"]`. Ficam só os dois temas prontos
+    (dia/noite), trocados pelo toggle de céu do item 45 — que agora é o
+    único controle de tema no cabeçalho (a `div#temaSeletor` que o
+    envolvia também saiu, virou filho direto de `.header-switches`).
+    - **Migração**: quem tinha `localStorage.theme === "personalizado"`
+      salvo de uma visita anterior seria jogado pro `:root` padrão (sem
+      bloco CSS correspondente mais) - pra evitar isso, o script inline
+      no `<head>` do `index.html` (que já lia o tema salvo antes do
+      `app.js` carregar, pra não piscar) agora detecta esse valor antigo,
+      converte pra `"noite"` (a paleta da qual o personalizado sempre
+      partia) e limpa a chave `temaPersonalizado` órfã do localStorage.
+    - Retestado via Playwright: botão/modal removidos do DOM, toggle de
+      céu ainda alterna `data-theme` nos dois sentidos, migração de tema
+      antigo funciona, zero erros de console.
+
 ## Deploy
 
 - **Mudou em 2026-08-08** (item 24): o site agora tem uma Netlify
