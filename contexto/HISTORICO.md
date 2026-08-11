@@ -636,6 +636,25 @@ por trás de cada decisão, pra não se perder o contexto depois.
       roda de verdade, não só que o resultado final está certo. Sem
       overflow em nenhuma largura, sem erro de console.
 
+44. **"Melhore mais e mais"** (2026-08-10) — mais uma rodada de polimento
+    livre, tudo baixo risco:
+    - **Favicon** (o site não tinha nenhum - aba do navegador mostrava o
+      ícone genérico): SVG embutido como data URI direto no `<link
+      rel="icon">` do `index.html` (sem precisar de arquivo separado),
+      quadrado com o gradiente accent→accent-2 e "1MA" em branco, mesma
+      cara do `.brand-mark` do cabeçalho.
+    - **Rolagem estilizada**: `::-webkit-scrollbar` + `scrollbar-color`/
+      `scrollbar-width` (Firefox) pra combinar com o tema em vez da barra
+      cinza padrão do sistema - fina, cor de accent, se destaca mais no
+      hover.
+    - **Cor de seleção de texto** (`::selection`) tingida de accent, em
+      vez do azul padrão do navegador.
+    - **Feedback de toque**: `.chip` e `.sidebar-item` ganharam
+      `:active { transform: scale(0.96) }` (não tinham nenhum feedback
+      de "prensado" ao clicar/tocar, só hover).
+    - Retestado nas 5 larguras de sempre, sem overflow, sem erro de
+      console.
+
 ## Deploy
 
 - **Mudou em 2026-08-08** (item 24): o site agora tem uma Netlify
