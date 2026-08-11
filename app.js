@@ -29,7 +29,7 @@ const SUBJECTS = [
   { name: "Biologia", color: "var(--c1)", emoji: "🧬" },
   { name: "Química", color: "var(--c2)", emoji: "🧪" },
   { name: "Matemática", color: "var(--c3)", emoji: "🧮" },
-  { name: "Inglês", color: "var(--c4)", emoji: "🇺🇸" },
+  { name: "Inglês", color: "var(--c4)", emoji: "🇬🇧" },
   { name: "História", color: "var(--c5)", emoji: "🏛️" },
   { name: "Física", color: "var(--c6)", emoji: "⚛️" },
   { name: "Projeto de Vida", color: "var(--c7)", emoji: "🎯" },
