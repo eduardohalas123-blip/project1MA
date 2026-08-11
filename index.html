@@ -707,6 +707,12 @@
 
   <div id="toast" class="toast" hidden></div>
 
+  <!-- Twemoji: os emojis de matéria no Mural usam isso pra renderizar sempre
+       "chapados" (sem o fundo quadrado que o Windows/Segoe UI Emoji coloca
+       atrás de todo emoji nativo - não tem como tirar isso só com CSS,
+       é o próprio desenho da fonte do sistema). Vira <img>, funciona igual
+       em qualquer sistema. Ver emojiParaImg() em app.js. -->
+  <script src="https://cdn.jsdelivr.net/npm/twemoji@14.0.2/dist/twemoji.min.js" crossorigin="anonymous"></script>
   <script type="module" src="app.js"></script>
 </body>
 </html>

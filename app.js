@@ -28,8 +28,8 @@ import {
 const SUBJECTS = [
   { name: "Biologia", color: "var(--c1)", emoji: "🧬" },
   { name: "Química", color: "var(--c2)", emoji: "🧪" },
-  { name: "Matemática", color: "var(--c3)", emoji: "🔢" },
-  { name: "Inglês", color: "var(--c4)", emoji: "🔤" },
+  { name: "Matemática", color: "var(--c3)", emoji: "🧮" },
+  { name: "Inglês", color: "var(--c4)", emoji: "🇺🇸" },
   { name: "História", color: "var(--c5)", emoji: "🏛️" },
   { name: "Física", color: "var(--c6)", emoji: "⚛️" },
   { name: "Projeto de Vida", color: "var(--c7)", emoji: "🎯" },
@@ -627,10 +627,11 @@ function renderBoard() {
     const header = document.createElement("div");
     header.className = "subject-section-header";
     header.innerHTML = `
-      <span class="subject-dot" style="background:${color}; color:${color}">${emoji}</span>
+      <span class="subject-dot" style="color:${color}">${emoji}</span>
       <span class="subject-name">${escapeHtml(materia)}</span>
       <span class="subject-count">${items.length} ${items.length === 1 ? "tarefa" : "tarefas"}</span>
     `;
+    if (window.twemoji) window.twemoji.parse(header, { folder: "svg", ext: ".svg" });
     section.appendChild(header);
 
     const grid = document.createElement("div");

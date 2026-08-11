@@ -12,6 +12,15 @@
 - Uma exceção ao "sem backend": `netlify/functions/tts.js` é uma Netlify
   Function (Node.js) — só ela roda servidor de verdade, e só pra gerar a
   voz do Tradutor. Ver seção "Netlify Function: voz do Tradutor" abaixo.
+- Outras dependências via CDN (sem npm/bundler, mesmo padrão do Firebase):
+  Google Fonts (Manrope/Inter, `<link>` no `<head>`) e Twemoji
+  (`twemoji.min.js`, script clássico carregado antes do `app.js` no fim
+  do `<body>`) — usado só pra desenhar os emojis das matérias no Mural
+  como `<img>` flat em vez do emoji nativo do sistema (que no Windows
+  vem com um fundo "sticker" quadrado colorido, embutido no próprio
+  glifo da fonte - não dá pra tirar com CSS). Ver `emojiForSubject()` e
+  a chamada `window.twemoji.parse(...)` em `app.js`, e HISTORICO.md
+  item 42.
 
 ## Dados (Firestore)
 

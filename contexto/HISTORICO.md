@@ -584,6 +584,30 @@ por trás de cada decisão, pra não se perder o contexto depois.
       Aberto (escolha de mapa + jogo) continua funcionando sem alteração
       de lógica.
 
+42. **Emoji sem quadrado + Tradutor com uma cor só nos botões** (2026-08-10)
+    — dois ajustes rápidos em cima do que já tinha:
+    - **"não quero o emoji dentro do quadrado, quero só o emoji"**: o
+      quadrado atrás do emoji das matérias não era CSS meu - é o próprio
+      desenho da fonte de emoji do Windows (Segoe UI Emoji/Fluent Emoji
+      usa um estilo "sticker" com fundo arredondado colorido pra
+      **qualquer** emoji, isso é assado no glifo da fonte, não dá pra
+      remover só com CSS). Solução: **Twemoji** (biblioteca da Twitter,
+      carregada via CDN em `index.html`, `twemoji.parse()` chamado em
+      `app.js` logo depois de montar o `subject-section-header`) - troca
+      o caractere emoji por uma `<img class="emoji">` de um SVG num
+      estilo flat, sem fundo, igual em qualquer sistema operacional (e
+      de brinde, fica visualmente idêntico pra todo mundo que acessa o
+      site, não só no Windows). CSS: `.subject-dot img.emoji { width/
+      height: 1.4rem }` (sem isso o SVG nasce enorme, tamanho nativo).
+      Dois emojis trocados porque o "quadrado" ali era o desenho
+      *oficial* do emoji (categoria "input symbol" do Unicode, sempre
+      parece uma plaquinha em qualquer fonte/site): Inglês 🔤→🇺🇸,
+      Matemática 🔢→🧮.
+    - **"deixe uma cor só aquelas linhas coloridas dos botões"**: o
+      mosaico colorido dos 10 botões de ação do Tradutor (item 41) foi
+      revertido - tirado o `:nth-child` que ciclava pela paleta,
+      `--grid-color` volta a ser só `var(--accent)` pra todos, uma cor só.
+
 ## Deploy
 
 - **Mudou em 2026-08-08** (item 24): o site agora tem uma Netlify

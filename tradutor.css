@@ -346,18 +346,6 @@
   background: color-mix(in srgb, var(--grid-color) 10%, var(--surface));
   box-shadow: 0 10px 20px -12px color-mix(in srgb, var(--grid-color) 60%, transparent);
 }
-/* Cicla pelas cores da paleta pra ficar mais vivo, sem significado real
-   por trás - são 10 botões de ação, não categorias. */
-#tradutorSection .trad-btn-grid:nth-child(10n+1) { --grid-color: var(--c1); }
-#tradutorSection .trad-btn-grid:nth-child(10n+2) { --grid-color: var(--c9); }
-#tradutorSection .trad-btn-grid:nth-child(10n+3) { --grid-color: var(--c6); }
-#tradutorSection .trad-btn-grid:nth-child(10n+4) { --grid-color: var(--c13); }
-#tradutorSection .trad-btn-grid:nth-child(10n+5) { --grid-color: var(--c4); }
-#tradutorSection .trad-btn-grid:nth-child(10n+6) { --grid-color: var(--c8); }
-#tradutorSection .trad-btn-grid:nth-child(10n+7) { --grid-color: var(--c11); }
-#tradutorSection .trad-btn-grid:nth-child(10n+8) { --grid-color: var(--c2); }
-#tradutorSection .trad-btn-grid:nth-child(10n+9) { --grid-color: var(--c7); }
-#tradutorSection .trad-btn-grid:nth-child(10n+10) { --grid-color: var(--c14); }
 
 #tradutorSection .trad-btn-perigo {
   display: block;
