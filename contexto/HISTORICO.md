@@ -705,6 +705,50 @@ por trás de cada decisão, pra não se perder o contexto depois.
       céu ainda alterna `data-theme` nos dois sentidos, migração de tema
       antigo funciona, zero erros de console.
 
+47. **"Circular reveal" ao trocar de seção pelo menu lateral** (2026-08-11)
+    — usuário mandou outro vídeo (site de demonstração "Space Explorer",
+    feito só com CSS): ao clicar num planeta na lista lateral, o conteúdo
+    novo cresce por cima do antigo a partir de um ponto, tipo uma
+    revelação circular. Pediu pra trocar de seção no mural (Mural, Mérito,
+    Dúvidas etc.) seguir a mesma ideia. Extraí frames com `ffmpeg` de
+    novo pra examinar o efeito antes de implementar.
+    - Implementado com a **View Transitions API**
+      (`document.startViewTransition()`), não com uma animação CSS manual
+      - é o jeito nativo do navegador de fazer exatamente esse tipo de
+      efeito (o navegador tira um "antes" e um "depois" da seção como
+      imagens estáticas e anima entre elas). `<main class="main">` ganhou
+      `view-transition-name: app-main` pra virar seu próprio grupo de
+      transição, separado do resto da página (cabeçalho/sidebar não
+      re-renderizam).
+    - `app.js`: no clique do item lateral, calcula o centro do botão
+      clicado relativo ao `<main>` (`--vt-x`/`--vt-y`) e o raio até o
+      canto mais distante do painel (`--vt-r`, via `Math.hypot`) - assim o
+      círculo cobre exatamente o painel inteiro no fim da animação, nem
+      sobra nem falta. Essas variáveis CSS são lidas pelas keyframes
+      (`::view-transition-new(app-main)` herda de `:root`).
+    - CSS: `::view-transition-old(app-main)` fica parado
+      (`animation: none`) enquanto `::view-transition-new(app-main)`
+      cresce por cima via `clip-path: circle(...)` animado de `0px` até
+      `var(--vt-r)`. **Primeira tentativa usou `150vmax` fixo e uma curva
+      de easing muito agressiva (`cubic-bezier(0.22,1,0.36,1)`)** - o
+      círculo estourava o tamanho do painel quase instantaneamente,
+      parecia um corte seco em vez de uma revelação. Corrigido calculando
+      o raio exato (acima) e trocando pra uma curva mais equilibrada
+      (`cubic-bezier(0.65,0,0.35,1)`, 0.65s) - crescimento visível e
+      gradual, confirmado tirando screenshots em vários pontos da
+      animação (60ms/250ms/450ms) via Playwright.
+    - Fallback: se o navegador não suporta `startViewTransition` (feature
+      detection simples) ou a pessoa tem "reduzir movimento" ativado
+      (`prefers-reduced-motion`), a troca de seção continua instantânea
+      como sempre - sem quebrar nada. `.app-section` ganhou uma regra
+      `:root.vt-nav .app-section { transition: none; }` pra não competir
+      com o fade que já existia (item 36) durante a revelação circular -
+      as duas animações ao mesmo tempo ficavam confusas.
+    - Testado: revelação circular visível e gradual, fallback instantâneo
+      com "reduzir movimento" confirmado, clique na aba já ativa não
+      dispara transição à toa, retestado nas 5 larguras sem overflow e
+      sem erro de console.
+
 ## Deploy
 
 - **Mudou em 2026-08-08** (item 24): o site agora tem uma Netlify

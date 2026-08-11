@@ -190,14 +190,43 @@ window.addEventListener("resize", () => {
 // ---------------------------------------------------------------------------
 // Navegação lateral
 // ---------------------------------------------------------------------------
+// Troca de seção com "circular reveal" (View Transitions API) - o conteúdo
+// novo cresce por cima do antigo a partir do item clicado, inspirado num
+// vídeo que o usuário mandou. Em navegador sem suporte (ou com "reduzir
+// movimento" ativado), cai pro fade simples que já existia via CSS.
 const sidebarItems = document.querySelectorAll(".sidebar-item");
 const appSections = document.querySelectorAll(".app-section");
+const mainEl = document.querySelector("main.main");
+const reduzMovimento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function trocarSecaoAtiva(targetId) {
+  appSections.forEach((section) => { section.hidden = section.id !== targetId; });
+}
+
 sidebarItems.forEach((item) => {
   item.addEventListener("click", () => {
+    if (item.classList.contains("active")) return;
     sidebarItems.forEach((i) => i.classList.remove("active"));
     item.classList.add("active");
     const targetId = item.dataset.section;
-    appSections.forEach((section) => { section.hidden = section.id !== targetId; });
+
+    if (!reduzMovimento && document.startViewTransition && mainEl) {
+      const rect = item.getBoundingClientRect();
+      const mainRect = mainEl.getBoundingClientRect();
+      const x = rect.left + rect.width / 2 - mainRect.left;
+      const y = rect.top + rect.height / 2 - mainRect.top;
+      // Raio até o canto mais distante do painel, pra o círculo cobrir tudo
+      // exatamente quando a animação termina (nem sobrar, nem faltar).
+      const raio = Math.hypot(Math.max(x, mainRect.width - x), Math.max(y, mainRect.height - y));
+      document.documentElement.style.setProperty("--vt-x", `${x}px`);
+      document.documentElement.style.setProperty("--vt-y", `${y}px`);
+      document.documentElement.style.setProperty("--vt-r", `${raio}px`);
+      document.documentElement.classList.add("vt-nav");
+      const transition = document.startViewTransition(() => trocarSecaoAtiva(targetId));
+      transition.finished.finally(() => document.documentElement.classList.remove("vt-nav"));
+    } else {
+      trocarSecaoAtiva(targetId);
+    }
   });
 });
 

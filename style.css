@@ -286,6 +286,31 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--fon
     transform: translateY(10px);
   }
 }
+/* Durante a transição "circular reveal" (JS liga essa classe em <html> nos
+   navegadores com suporte à View Transitions API), a troca de seção deve
+   ser instantânea - a animação de verdade é a ::view-transition-new(app-main)
+   logo abaixo, não faz sentido animar os dois ao mesmo tempo. */
+:root.vt-nav .app-section { transition: none; }
+
+/* "Circular reveal" ao trocar de seção pelo menu lateral - inspirado num
+   vídeo que o usuário mandou (site "Space Explorer": clicar num item
+   lateral faz o conteúdo novo crescer por cima do antigo a partir de um
+   ponto). --vt-x/--vt-y são a posição do item clicado, calculadas em
+   app.js antes de chamar startViewTransition(); o conteúdo antigo fica
+   parado (animation:none) enquanto o novo se revela por cima via
+   clip-path. Sem suporte no navegador, cai pro fade simples de sempre. */
+main.main { view-transition-name: app-main; }
+::view-transition-old(app-main) { animation: none; }
+::view-transition-new(app-main) {
+  animation: vt-reveal 0.65s cubic-bezier(0.65, 0, 0.35, 1);
+}
+@keyframes vt-reveal {
+  from { clip-path: circle(0px at var(--vt-x, 50%) var(--vt-y, 50%)); }
+  to { clip-path: circle(var(--vt-r, 150%) at var(--vt-x, 50%) var(--vt-y, 50%)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-new(app-main) { animation: none; }
+}
 
 /* Setup notice */
 .setup-notice { background: var(--warning-bg); border-bottom: 1px solid var(--warning); }
