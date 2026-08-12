@@ -756,6 +756,156 @@ por trás de cada decisão, pra não se perder o contexto depois.
       cliques rápidos sem deixar seção presa, retestado nas 5 larguras sem
       overflow e sem erro de console.
 
+48. **Terceiro redesign visual — "profissional, inspirado em sites de carro,
+    com transições incríveis"** (2026-08-11) — antes de mexer no visual, o
+    usuário pediu duas coisas de infraestrutura: instalar Node.js
+    (avaliamos rodar o wizard do `ruflo`/claude-flow — framework de
+    orquestração multi-agente incompatível com o porte deste projeto,
+    decidimos **não instalar**, só o Node ficou) e reviver o servidor local
+    de desenvolvimento (documentado no ARQUITETURA.md mas o arquivo em si
+    nunca tinha sido commitado) — virou `scripts/dev_server.py`, porta 8091.
+    Pedido de design: "profissional" + "transições incríveis" +
+    "inspirado nos sites de carro" + "não esqueça de adaptar pro celular".
+    Diferente dos dois redesigns anteriores (itens 15 e 36-44), que
+    reformularam cores/sombras/cards, esta rodada focou em **tipografia de
+    destaque** e **motion** por cima do sistema já existente (sem trocar a
+    paleta indigo/violeta nem os 2 temas dia/noite, já validados em várias
+    rodadas):
+    - **Tipografia de destaque**: nova variável `--font-display` ("Big
+      Shoulders Display", peso 800/900 — condensada, inspirada em letreiro
+      arquitetônico/industrial, não confundir com `--font-heading`/Manrope,
+      que continua nos títulos menores/UI). Aplicada só nos `h2` grandes de
+      cada seção (`.section-intro h2`/`.merito-intro h2`, eram idênticos e
+      duplicados, os dois ganharam a mesma regra) com `font-size:
+      clamp(1.9rem, 4vw + 1.1rem, 2.75rem)` — fluido, sem precisar de
+      breakpoint separado pro celular. `--font-mono` trocou da pilha de
+      fontes de sistema pra "Space Mono" (Google Fonts), usada nos
+      eyebrows/badges/timestamps — reforça a leitura "ficha técnica".
+      **Bug pego só testando com Playwright**: a princípio a marca "1MA" no
+      cabeçalho também ganhou `--font-display`, mas o "1" dessa fonte
+      específica é visualmente idêntico a um "I" maiúsculo nesse peso —
+      lia "IMA". Revertido só a marca de volta pro Manrope (testado, ficou
+      "1MA" legível de novo); os headings de seção não têm esse problema
+      (são palavras, não um "1" sozinho colado em letras).
+    - **Brilho (sheen) ao passar o mouse**: efeito novo, só CSS (gradiente
+      diagonal que desloca de posição no hover, sem imagem/JS) — inspirado
+      em pintura de carro reagindo à luz num configurador. Aplicado só nas
+      superfícies de maior destaque (`.btn-primary`, `.card`, `.duvida-card`,
+      `.arte-card` em `style.css`; `.trad-btn-primario`/`.trad-btn-mundo`
+      em `tradutor.css`) — de propósito não foi espalhado pra tudo (botões
+      secundários, chips, etc. continuam como estavam), pra não virar
+      exagero. Usa `pointer-events:none` pra não atrapalhar clique/toque, e
+      `border-radius:inherit` pra se recortar sozinho sem precisar de
+      `overflow:hidden` no elemento pai.
+    - **Revelação ao rolar**: novo atributo `[data-reveal]` (CSS em
+      `style.css`) + `iniciarRevelacaoScroll()` em `app.js`
+      (`IntersectionObserver`, reaproveita a constante `reduzMovimento` que
+      já existia pra revelação circular) — elemento nasce com opacidade 0 e
+      sobe 28px, revela com fade+subida ao entrar na tela. Aplicado só em
+      elementos **estáticos** do HTML (`.versiculo-card`, `.versiculo-chat`,
+      `.horario-table-wrap`, os `.trad-card`/`.trad-resultado-card`) —
+      conteúdo gerado pelo Firestore (cards do Mural, Dúvidas...) **não**
+      recebeu esse atributo, continua só com a `entrada-card` que já existia
+      (adicionar `data-reveal` num card recriado a cada `onSnapshot` exigiria
+      reobservar toda hora, sem ganho real já que ele já anima ao ser
+      criado). Sem JS ou com `prefers-reduced-motion`, os elementos aparecem
+      direto (nunca ficam presos invisíveis).
+    - Nova variável `--ease-premium` (`cubic-bezier(0.16, 1, 0.3, 1)`,
+      desaceleração longa) usada só nos dois efeitos novos acima — as
+      transições antigas (hover de botão/chip/sidebar) não foram
+      mexidas, continuam com os tempos/curvas já testados em rodadas
+      anteriores.
+    - Testado com Playwright: 5 larguras (320–1440px) sem overflow
+      horizontal em nenhuma, hover do brilho confirmado visualmente, seções
+      Mural/Mérito/Dúvidas/Versículo/Tradutor conferidas depois da mudança,
+      zero erro de console novo (o único erro que aparece,
+      "Missing or insufficient permissions" do Firestore, é preexistente do
+      ambiente de teste local sem login — não relacionado a esta mudança).
+
+49. **Ajustes em cima do item 48 + ícones por seção** (2026-08-11) — usuário
+    testou o redesign e reportou dois problemas, mais um pedido novo:
+    - **"No mural o reflexo tá muito aparente"**: o brilho (sheen) de hover
+      do item 48 tinha sido aplicado em `.card`/`.duvida-card`/`.arte-card`
+      além do botão primário — nos cards do Mural (que já têm fundo colorido
+      tingido pela matéria) o brilho branco chamava atenção demais, competia
+      com o conteúdo. Removido dos 3 tipos de card, ficou só no botão
+      primário, e ainda mais discreto (opacidade do branco caiu de 45%→18%).
+    - **"A transição falha carregando a página, parece que tá acontecendo"**:
+      causa provável — o sistema de "revelação ao rolar" (`[data-reveal]` +
+      `IntersectionObserver`, item 48) rodava em paralelo com a revelação
+      circular ao trocar de seção (já existente, item 47): a seção nova
+      aparecia inteira por baixo do círculo crescente, mas o conteúdo
+      marcado `data-reveal` só ficava visível depois que o
+      `IntersectionObserver` disparasse (assíncrono, 1+ frame de atraso) -
+      as duas animações desincronizadas pareciam um "engasgo"/bug em vez de
+      uma transição limpa. Removido por completo (CSS `[data-reveal]` em
+      `style.css`, função `iniciarRevelacaoScroll()` em `app.js`, atributos
+      no `index.html`) — as seções deste site cabem quase todas numa tela
+      só, "revelar ao rolar" não tinha muito o que revelar mesmo; a
+      revelação circular sozinha já é a transição de destaque, sem
+      concorrência.
+    - **Ícone por seção**: pedido de "imagens boas e profissionais em cada
+      vertente do site". Não há banco de fotos disponível (nem seria
+      apropriado baixar fotos genéricas da internet pro site), e a
+      geração por IA (skill `design`, ícone/banner via Gemini) precisa de
+      `GEMINI_API_KEY`, que não está configurada neste ambiente — em vez de
+      travar nisso, optamos por **ícones SVG desenhados à mão**, um por
+      seção, no mesmo estilo do `.brand-mark` (badge com gradiente
+      accent→accent-2). Ficam como `<symbol>` num sprite oculto logo no
+      início do `<body>` (`index.html`) e são reusados via `<svg><use
+      href="#icon-X"></svg>` no início de cada `h2` de seção — evita
+      repetir o markup do SVG (Dúvidas e Ideias aparecem 2x cada:
+      formulário público + inbox do admin, então o mesmo ícone é reusado
+      nos dois). Layout novo `.section-heading-row` (flex, ícone + h2 lado
+      a lado) por cima do `.section-intro h2`/`.merito-intro h2` que já
+      existia — badge menor no visual celular (50px → 42px). Testado nas
+      9 seções (todas mostram o ícone certo) e em 360px sem overflow.
+
+50. **"A transição volta como se a página tivesse carregando"** (2026-08-11)
+    — usuário reportou de novo, mesmo depois do item 49. Testado a sério
+    dessa vez: screenshot solto via Playwright é pouco confiável pra
+    animação (o próprio ato de tirar o screenshot pode capturar um frame
+    de repintura pela metade) — gravei **vídeo real** da transição
+    (`context(record_video_dir=...)`) e extraí frames com `ffmpeg` pra
+    olhar sem esse artefato. Com a página já assentada (fontes/Firestore
+    carregados), a revelação circular em si estava **limpa**, sem nenhum
+    "engasgo" — então o problema não é a animação de troca de seção.
+    Achado real ao testar clicando bem cedo (antes do Firestore
+    responder): o `renderBoard()` do Mural faz `board.innerHTML = ""` e
+    reconstrói **todos** os cards do zero toda vez que é chamado, e é
+    chamado a cada `onSnapshot` do Firestore — inclusive quando o canal de
+    tempo real simplesmente reconecta, **sem nenhuma tarefa ter mudado de
+    verdade**. Isso reproduz a animação de entrada dos cards (`entrada-
+    card`) e reprocessa o Twemoji do zero, mesmo sem novidade nenhuma —
+    exatamente a cara de "a página recarregou". Corrigido com uma
+    assinatura simples (`JSON.stringify` da lista de tarefas) comparada
+    antes de re-renderizar: só reconstrói o quadro se o conteúdo mudou de
+    verdade. Não mexeu no caminho "dado novo chegou" (continua
+    renderizando normalmente), só corta o caminho "mesmo dado de novo".
+    Retestado: 5 cards no load inicial continuam aparecendo, zero erro
+    novo no console.
+
+51. **Revelação circular removida** (2026-08-11) — mesmo depois da correção
+    do item 50, o usuário continuou vendo a página "recarregar do nada"
+    cancelando a transição, e pediu pra tirar de vez ("coloque apenas a
+    animação suave das letras quando aparecem mesmo"). Removida a
+    revelação circular inteira: função `trocarSecaoComRevelacao()`,
+    `mainEl`/cálculo de `--vt-x/--vt-y/--vt-r` em `app.js`, e o bloco
+    `.app-section.vt-revelando`/`@keyframes vt-reveal`/`main.main{position:
+    relative}` em `style.css` (não só desligada - apagada de vez, não tinha
+    mais nenhum caminho de código chamando). Causa raiz estrutural (não só
+    o bug pontual do item 50): a revelação circular mantinha as **duas**
+    seções (antiga e nova) visíveis ao mesmo tempo por ~0.65s
+    (`position:absolute` por cima); qualquer re-render do Mural nessa
+    janela (Firestore, reconexão) ficava visível e parecia um bug. A troca
+    de seção agora usa só o fade+leve subida que já existia em CSS
+    (`.app-section` com `@starting-style`, ver item 43) - troca o `hidden`
+    na hora, nunca duas seções sobrepostas, imune a esse problema por
+    construção. Perde o efeito visual mais chamativo (item 47), mas ganha
+    robustez - e o usuário pediu explicitamente algo mais simples.
+    Retestado: todas as seções continuam abrindo/fechando certo, sem
+    overflow, sem erro novo de console.
+
 ## Deploy
 
 - **Mudou em 2026-08-08** (item 24): o site agora tem uma Netlify

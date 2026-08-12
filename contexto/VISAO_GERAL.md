@@ -61,6 +61,7 @@ cadastro público no site).
 | `mundo-mapas.json` | Geometria dos 3 mapas do Mundo Aberto (gerado a partir de `audioT/mundo_dados.py`, ver ARQUITETURA.md) |
 | `imagesmap/` | Imagens do Mundo Aberto (mapas, sprites do personagem, badge do "E"), cópia de `audioT/static/imagesmap/` |
 | `LogotipoAdventista.svg.webp` | Logo da escola (marca d'água) |
+| `scripts/dev_server.py` | Servidor local de desenvolvimento (porta 8091), ver ARQUITETURA.md |
 
 Para detalhes técnicos de arquitetura veja [ARQUITETURA.md](ARQUITETURA.md),
 pra lista de funcionalidades veja [FUNCIONALIDADES.md](FUNCIONALIDADES.md),

@@ -47,7 +47,15 @@
 
   --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   --font-heading: "Manrope", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-  --font-mono: ui-monospace, "Cascadia Code", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  /* Fonte de destaque só pros títulos grandes de seção e a marca - condensada
+     e pesada de propósito ("placa" automotiva), pra não competir com o
+     --font-heading (Manrope) usado no resto da interface. Ver HISTORICO.md. */
+  --font-display: "Big Shoulders Display", var(--font-heading);
+  --font-mono: "Space Mono", ui-monospace, "Cascadia Code", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  /* Easing "cinematográfico" (desaceleração longa e suave) usado nas
+     transições de destaque - hover com brilho, revelação ao rolar. As
+     transições antigas (cards, botões) continuam com "ease" simples. */
+  --ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
   color-scheme: light;
 }
 
@@ -286,42 +294,6 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--fon
     transform: translateY(10px);
   }
 }
-/* "Circular reveal" ao trocar de seção pelo menu lateral - inspirado num
-   vídeo que o usuário mandou (site "Space Explorer": clicar num item
-   lateral faz o conteúdo novo crescer por cima do antigo a partir de um
-   ponto). Chegou a ser feito com a View Transitions API
-   (startViewTransition), mas o navegador tenta "morfar" automaticamente
-   o tamanho/posição do grupo antigo pro novo e isso distorcia o texto
-   durante a animação (letras de uma seção esticando por cima da outra) -
-   difícil de controlar de fora. Trocado por uma versão 100% manual: a
-   seção nova entra por cima da antiga (position:absolute, mesmo espaço)
-   já com o clip-path fechado, e um @keyframes abre o círculo - controle
-   total, sem esticar nada, e funciona em muito mais navegadores (só
-   depende de clip-path, não de uma API experimental). --vt-x/--vt-y/
-   --vt-r são calculados em app.js (posição do item clicado + raio até o
-   canto mais distante do painel) e ficam como CSS var em main.main. */
-main.main { position: relative; }
-.app-section.vt-revelando {
-  /* Anula o fade/translateY de cima (o :not([hidden]) dispara junto
-     quando o JS tira o hidden) - aqui quem anima é só o clip-path. */
-  transition: none;
-  opacity: 1;
-  transform: none;
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  overflow: hidden;
-  background: var(--bg);
-  animation: vt-reveal 0.65s cubic-bezier(0.65, 0, 0.35, 1) forwards;
-}
-@keyframes vt-reveal {
-  from { clip-path: circle(0px at var(--vt-x, 50%) var(--vt-y, 50%)); }
-  to { clip-path: circle(var(--vt-r, 150%) at var(--vt-x, 50%) var(--vt-y, 50%)); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .app-section.vt-revelando { animation: none; clip-path: none; }
-}
-
 /* Setup notice */
 .setup-notice { background: var(--warning-bg); border-bottom: 1px solid var(--warning); }
 .setup-notice[hidden] { display: none; }
@@ -354,6 +326,9 @@ main.main { position: relative; }
 }
 .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .brand-mark {
+  /* NÃO usa --font-display aqui de propósito: testado e o "1" de "1MA"
+     fica visualmente idêntico a um "I" maiúsculo nessa fonte condensada,
+     lendo como "IMA" - ambíguo demais pra marca do site. */
   font-family: var(--font-heading);
   font-weight: 800; font-size: 1.05rem;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
@@ -490,6 +465,36 @@ main.main { position: relative; }
 .btn-ghost:hover { color: var(--accent); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
 .btn-block { width: 100%; margin-top: 8px; }
 
+/* "Brilho" (sheen) ao passar o mouse - uma faixa de luz diagonal bem sutil
+   que desloca de posição (sem JS, sem imagem). Só no botão primário -
+   tentativa inicial também tinha isso nos cards do Mural/Dúvidas/Artes,
+   usuário achou "muito aparente" (chamava mais atenção que o próprio
+   conteúdo do card) e foi tirado de lá; ficou só aqui, mais discreto
+   (opacidade baixa, branco bem diluído). `pointer-events:none` pra não
+   atrapalhar clique/toque. */
+.btn-primary {
+  position: relative;
+}
+.btn-primary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(115deg, transparent 40%, color-mix(in srgb, white 18%, transparent) 50%, transparent 60%);
+  background-size: 220% 220%;
+  background-position: -40% -40%;
+  opacity: 0;
+  transition: background-position 0.8s var(--ease-premium), opacity 0.3s ease;
+  pointer-events: none;
+}
+.btn-primary:hover::after {
+  background-position: 60% 60%;
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn-primary::after { transition: opacity 0.2s ease; }
+}
+
 /* Main / states */
 .main { min-height: 50vh; }
 .loading-state, .empty-state {
@@ -518,14 +523,43 @@ main.main { position: relative; }
 /* Section intro (usado em Mural, Mérito, Dúvidas, Horário) */
 .section-intro { max-width: 700px; margin: 0 auto 32px; }
 .section-intro h2 {
-  font-size: 2.35rem; font-weight: 800; margin-bottom: 12px; line-height: 1.1;
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 4vw + 1.1rem, 2.75rem);
+  font-weight: 800; margin-bottom: 12px; line-height: 1.03;
 }
 .section-intro p { color: var(--text-muted); font-size: 0.98rem; line-height: 1.65; }
 .section-intro strong { color: var(--text); }
+/* Ícone de cada seção - badge com o mesmo gradiente do .brand-mark, SVG
+   desenhado à mão (símbolos em index.html, reusados via <use>) em vez de
+   gerado por IA (a skill de ícones precisa de GEMINI_API_KEY, não
+   configurada aqui) - mais leve e garante o mesmo estilo nas 9 seções. */
+.section-heading-row { display: flex; align-items: center; gap: 14px; }
+.section-heading-row h2 { margin-bottom: 0; }
+.section-icon {
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  width: 50px; height: 50px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+  box-shadow: 0 10px 22px -10px color-mix(in srgb, var(--accent) 65%, transparent);
+}
+.section-icon svg { width: 26px; height: 26px; }
+:root[data-view="mobile"] .section-icon { width: 42px; height: 42px; }
+:root[data-view="mobile"] .section-icon svg { width: 22px; height: 22px; }
+@media (max-width: 860px) {
+  .section-icon { width: 42px; height: 42px; }
+  .section-icon svg { width: 22px; height: 22px; }
+}
+
 .mural-intro { max-width: 1100px; padding: 32px 24px 0; margin-bottom: -8px; }
 :root[data-view="mobile"] .mural-intro { padding: 24px 16px 0; }
 .merito-intro { max-width: 700px; margin: 0 auto 32px; }
-.merito-intro h2 { font-size: 2.35rem; font-weight: 800; margin-bottom: 12px; line-height: 1.1; }
+.merito-intro h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 4vw + 1.1rem, 2.75rem);
+  font-weight: 800; margin-bottom: 12px; line-height: 1.03;
+}
 .merito-intro p { color: var(--text-muted); font-size: 0.98rem; line-height: 1.65; }
 .merito-intro strong { color: var(--text); }
 

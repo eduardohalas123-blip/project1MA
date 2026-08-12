@@ -7,7 +7,7 @@
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%234C5FEE'/%3E%3Cstop offset='1' stop-color='%237C6CF0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='url(%23g)'/%3E%3Ctext x='32' y='41' font-family='Arial,sans-serif' font-size='22' font-weight='800' fill='%23fff' text-anchor='middle'%3E1MA%3C/text%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Big+Shoulders+Display:wght@700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="tradutor.css" />
   <script>
@@ -24,6 +24,57 @@
   </script>
 </head>
 <body>
+
+  <!-- Ícones das seções (SVG desenhado à mão, não gerado por IA - a skill de
+       geração de ícone precisa de GEMINI_API_KEY, que não está configurada
+       aqui). Um <symbol> por seção, reusado via <use> no badge de cada
+       cabeçalho (.section-icon em style.css) - evita repetir o markup do
+       SVG 11 vezes (Dúvidas e Ideias aparecem em 2 lugares cada: formulário
+       público + inbox do admin). Ficam num sprite oculto, nunca renderizado
+       sozinho. -->
+  <svg aria-hidden="true" style="position:absolute; width:0; height:0; overflow:hidden;">
+    <defs>
+      <symbol id="icon-mural" viewBox="0 0 24 24">
+        <path d="M9 3h6a1 1 0 011 1v1h1a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V7a2 2 0 012-2h1V4a1 1 0 011-1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+        <path d="M8 12h8M8 16h5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+      </symbol>
+      <symbol id="icon-merito" viewBox="0 0 24 24">
+        <path d="M5 9l3-5h8l3 5-7 11-7-11z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+        <path d="M5 9h14M9.5 4l2.5 5 2.5-5M12 9l-2 11M12 9l2 11" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+      </symbol>
+      <symbol id="icon-duvidas" viewBox="0 0 24 24">
+        <path d="M4 6a2 2 0 012-2h12a2 2 0 012 2v9a2 2 0 01-2 2H9l-4 3v-3H6a2 2 0 01-2-2V6z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+        <path d="M10 9.5a2 2 0 113 1.7c-.7.4-1 .8-1 1.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="12" cy="15.1" r="0.9" fill="currentColor"/>
+      </symbol>
+      <symbol id="icon-ideias" viewBox="0 0 24 24">
+        <path d="M9 18h6M10 21h4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+        <path d="M12 3a6 6 0 00-3.5 10.9c.6.45 1 1.2 1 2.1h5c0-.9.4-1.65 1-2.1A6 6 0 0012 3z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+      </symbol>
+      <symbol id="icon-enquetes" viewBox="0 0 24 24">
+        <path d="M4 20V10M10 20V4M16 20v-7M20 20H4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </symbol>
+      <symbol id="icon-horario" viewBox="0 0 24 24">
+        <rect x="4" y="5" width="16" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/>
+        <path d="M4 9.5h16M8 3v3.2M16 3v3.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M8.5 13.5h2M13.5 13.5h2M8.5 17h2M13.5 17h2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      </symbol>
+      <symbol id="icon-versiculo" viewBox="0 0 24 24">
+        <path d="M12 6.5c-1.6-1.4-4-2-6.5-2-.6 0-1 .45-1 1v11c0 .55.45 1 1 1 2.3 0 4.6.55 6.5 1.9 1.9-1.35 4.2-1.9 6.5-1.9.55 0 1-.45 1-1v-11c0-.55-.4-1-1-1-2.5 0-4.9.6-6.5 2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M12 6.5v12.4" fill="none" stroke="currentColor" stroke-width="1.5"/>
+      </symbol>
+      <symbol id="icon-tradutor" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.6"/>
+        <path d="M3.5 12h17M12 3.5c2.5 2.4 3.8 5.4 3.8 8.5s-1.3 6.1-3.8 8.5c-2.5-2.4-3.8-5.4-3.8-8.5S9.5 5.9 12 3.5z" fill="none" stroke="currentColor" stroke-width="1.4"/>
+      </symbol>
+      <symbol id="icon-artes" viewBox="0 0 24 24">
+        <path d="M12 3.5a8.3 8.3 0 100 16.6c1 0 1.8-.8 1.8-1.8 0-.5-.2-.9-.5-1.3-.3-.35-.5-.75-.5-1.2 0-1 .8-1.8 1.8-1.8h1.9c1.9 0 3.5-1.6 3.5-3.5 0-3.9-3.6-7-8-7z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+        <circle cx="7.5" cy="11" r="1.15" fill="currentColor"/>
+        <circle cx="9.3" cy="7.3" r="1.15" fill="currentColor"/>
+        <circle cx="14" cy="6.7" r="1.15" fill="currentColor"/>
+      </symbol>
+    </defs>
+  </svg>
 
   <div id="setupNotice" class="setup-notice" hidden>
     <div class="setup-notice-inner">
@@ -116,7 +167,10 @@
         <section id="muralSection" class="app-section">
           <div class="section-intro mural-intro">
             <span class="eyebrow">// mural</span>
-            <h2>Tarefas da turma</h2>
+            <div class="section-heading-row">
+              <span class="section-icon" aria-hidden="true"><svg><use href="#icon-mural"></use></svg></span>
+              <h2>Tarefas da turma</h2>
+            </div>
           </div>
           <div id="emptyState" class="empty-state" hidden>
             <p>Nenhuma tarefa por aqui ainda.</p>
@@ -131,7 +185,10 @@
         <section id="meritoSection" class="app-section merito-section" hidden>
           <div class="merito-intro">
             <span class="eyebrow">// mérito</span>
-            <h2>Mérito</h2>
+            <div class="section-heading-row">
+              <span class="section-icon" aria-hidden="true"><svg><use href="#icon-merito"></use></svg></span>
+              <h2>Mérito</h2>
+            </div>
             <p>Coloque suas notas do boletim em cada matéria. A média decide seu nível: <strong>9,5 ou mais</strong> é Diamante, <strong>de 9 a 9,4</strong> é Ouro, abaixo de <strong>9</strong> ainda não tem nível.</p>
           </div>
           <div class="merito-itinerario">
@@ -150,7 +207,10 @@
           <div id="duvidaFormWrap">
             <div class="merito-intro">
               <span class="eyebrow">// dúvidas</span>
-              <h2>Tire suas dúvidas</h2>
+              <div class="section-heading-row">
+                <span class="section-icon" aria-hidden="true"><svg><use href="#icon-duvidas"></use></svg></span>
+                <h2>Tire suas dúvidas</h2>
+              </div>
               <p>Escreva sua dúvida abaixo. Só o admin vê antes de responder — depois de respondida, a pergunta e a resposta ficam visíveis aqui embaixo pra todo mundo (útil pra quem tiver a mesma dúvida).</p>
             </div>
             <form id="duvidaForm" class="duvida-form">
@@ -177,7 +237,10 @@
           <div id="duvidaListWrap" hidden>
             <div class="merito-intro">
               <span class="eyebrow">// dúvidas</span>
-              <h2>Dúvidas recebidas</h2>
+              <div class="section-heading-row">
+                <span class="section-icon" aria-hidden="true"><svg><use href="#icon-duvidas"></use></svg></span>
+                <h2>Dúvidas recebidas</h2>
+              </div>
               <p>Todas as perguntas aparecem aqui. As respondidas também ficam visíveis pra turma toda.</p>
             </div>
             <div id="duvidaEmpty" class="empty-state" hidden>
@@ -191,7 +254,10 @@
           <div id="ideiaFormWrap">
             <div class="merito-intro">
               <span class="eyebrow">// ideias</span>
-              <h2>Me dê uma ideia</h2>
+              <div class="section-heading-row">
+                <span class="section-icon" aria-hidden="true"><svg><use href="#icon-ideias"></use></svg></span>
+                <h2>Me dê uma ideia</h2>
+              </div>
               <p>Tem alguma ideia pro mural? Escreva abaixo — só o admin vê as ideias enviadas.</p>
             </div>
             <form id="ideiaForm" class="duvida-form">
@@ -210,7 +276,10 @@
           <div id="ideiaListWrap" hidden>
             <div class="merito-intro">
               <span class="eyebrow">// ideias</span>
-              <h2>Ideias recebidas</h2>
+              <div class="section-heading-row">
+                <span class="section-icon" aria-hidden="true"><svg><use href="#icon-ideias"></use></svg></span>
+                <h2>Ideias recebidas</h2>
+              </div>
               <p>Todas as ideias enviadas pela turma aparecem aqui.</p>
             </div>
             <div id="ideiaEmpty" class="empty-state" hidden>
@@ -223,7 +292,10 @@
         <section id="enquetesSection" class="app-section duvidas-section" hidden>
           <div class="merito-intro">
             <span class="eyebrow">// enquetes</span>
-            <h2>Enquetes</h2>
+            <div class="section-heading-row">
+              <span class="section-icon" aria-hidden="true"><svg><use href="#icon-enquetes"></use></svg></span>
+              <h2>Enquetes</h2>
+            </div>
             <p>Vote nas enquetes da turma. O resultado aparece assim que você vota.</p>
           </div>
           <button id="addEnqueteBtn" class="btn btn-primary" type="button" hidden>+ Nova enquete</button>
@@ -236,7 +308,10 @@
         <section id="horarioSection" class="app-section horario-section" hidden>
           <div class="merito-intro">
             <span class="eyebrow">// horário</span>
-            <h2>Horário de aulas</h2>
+            <div class="section-heading-row">
+              <span class="section-icon" aria-hidden="true"><svg><use href="#icon-horario"></use></svg></span>
+              <h2>Horário de aulas</h2>
+            </div>
             <p>Horário da turma 1MA — válido a partir de 21/07.</p>
           </div>
           <div class="horario-table-wrap">
@@ -308,7 +383,10 @@
         <section id="versiculoSection" class="app-section versiculo-section" hidden>
           <div class="merito-intro">
             <span class="eyebrow">// versículo do dia</span>
-            <h2>Versículo do dia</h2>
+            <div class="section-heading-row">
+              <span class="section-icon" aria-hidden="true"><svg><use href="#icon-versiculo"></use></svg></span>
+              <h2>Versículo do dia</h2>
+            </div>
           </div>
           <div class="versiculo-card">
             <p id="versiculoTexto" class="versiculo-texto">Carregando…</p>
@@ -334,7 +412,10 @@
         <section id="tradutorSection" class="app-section tradutor-section" hidden>
           <div class="merito-intro">
             <span class="eyebrow">// tradutor</span>
-            <h2>Tradutor</h2>
+            <div class="section-heading-row">
+              <span class="section-icon" aria-hidden="true"><svg><use href="#icon-tradutor"></use></svg></span>
+              <h2>Tradutor</h2>
+            </div>
             <p>Traduza um texto entre 34 idiomas, com voz, favoritos, flashcards e quiz.</p>
           </div>
 
@@ -396,7 +477,10 @@
         <section id="artesSection" class="app-section duvidas-section" hidden>
           <div class="merito-intro">
             <span class="eyebrow">// trabalho de artes</span>
-            <h2>Instagrams dos artistas</h2>
+            <div class="section-heading-row">
+              <span class="section-icon" aria-hidden="true"><svg><use href="#icon-artes"></use></svg></span>
+              <h2>Instagrams dos artistas</h2>
+            </div>
             <p>Poste o Instagram que você criou pro seu artista: seu nome, o nome do artista e o @ que você escolheu. Todo mundo pode postar e ver os posts dos colegas.</p>
           </div>
           <form id="arteForm" class="duvida-form">

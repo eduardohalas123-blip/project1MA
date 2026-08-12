@@ -125,6 +125,7 @@
 }
 
 #tradutorSection .trad-btn-primario {
+  position: relative;
   display: block;
   width: 100%;
   height: 46px;
@@ -139,6 +140,25 @@
   cursor: pointer;
   box-shadow: 0 12px 24px -10px color-mix(in srgb, var(--accent) 70%, transparent);
   transition: transform 0.15s ease, box-shadow 0.15s ease, opacity .15s ease;
+}
+/* Mesmo brilho diagonal do .btn-primary (style.css) - ver comentário lá. */
+#tradutorSection .trad-btn-primario::after,
+#tradutorSection .trad-btn-mundo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(115deg, transparent 35%, color-mix(in srgb, white 45%, transparent) 50%, transparent 65%);
+  background-size: 220% 220%;
+  background-position: -40% -40%;
+  opacity: 0;
+  transition: background-position 0.8s var(--ease-premium), opacity 0.3s ease;
+  pointer-events: none;
+}
+#tradutorSection .trad-btn-primario:hover::after,
+#tradutorSection .trad-btn-mundo:hover::after {
+  background-position: 60% 60%;
+  opacity: 1;
 }
 
 #tradutorSection .trad-btn-primario:hover {
@@ -369,6 +389,7 @@
 }
 
 #tradutorSection .trad-btn-mundo {
+  position: relative;
   display: block;
   width: 100%;
   height: 52px;

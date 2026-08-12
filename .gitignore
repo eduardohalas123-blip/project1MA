@@ -3,3 +3,7 @@ translator/
 
 # Ambiente local
 .netlify/
+
+# Config local de MCP servers (nomes/URLs de ferramentas de dev, não segredo
+# do projeto em si, mas não precisa ir pro repo público)
+.mcp.json

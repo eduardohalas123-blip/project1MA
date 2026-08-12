@@ -113,15 +113,19 @@ Guardado em `localStorage`, só no navegador de cada pessoa:
    390px). E qualquer regra que force `display` numa classe genérica tipo
    `.btn` precisa do `:not([hidden])`, senão sobrescreve o `[hidden]` da
    UA stylesheet e reexibe botões que deveriam estar escondidos.
-5. **Navegação lateral** — troca qual `.app-section` fica visível, com uma
-   revelação circular (`clip-path` animado, ver HISTORICO.md item 47):
-   `trocarSecaoComRevelacao()` sobrepõe a seção nova por cima da atual
-   (`position:absolute` + classe `.vt-revelando`) e deixa um
-   `@keyframes` abrir o círculo a partir do item clicado; ao terminar
-   (`animationend`), a seção antiga vira `hidden`. Auto-curativo contra
-   cliques rápidos demais (limpa qualquer `vt-revelando` órfão de um
-   clique anterior antes de começar um novo). `prefers-reduced-motion`
-   pula direto pra `trocarSecaoAtiva()` (troca instantânea, sem overlay).
+5. **Navegação lateral** — `trocarSecaoAtiva()` troca qual `.app-section`
+   fica visível (`hidden` liga/desliga na hora); a animação de entrada é só
+   o fade+leve subida que já existe em CSS (`.app-section` com
+   `@starting-style`, item 43 do HISTORICO.md). Existiu uma "revelação
+   circular" (`clip-path` crescendo a partir do item clicado, item 47) —
+   **removida no item 51**: mantinha as duas seções (antiga/nova) visíveis
+   ao mesmo tempo por ~0.65s, e um re-render do Mural nessa janela
+   (Firestore reconectando) ficava visível e parecia a página travando/
+   recarregando (item 50). O fade simples nunca sobrepõe duas seções, imune
+   a esse problema por construção. Ver também item 49 — um sistema de
+   "revelação ao rolar" (`[data-reveal]`/`IntersectionObserver`) também foi
+   tentado e removido, por interagir mal com a revelação circular (que já
+   não existe mais de qualquer forma).
 6. **Versículo do dia** — `fetch("versiculos.json")`, escolhe pelo dia do ano.
 7. **Mérito** — grid de notas dinâmico por itinerário, cálculo de média.
    `getMeritoSubjectNames()` monta a lista a partir de `SUBJECTS` +
@@ -412,6 +416,38 @@ Tokens de tema em `:root` (light) e redefinidos em
 o switch manual precisa funcionar independente do SO). Paleta categórica
 `--c1`..`--c10` usada nas matérias. `--warning` usado pra "Aviso".
 
+**Tipografia** (3 famílias, cada uma com um papel fixo, ver HISTORICO.md
+item 48): `--font-body` (Inter, texto corrido), `--font-heading` (Manrope,
+títulos de UI/menores: modais, nomes de matéria, marca "1MA" no cabeçalho),
+`--font-display` (Big Shoulders Display, só nos `h2` grandes de cada seção
+— `.section-intro h2`/`.merito-intro h2` — condensada/pesada de propósito,
+pra não competir com o Manrope usado em todo o resto). **Não** usar
+`--font-display` em textos curtos com números colados a letras tipo "1MA"
+— o "1" dessa fonte é visualmente idêntico a "I" nesse peso, testado e
+confirmado com Playwright. `--font-mono` é Space Mono (Google Fonts),
+usado em eyebrows/badges/timestamps/horário.
+
+**Motion**: `--ease-premium` (`cubic-bezier(0.16, 1, 0.3, 1)`) é usado só
+no "brilho" (sheen) de hover do `.btn-primary` (gradiente diagonal que
+desloca de posição, `::after` com `pointer-events:none` e
+`border-radius:inherit`) — ver item 48 do HISTORICO.md. Existiu também uma
+versão do sheen nos cards (Mural/Dúvidas/Artes) e um sistema de "revelação
+ao rolar" (`[data-reveal]` + `IntersectionObserver`); **ambos foram
+removidos no item 49** (brilho "muito aparente" nos cards, revelação ao
+rolar competindo/desincronizada com a revelação circular ao trocar de
+seção). As transições mais antigas (hover de botão secundário/chip/
+sidebar, revelação circular ao trocar de seção) continuam com suas
+próprias curvas/tempos já testados, não foram unificadas nessa variável.
+
+**Ícones de seção**: cada `h2` de seção (`.section-intro`/`.merito-intro`)
+tem um badge `.section-icon` com o mesmo gradiente do `.brand-mark`, SVG
+desenhado à mão (não gerado por IA — a skill de geração de ícone precisa
+de `GEMINI_API_KEY`, não configurada aqui). Os símbolos ficam num sprite
+`<svg>` oculto (`<symbol id="icon-X">`) logo no início do `<body>` em
+`index.html`, reusados via `<use href="#icon-X">` — evita repetir o SVG
+inteiro nas seções que aparecem 2x (Dúvidas/Ideias: formulário público +
+inbox do admin, mesmo ícone nos dois). Ver item 49 do HISTORICO.md.
+
 ## `tradutor.css`
 
 Arquivo à parte (não misturado em `style.css`) só com o visual da seção
@@ -493,6 +529,9 @@ Existe uma pasta de teste isolada na scratchpad da sessão
 Firestore + regras de segurança, usada só durante o desenvolvimento pra
 testar sem mexer nos dados reais. Não faz parte do site publicado.
 
-Servidor local de desenvolvimento (arquivo real do projeto, porta 8091):
-roda um `http.server.ThreadingHTTPServer` simples forçando
-`charset=utf-8` nas respostas `.html` (sem isso os acentos quebravam).
+Servidor local de desenvolvimento: `scripts/dev_server.py` (porta 8091,
+`python scripts/dev_server.py`) — `http.server.ThreadingHTTPServer`
+simples forçando `charset=utf-8` nas respostas `.html` (sem isso os
+acentos quebravam). Existia só como prática/documentação até 2026-08-11 —
+o arquivo em si nunca tinha sido commitado; formalizado no item 48 do
+HISTORICO.md.

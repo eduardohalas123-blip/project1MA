@@ -190,70 +190,20 @@ window.addEventListener("resize", () => {
 // ---------------------------------------------------------------------------
 // Navegação lateral
 // ---------------------------------------------------------------------------
-// Troca de seção com "revelação circular" - a seção nova entra por cima da
-// atual (position:absolute) já com o clip-path fechado, e um círculo abre
-// a partir do item clicado até cobrir tudo, inspirado num vídeo que o
-// usuário mandou. Feito manualmente com clip-path + @keyframes (não com a
-// View Transitions API - ela tenta "morfar" automaticamente o tamanho do
-// conteúdo antigo pro novo, o que distorcia/fantasmava o texto durante a
-// animação, sem controle fino o bastante pra evitar isso). Em "reduzir
-// movimento", cai pro fade simples que já existia via CSS.
+// Troca de seção só com o fade suave que já existe em CSS (.app-section,
+// opacity+transform com @starting-style). Existiu uma "revelação circular"
+// (clip-path crescendo a partir do item clicado, ver HISTORICO.md item 47)
+// - removida no item 51: com as duas seções ficando visíveis ao mesmo tempo
+// durante os ~0.65s da animação, um re-render do Mural vindo do Firestore
+// bem nessa janela (ex.: reconexão do canal em tempo real) deixava a
+// transição com cara de "recarregando"/travando. O fade simples troca o
+// `hidden` na hora, sem manter as duas seções sobrepostas - imune a esse
+// problema por construção.
 const sidebarItems = document.querySelectorAll(".sidebar-item");
 const appSections = document.querySelectorAll(".app-section");
-const mainEl = document.querySelector("main.main");
-const reduzMovimento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 function trocarSecaoAtiva(targetId) {
   appSections.forEach((section) => { section.hidden = section.id !== targetId; });
-}
-
-function trocarSecaoComRevelacao(item, targetId) {
-  const novaSecao = document.getElementById(targetId);
-  if (!mainEl || !novaSecao) {
-    trocarSecaoAtiva(targetId);
-    return;
-  }
-
-  // Se um clique anterior ainda estava no meio da revelação (clicou rápido
-  // demais entre abas, antes dos 0.65s acabarem), encerra ele na hora -
-  // sem isso, sobrava mais de uma seção "vazando" com vt-revelando/
-  // position:absolute presa, porque o addEventListener("animationend") de
-  // baixo só sabe fechar a seção que ERA a atual no momento daquele clique.
-  appSections.forEach((s) => {
-    if (s !== novaSecao) {
-      s.classList.remove("vt-revelando");
-      s.style.pointerEvents = "";
-    }
-  });
-
-  const secaoAtual = Array.from(appSections).find((s) => s !== novaSecao && !s.hidden);
-  if (!secaoAtual) {
-    trocarSecaoAtiva(targetId);
-    return;
-  }
-  // Garante que não sobra nenhuma outra seção visível além dessas duas,
-  // mesmo se um clique anterior tiver deixado alguma "esquecida" acesa.
-  appSections.forEach((s) => { if (s !== novaSecao && s !== secaoAtual) s.hidden = true; });
-
-  const rect = item.getBoundingClientRect();
-  const mainRect = mainEl.getBoundingClientRect();
-  const x = rect.left + rect.width / 2 - mainRect.left;
-  const y = rect.top + rect.height / 2 - mainRect.top;
-  // Raio até o canto mais distante do painel, pra o círculo cobrir tudo
-  // exatamente quando a animação termina (nem sobrar, nem faltar).
-  const raio = Math.hypot(Math.max(x, mainRect.width - x), Math.max(y, mainRect.height - y));
-  mainEl.style.setProperty("--vt-x", `${x}px`);
-  mainEl.style.setProperty("--vt-y", `${y}px`);
-  mainEl.style.setProperty("--vt-r", `${raio}px`);
-
-  secaoAtual.style.pointerEvents = "none";
-  novaSecao.hidden = false;
-  novaSecao.classList.add("vt-revelando");
-  novaSecao.addEventListener("animationend", () => {
-    novaSecao.classList.remove("vt-revelando");
-    secaoAtual.hidden = true;
-    secaoAtual.style.pointerEvents = "";
-  }, { once: true });
 }
 
 sidebarItems.forEach((item) => {
@@ -261,13 +211,7 @@ sidebarItems.forEach((item) => {
     if (item.classList.contains("active")) return;
     sidebarItems.forEach((i) => i.classList.remove("active"));
     item.classList.add("active");
-    const targetId = item.dataset.section;
-
-    if (!reduzMovimento) {
-      trocarSecaoComRevelacao(item, targetId);
-    } else {
-      trocarSecaoAtiva(targetId);
-    }
+    trocarSecaoAtiva(item.dataset.section);
   });
 });
 
@@ -3723,10 +3667,27 @@ if (!isConfigured) {
   iniciarEnquetes();
   iniciarArtes();
 
+  // O Firestore reenvia o snapshot inteiro em reconexões do canal em tempo
+  // real mesmo sem nenhuma tarefa ter mudado de verdade (ex.: o long-poll
+  // do onSnapshot renova sozinho de tempos em tempos) - sem essa checagem,
+  // cada reenvio destruía e recriava TODOS os cards do zero (renderBoard()
+  // faz board.innerHTML = "" e reconstrói), reproduzindo a animação de
+  // entrada de novo do nada. Achado testando a transição de seção com
+  // gravação de vídeo real (usuário reportou "parece que a página tá
+  // carregando"): comparar um retrato (assinatura) simples da lista antes
+  // de re-renderizar evita esse "flash" quando o conteúdo é idêntico.
+  let ultimaAssinaturaTarefas = null;
   onSnapshot(
     query(tasksRef, orderBy("prazo", "asc")),
     (snapshot) => {
-      allTasks = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+      const novasTasks = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+      const assinatura = JSON.stringify(novasTasks);
+      if (assinatura === ultimaAssinaturaTarefas) {
+        el.loadingState.hidden = true;
+        return;
+      }
+      ultimaAssinaturaTarefas = assinatura;
+      allTasks = novasTasks;
       renderFilterBar();
       renderBoard();
     },
