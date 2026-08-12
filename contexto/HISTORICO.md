@@ -906,6 +906,22 @@ por trás de cada decisão, pra não se perder o contexto depois.
     Retestado: todas as seções continuam abrindo/fechando certo, sem
     overflow, sem erro novo de console.
 
+52. **Enquetes: resultado ao vivo pra quem ainda não votou** (2026-08-12) —
+    usuário pediu "que apareça em tempo real os votos até mesmo sem
+    precisar clicar". Os votos já chegavam em tempo real de verdade
+    (`iniciarEnquetes()` usa `onSnapshot`, não uma leitura única) - o
+    problema era só de exibição: `renderEnquetes()` só mostrava a barra de
+    resultado (contagem/porcentagem) pra quem **já tinha votado** naquela
+    enquete (`jaVotouIndice !== undefined`, lido do `localStorage`); quem
+    ainda não votou só via os botões de opção, sem nenhum número. Unificado
+    os dois: agora sempre renderiza a barra de resultado com contagem ao
+    vivo pra todo mundo; a diferença é só se ela é clicável (`<button
+    class="enquete-resultado clicavel">`, quem ainda não votou - clicar
+    registra o voto) ou travada (`<div class="enquete-resultado votada">`,
+    quem já votou, com o ✓ na opção escolhida). Classe `.enquete-opcao-btn`
+    (só usada no caminho antigo "sem votar") removida do CSS por ficar sem
+    uso.
+
 ## Deploy
 
 - **Mudou em 2026-08-08** (item 24): o site agora tem uma Netlify

@@ -908,18 +908,19 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--fon
 .enquete-total { font-size: 0.78rem; color: var(--text-muted); }
 .enquete-opcoes { display: flex; flex-direction: column; gap: 9px; margin-top: 4px; }
 
-.enquete-opcao-btn {
-  text-align: left; padding: 11px 15px; border-radius: var(--radius-md);
-  border: 1.5px solid var(--border); background: var(--surface-2); color: var(--text);
-  cursor: pointer; font: inherit; font-weight: 600; font-size: 0.92rem;
-  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
-}
-.enquete-opcao-btn:hover { border-color: var(--accent); background: var(--bg-alt); transform: translateY(-1px); }
-
 .enquete-resultado {
-  position: relative; border-radius: var(--radius-md); overflow: hidden;
+  position: relative; display: block; width: 100%; border-radius: var(--radius-md); overflow: hidden;
   border: 1.5px solid var(--border); background: var(--surface-2);
 }
+/* Enquanto a pessoa ainda não votou, a própria barra de resultado é o
+   botão de voto (mostra a contagem ao vivo antes mesmo de clicar) - só
+   fica "morta" (sem :hover/cursor) depois que ela vota, no <div> sem essa
+   classe. Ver HISTORICO.md. */
+.enquete-resultado.clicavel {
+  cursor: pointer; font: inherit; text-align: left;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.enquete-resultado.clicavel:hover { border-color: var(--accent); transform: translateY(-1px); }
 .enquete-resultado-barra {
   position: absolute; inset: 0; width: 0%;
   background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 30%, transparent), color-mix(in srgb, var(--accent-2) 30%, transparent));

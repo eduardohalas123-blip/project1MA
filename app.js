@@ -983,36 +983,36 @@ function renderEnquetes() {
     const opcoesWrap = document.createElement("div");
     opcoesWrap.className = "enquete-opcoes";
 
+    // Sempre mostra a barra com contagem ao vivo (não só depois de votar) -
+    // quem ainda não votou também acompanha o resultado em tempo real via
+    // onSnapshot, sem precisar clicar em nada; a barra continua clicável
+    // pra essa pessoa (vira o próprio voto), só trava depois que ela vota.
     (enquete.opcoes || []).forEach((opcao, indice) => {
       const contagem = votos[String(indice)] || 0;
+      const pct = total > 0 ? Math.round((contagem / total) * 100) : 0;
+      const jaVotou = jaVotouIndice !== undefined;
 
-      if (jaVotouIndice === undefined) {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "enquete-opcao-btn";
-        btn.textContent = opcao;
-        btn.addEventListener("click", () => votarEnquete(enquete.id, indice));
-        opcoesWrap.appendChild(btn);
-      } else {
-        const pct = total > 0 ? Math.round((contagem / total) * 100) : 0;
-        const resultado = document.createElement("div");
-        resultado.className = "enquete-resultado" + (indice === jaVotouIndice ? " votada" : "");
-
-        const barra = document.createElement("div");
-        barra.className = "enquete-resultado-barra";
-        barra.style.width = `${pct}%`;
-
-        const info = document.createElement("div");
-        info.className = "enquete-resultado-info";
-        const label = document.createElement("span");
-        label.textContent = opcao + (indice === jaVotouIndice ? " ✓" : "");
-        const pctSpan = document.createElement("span");
-        pctSpan.textContent = `${pct}% (${contagem})`;
-        info.append(label, pctSpan);
-
-        resultado.append(barra, info);
-        opcoesWrap.appendChild(resultado);
+      const resultado = document.createElement(jaVotou ? "div" : "button");
+      if (!jaVotou) {
+        resultado.type = "button";
+        resultado.addEventListener("click", () => votarEnquete(enquete.id, indice));
       }
+      resultado.className = "enquete-resultado" + (indice === jaVotouIndice ? " votada" : "") + (jaVotou ? "" : " clicavel");
+
+      const barra = document.createElement("div");
+      barra.className = "enquete-resultado-barra";
+      barra.style.width = `${pct}%`;
+
+      const info = document.createElement("div");
+      info.className = "enquete-resultado-info";
+      const label = document.createElement("span");
+      label.textContent = opcao + (indice === jaVotouIndice ? " ✓" : "");
+      const pctSpan = document.createElement("span");
+      pctSpan.textContent = `${pct}% (${contagem})`;
+      info.append(label, pctSpan);
+
+      resultado.append(barra, info);
+      opcoesWrap.appendChild(resultado);
     });
     card.appendChild(opcoesWrap);
 
