@@ -91,6 +91,12 @@ const el = {
   taskPrazo: document.getElementById("taskPrazo"),
   taskDescricao: document.getElementById("taskDescricao"),
   taskLink: document.getElementById("taskLink"),
+  taskFoto: document.getElementById("taskFoto"),
+  taskFotoPreviewWrap: document.getElementById("taskFotoPreviewWrap"),
+  taskFotoPreview: document.getElementById("taskFotoPreview"),
+  taskFotoRemoverBtn: document.getElementById("taskFotoRemoverBtn"),
+  fotoModal: document.getElementById("fotoModal"),
+  fotoModalImg: document.getElementById("fotoModalImg"),
   toast: document.getElementById("toast"),
   temaCeuToggle: document.getElementById("temaCeuToggle"),
   viewToggle: document.getElementById("viewToggle"),
@@ -366,6 +372,65 @@ function showToast(message) {
   toastTimer = setTimeout(() => { el.toast.hidden = true; }, 3200);
 }
 
+// ---------------------------------------------------------------------------
+// Foto anexada (tarefa do Mural, opção de enquete) - sem Firebase Storage
+// (exigiria plano pago Blaze), a foto vai comprimida direto num campo do
+// documento no Firestore. Redimensiona num <canvas> e comprime como JPEG;
+// se ainda ficar grande, tenta de novo com menos qualidade/tamanho antes de
+// desistir - o limite de documento do Firestore é 1 MiB, então o teto aqui
+// (~290KB de imagem) deixa folga confortável mesmo com o resto dos campos.
+const FOTO_MAX_BASE64 = 400000;
+const FOTO_TENTATIVAS = [
+  [640, 0.6],
+  [640, 0.4],
+  [480, 0.4],
+];
+
+function comprimirImagem(file) {
+  return new Promise((resolve, reject) => {
+    if (!file.type || !file.type.startsWith("image/")) {
+      reject(new Error("Selecione uma imagem."));
+      return;
+    }
+    const leitor = new FileReader();
+    leitor.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        for (const [maxDim, qualidade] of FOTO_TENTATIVAS) {
+          let { width, height } = img;
+          if (width > height) {
+            if (width > maxDim) { height = Math.round(height * (maxDim / width)); width = maxDim; }
+          } else if (height > maxDim) {
+            width = Math.round(width * (maxDim / height));
+            height = maxDim;
+          }
+          canvas.width = width;
+          canvas.height = height;
+          ctx.drawImage(img, 0, 0, width, height);
+          const comprimida = canvas.toDataURL("image/jpeg", qualidade);
+          if (comprimida.length <= FOTO_MAX_BASE64) {
+            resolve(comprimida);
+            return;
+          }
+        }
+        reject(new Error("Essa foto é grande demais mesmo comprimida. Tente outra."));
+      };
+      img.onerror = () => reject(new Error("Não foi possível ler essa imagem."));
+      img.src = leitor.result;
+    };
+    leitor.onerror = () => reject(new Error("Não foi possível ler o arquivo."));
+    leitor.readAsDataURL(file);
+  });
+}
+
+function abrirLightboxFoto(src, alt) {
+  el.fotoModalImg.src = src;
+  el.fotoModalImg.alt = alt || "";
+  openModal(el.fotoModal);
+}
+
 function openModal(modal) {
   modal.hidden = false;
   const firstField = modal.querySelector("input, select, textarea");
@@ -448,6 +513,7 @@ let allTasks = [];
 let isAdmin = false;
 let activeFilter = "Todas";
 let editingTaskId = null;
+let fotoTarefaPendente = null;
 let db = null;
 let currentCommentTaskId = null;
 let unsubscribeComments = null;
@@ -570,6 +636,16 @@ function renderBoard() {
       desc.textContent = task.descricao;
       card.appendChild(desc);
 
+      if (task.foto) {
+        const foto = document.createElement("img");
+        foto.className = "card-foto";
+        foto.src = task.foto;
+        foto.alt = "Foto da tarefa: " + task.descricao;
+        foto.loading = "lazy";
+        foto.addEventListener("click", () => abrirLightboxFoto(task.foto, foto.alt));
+        card.appendChild(foto);
+      }
+
       if (task.link && isSafeUrl(task.link)) {
         const link = document.createElement("a");
         link.className = "card-link";
@@ -630,9 +706,21 @@ function renderBoard() {
 // ---------------------------------------------------------------------------
 // Formulário de tarefa (criar / editar)
 // ---------------------------------------------------------------------------
+function exibirPreviewFotoTarefa(src) {
+  if (src) {
+    el.taskFotoPreview.src = src;
+    el.taskFotoPreviewWrap.hidden = false;
+  } else {
+    el.taskFotoPreview.src = "";
+    el.taskFotoPreviewWrap.hidden = true;
+  }
+}
+
 function resetTaskForm() {
   el.taskForm.reset();
   editingTaskId = null;
+  fotoTarefaPendente = null;
+  exibirPreviewFotoTarefa(null);
   el.taskTitle.textContent = "Nova tarefa";
   el.taskSubmitBtn.textContent = "Adicionar tarefa";
   el.taskError.hidden = true;
@@ -655,9 +743,28 @@ function openEditModal(id) {
   el.taskPrazo.value = task.prazo;
   el.taskDescricao.value = task.descricao;
   el.taskLink.value = task.link || "";
+  fotoTarefaPendente = task.foto || null;
+  exibirPreviewFotoTarefa(fotoTarefaPendente);
 
   openModal(el.taskModal);
 }
+
+el.taskFoto.addEventListener("change", async () => {
+  const arquivo = el.taskFoto.files[0];
+  if (!arquivo) return;
+  try {
+    fotoTarefaPendente = await comprimirImagem(arquivo);
+    exibirPreviewFotoTarefa(fotoTarefaPendente);
+  } catch (erro) {
+    showToast(erro.message || "Não foi possível usar essa foto.");
+  }
+  el.taskFoto.value = "";
+});
+
+el.taskFotoRemoverBtn.addEventListener("click", () => {
+  fotoTarefaPendente = null;
+  exibirPreviewFotoTarefa(null);
+});
 
 async function toggleDone(id, value) {
   try {
@@ -698,12 +805,37 @@ function buildReplyForm(item) {
   textarea.placeholder = "Escreva a resposta...";
   textarea.value = item.resposta || "";
 
+  const acoes = document.createElement("div");
+  acoes.className = "duvida-reply-acoes";
+
   const btn = document.createElement("button");
   btn.type = "submit";
   btn.className = "btn btn-primary";
   btn.textContent = item.resposta ? "Atualizar resposta" : "Responder";
+  acoes.appendChild(btn);
 
-  form.append(textarea, btn);
+  // Só existe depois de já ter uma resposta - apaga só a resposta (a
+  // dúvida volta a ficar "não respondida": some da lista pública, some
+  // do FAQ, continua só na caixa de entrada do admin), sem apagar a
+  // pergunta original.
+  if (item.resposta) {
+    const apagarRespostaBtn = document.createElement("button");
+    apagarRespostaBtn.type = "button";
+    apagarRespostaBtn.className = "text-btn danger";
+    apagarRespostaBtn.textContent = "Apagar resposta";
+    apagarRespostaBtn.addEventListener("click", async () => {
+      if (!confirm("Apagar essa resposta? A dúvida some da lista pública e volta pra sua caixa de entrada como não respondida.")) return;
+      try {
+        await updateDoc(doc(db, "duvidas", item.id), { resposta: null, respondidoEm: null });
+        showToast("Resposta apagada.");
+      } catch (error) {
+        showToast("Não foi possível apagar a resposta.");
+      }
+    });
+    acoes.appendChild(apagarRespostaBtn);
+  }
+
+  form.append(textarea, acoes);
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const resposta = textarea.value.trim();
@@ -987,7 +1119,10 @@ function renderEnquetes() {
     // quem ainda não votou também acompanha o resultado em tempo real via
     // onSnapshot, sem precisar clicar em nada; a barra continua clicável
     // pra essa pessoa (vira o próprio voto), só trava depois que ela vota.
-    (enquete.opcoes || []).forEach((opcao, indice) => {
+    (enquete.opcoes || []).forEach((opcaoRaw, indice) => {
+      // Enquetes criadas antes da foto por opção têm `opcoes` como
+      // string[]; as novas são {texto, foto}[] - aceita as duas.
+      const opcao = typeof opcaoRaw === "string" ? { texto: opcaoRaw, foto: null } : opcaoRaw;
       const contagem = votos[String(indice)] || 0;
       const pct = total > 0 ? Math.round((contagem / total) * 100) : 0;
       const jaVotou = jaVotouIndice !== undefined;
@@ -999,6 +1134,24 @@ function renderEnquetes() {
       }
       resultado.className = "enquete-resultado" + (indice === jaVotouIndice ? " votada" : "") + (jaVotou ? "" : " clicavel");
 
+      if (opcao.foto) {
+        const foto = document.createElement("img");
+        foto.className = "enquete-opcao-foto";
+        foto.src = opcao.foto;
+        foto.alt = opcao.texto;
+        foto.loading = "lazy";
+        foto.addEventListener("click", (event) => {
+          event.stopPropagation();
+          abrirLightboxFoto(opcao.foto, opcao.texto);
+        });
+        resultado.appendChild(foto);
+      }
+
+      // Barra/info ficam num wrapper à parte (não a foto) - o preenchimento
+      // colorido é só atrás do texto/porcentagem, não tingindo a foto.
+      const corpo = document.createElement("div");
+      corpo.className = "enquete-resultado-corpo";
+
       const barra = document.createElement("div");
       barra.className = "enquete-resultado-barra";
       barra.style.width = `${pct}%`;
@@ -1006,12 +1159,13 @@ function renderEnquetes() {
       const info = document.createElement("div");
       info.className = "enquete-resultado-info";
       const label = document.createElement("span");
-      label.textContent = opcao + (indice === jaVotouIndice ? " ✓" : "");
+      label.textContent = opcao.texto + (indice === jaVotouIndice ? " ✓" : "");
       const pctSpan = document.createElement("span");
       pctSpan.textContent = `${pct}% (${contagem})`;
       info.append(label, pctSpan);
 
-      resultado.append(barra, info);
+      corpo.append(barra, info);
+      resultado.appendChild(corpo);
       opcoesWrap.appendChild(resultado);
     });
     card.appendChild(opcoesWrap);
@@ -1047,15 +1201,48 @@ function iniciarEnquetes() {
   );
 }
 
-function criarLinhaOpcaoEnquete(valor = "") {
+function criarLinhaOpcaoEnquete(valor = "", fotoExistente = null) {
   const row = document.createElement("div");
   row.className = "enquete-opcao-input-row";
+  // Guardado direto no elemento (não em atributo/DOM) - é um base64 grande
+  // demais pra virar atributo HTML à toa; lido de volta no submit do form
+  // percorrendo as linhas de #enqueteOpcoesArea, não com um querySelectorAll
+  // genérico de <input> (que pegaria também o <input type="file"> abaixo).
+  row._fotoBase64 = fotoExistente;
 
   const input = document.createElement("input");
   input.type = "text";
+  input.className = "enquete-opcao-texto";
   input.maxLength = 100;
   input.placeholder = "Opção";
   input.value = valor;
+
+  const fotoInput = document.createElement("input");
+  fotoInput.type = "file";
+  fotoInput.accept = "image/*";
+  fotoInput.hidden = true;
+
+  const fotoBtn = document.createElement("button");
+  fotoBtn.type = "button";
+  fotoBtn.className = "enquete-opcao-foto-btn";
+  fotoBtn.title = fotoExistente ? "Foto adicionada - clique pra trocar" : "Adicionar foto nessa opção";
+  fotoBtn.textContent = fotoExistente ? "🖼️" : "📷";
+  fotoBtn.addEventListener("click", () => fotoInput.click());
+
+  fotoInput.addEventListener("change", async () => {
+    const arquivo = fotoInput.files[0];
+    if (!arquivo) return;
+    try {
+      fotoBtn.textContent = "⏳";
+      row._fotoBase64 = await comprimirImagem(arquivo);
+      fotoBtn.textContent = "🖼️";
+      fotoBtn.title = "Foto adicionada - clique pra trocar";
+    } catch (erro) {
+      showToast(erro.message || "Não foi possível usar essa foto.");
+      fotoBtn.textContent = row._fotoBase64 ? "🖼️" : "📷";
+    }
+    fotoInput.value = "";
+  });
 
   const removerBtn = document.createElement("button");
   removerBtn.type = "button";
@@ -1065,7 +1252,7 @@ function criarLinhaOpcaoEnquete(valor = "") {
     if (el.enqueteOpcoesArea.children.length > 2) row.remove();
   });
 
-  row.append(input, removerBtn);
+  row.append(input, fotoBtn, fotoInput, removerBtn);
   return row;
 }
 
@@ -3770,9 +3957,12 @@ if (!isConfigured) {
     event.preventDefault();
     el.enqueteError.hidden = true;
     const pergunta = el.enquetePergunta.value.trim();
-    const opcoes = [...el.enqueteOpcoesArea.querySelectorAll("input")]
-      .map((input) => input.value.trim())
-      .filter((valor) => valor.length > 0);
+    const opcoes = [...el.enqueteOpcoesArea.children]
+      .map((row) => ({
+        texto: row.querySelector(".enquete-opcao-texto").value.trim(),
+        foto: row._fotoBase64 || null,
+      }))
+      .filter((opcao) => opcao.texto.length > 0);
 
     if (!pergunta || opcoes.length < 2) {
       el.enqueteError.textContent = "Preencha a pergunta e pelo menos 2 opções.";
@@ -3879,10 +4069,10 @@ if (!isConfigured) {
 
     try {
       if (editingTaskId) {
-        await updateDoc(doc(db, "tarefas", editingTaskId), { materia, prazo, descricao, link: link || null });
+        await updateDoc(doc(db, "tarefas", editingTaskId), { materia, prazo, descricao, link: link || null, foto: fotoTarefaPendente || null });
         showToast("Tarefa atualizada!");
       } else {
-        await addDoc(tasksRef, { materia, prazo, descricao, link: link || null, concluida: false, criadoEm: serverTimestamp() });
+        await addDoc(tasksRef, { materia, prazo, descricao, link: link || null, foto: fotoTarefaPendente || null, concluida: false, criadoEm: serverTimestamp() });
         showToast("Tarefa adicionada!");
       }
       closeModal(el.taskModal);

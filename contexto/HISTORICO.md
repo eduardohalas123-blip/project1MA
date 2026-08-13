@@ -922,6 +922,64 @@ por trás de cada decisão, pra não se perder o contexto depois.
     (só usada no caminho antigo "sem votar") removida do CSS por ficar sem
     uso.
 
+53. **Anexar foto nas tarefas e nas opções de enquete** (2026-08-12) — pedido
+    depois de uma leva de ideias sugeridas ("anexar foto, quero isso nas
+    enquetes também"). Duas decisões perguntadas antes de mexer: **(1)**
+    Firebase Storage exigiria o plano pago Blaze (mesmo ficando em R$0 pro
+    uso de uma turma, precisa cadastrar cartão) - usuário preferiu guardar
+    a foto **comprimida direto no Firestore** (sem custo, sem trocar de
+    plano); **(2)** nas Enquetes, foto **por opção** (não uma só pra
+    pergunta inteira) - mais trabalho, mas foi o que o usuário pediu.
+    - `comprimirImagem()` (novo, `app.js`): redimensiona num `<canvas>`
+      (até 640px no maior lado) e comprime como JPEG; se ainda ficar maior
+      que ~290KB (400000 caracteres em base64), tenta de novo com menos
+      qualidade/tamanho (3 tentativas) antes de desistir com erro. O
+      limite existe porque o Firestore trava documento em 1 MiB.
+    - **Tarefas**: campo `foto` novo (opcional) no formulário
+      (`#taskFoto` + pré-visualização + botão "Remover foto"), mostrado
+      como miniatura no card do Mural (`.card-foto`), clicável pra abrir
+      ampliada.
+    - **Enquetes**: `opcoes` deixou de ser `string[]` e virou
+      `{texto, foto}[]` - cada linha do formulário de criar
+      (`criarLinhaOpcaoEnquete()`) ganhou um botão de câmera (📷→🖼️ depois
+      de anexar). `renderEnquetes()` aceita as duas formas (checa
+      `typeof opcao === "string"`), então enquetes criadas antes desta
+      mudança continuam funcionando sem migração. A barra de resultado
+      (item 52) ganhou um sub-wrapper `.enquete-resultado-corpo` só pro
+      texto/porcentagem, pra a cor de preenchimento não tingir a foto (que
+      fica fora desse wrapper).
+    - **Lightbox compartilhado** (`#fotoModal`/`abrirLightboxFoto()`): um
+      modal novo, só a imagem ampliada + botão de fechar, reusado pelas
+      duas fotos (tarefa e opção de enquete) - usa o mesmo sistema
+      genérico de abrir/fechar modal que já existia (`[data-close]`,
+      clique fora, Esc), não precisou de nada novo pra isso.
+    - `firestore.rules`: `tarefas` ganhou validação de tamanho pro campo
+      `foto` (< 400000 caracteres, mesmo teto do cliente, só de garantia
+      contra escrita direta fora da UI). `enquetes` não precisou de
+      mudança - a regra de criar já não valida a forma interna de
+      `opcoes` (só que é lista de 2-6), e a de votar já compara
+      `opcoes` inteiro por igualdade (funciona igual não importa se é
+      string ou objeto lá dentro).
+    - Testado (Playwright): upload real de um arquivo de imagem através
+      dos dois formulários, pré-visualização aparece nos dois, ícone do
+      botão de foto na enquete muda de 📷 pra 🖼️. Voto/gravação real no
+      Firestore não dá pra testar no ambiente local (sem permissão), mas a
+      parte 100% client-side (compressão, preview) foi validada de ponta
+      a ponta.
+
+54. **Botão "Apagar resposta" nas Dúvidas** (2026-08-12) — depois de um
+    incidente (alguém mandou uma dúvida ofensiva com nome falso -
+    investigado e confirmado que não há como identificar quem foi, ver
+    conversa: sem login no formulário, sem log de IP/dispositivo em
+    lugar nenhum, e o Netlify não registra isso porque a escrita vai
+    direto do navegador pro Firestore, sem passar por ele), usuário pediu
+    uma forma de desfazer só a resposta sem apagar a dúvida inteira.
+    `buildReplyForm()` ganhou um botão "Apagar resposta" (só aparece
+    quando já existe `item.resposta`) que limpa `resposta`/`respondidoEm`
+    (`null`) - a dúvida volta a ficar só na caixa de entrada do admin, some
+    da lista pública/FAQ. Não precisou mexer em `firestore.rules` (update
+    já é liberado pra admin sem checar campo nenhum).
+
 ## Deploy
 
 - **Mudou em 2026-08-08** (item 24): o site agora tem uma Netlify

@@ -634,6 +634,11 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--fon
 .card-desc { font-size: 0.95rem; color: var(--text); }
 .card-desc.is-done { text-decoration: line-through; color: var(--text-muted); }
 
+.card-foto {
+  width: 100%; max-height: 200px; object-fit: cover;
+  border-radius: var(--radius-sm); cursor: zoom-in;
+}
+
 .card-link {
   font-size: 0.85rem; font-weight: 600; color: var(--accent);
   text-decoration: none; align-self: flex-start;
@@ -730,6 +735,32 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--fon
 .modal-body input:focus, .modal-body select:focus, .modal-body textarea:focus {
   outline: none; border-color: var(--accent);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+/* Pré-visualização de foto anexada (form de tarefa) */
+.foto-preview-wrap {
+  margin-top: 10px; display: flex; align-items: center; gap: 12px;
+}
+.foto-preview {
+  width: 72px; height: 72px; object-fit: cover; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); flex-shrink: 0;
+}
+
+/* Modal de foto ampliada (lightbox) - só a imagem, sem cabeçalho/padding
+   do .modal padrão, botão de fechar flutuando por cima. */
+.foto-modal {
+  max-width: min(90vw, 700px); background: transparent; box-shadow: none;
+  border: none; display: flex; align-items: center; justify-content: center;
+}
+.foto-modal img {
+  max-width: 100%; max-height: 80vh; display: block;
+  border-radius: var(--radius-md); box-shadow: var(--shadow-lg);
+}
+.foto-modal-close {
+  position: absolute; top: -14px; right: -14px; z-index: 1;
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--surface); box-shadow: var(--shadow-md);
+  font-size: 1.3rem;
 }
 
 /* Modal de comentários */
@@ -897,7 +928,8 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--fon
   background: var(--surface-2); color: var(--text); resize: vertical;
 }
 .duvida-reply-form textarea:focus { outline: none; border-color: var(--accent); }
-.duvida-reply-form button { align-self: flex-start; padding: 8px 14px; font-size: 0.85rem; }
+.duvida-reply-acoes { display: flex; align-items: center; gap: 10px; }
+.duvida-reply-form button { padding: 8px 14px; font-size: 0.85rem; }
 
 .duvida-public-wrap { margin-top: 40px; }
 .duvida-public-title { font-size: 1.1rem; font-weight: 800; margin-bottom: 16px; }
@@ -921,6 +953,10 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--fon
   transition: border-color 0.15s ease, transform 0.15s ease;
 }
 .enquete-resultado.clicavel:hover { border-color: var(--accent); transform: translateY(-1px); }
+/* Wrapper só da faixa texto+porcentagem - a barra de preenchimento
+   (position:absolute;inset:0) fica restrita a essa faixa, nunca cobrindo
+   a foto da opção (que é irmã, fora desse wrapper). */
+.enquete-resultado-corpo { position: relative; }
 .enquete-resultado-barra {
   position: absolute; inset: 0; width: 0%;
   background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 30%, transparent), color-mix(in srgb, var(--accent-2) 30%, transparent));
@@ -940,6 +976,22 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; font-family: var(--fon
 .enquete-opcao-input-row { display: flex; gap: 8px; align-items: center; }
 .enquete-opcao-input-row input { flex: 1; }
 .enquete-opcao-input-row .text-btn { flex-shrink: 0; padding: 6px 10px; }
+.enquete-opcao-foto-btn {
+  flex-shrink: 0; width: 34px; height: 34px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: var(--surface-2); cursor: pointer;
+  font-size: 15px; display: flex; align-items: center; justify-content: center;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+.enquete-opcao-foto-btn:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--surface-2)); }
+
+/* Miniatura da foto de uma opção de enquete (clicável, abre o #fotoModal
+   ampliado). Fica FORA de .enquete-resultado-corpo de propósito - assim a
+   barra de preenchimento colorida (position:absolute;inset:0, ver abaixo)
+   nunca tinge a foto, só a faixa de texto/porcentagem. */
+.enquete-opcao-foto {
+  display: block; width: 100%; max-height: 160px; object-fit: cover;
+  cursor: zoom-in;
+}
 
 /* Artes (TEMPORÁRIO - trabalho de artes, ver comentário no index.html) */
 .arte-grid {

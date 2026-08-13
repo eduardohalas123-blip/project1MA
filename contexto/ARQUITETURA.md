@@ -30,6 +30,7 @@ tarefas/{taskId}
   prazo: string (YYYY-MM-DD)
   descricao: string
   link: string | null
+  foto: string | null  (data URI base64, comprimida no navegador - ver item 53 HISTORICO.md)
   concluida: boolean
   criadoEm: timestamp
 
@@ -60,7 +61,8 @@ ideias/{ideiaId}
 
 enquetes/{enqueteId}
   pergunta: string
-  opcoes: string[]
+  opcoes: {texto: string, foto: string|null}[]  (antes de 2026-08-12 era string[] puro -
+    renderEnquetes() aceita as duas formas, ver item 53 HISTORICO.md)
   votos: { "0": number, "1": number, ... }  (mapa, uma chave por índice de opcoes)
   criadoEm: timestamp
 ```

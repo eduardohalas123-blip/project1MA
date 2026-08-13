@@ -23,7 +23,14 @@ service cloud.firestore {
         && request.resource.data.prazo is string
         && request.resource.data.descricao is string
         && request.resource.data.materia.size() > 0
-        && request.resource.data.descricao.size() > 0;
+        && request.resource.data.descricao.size() > 0
+        // Foto opcional (comprimida no navegador antes de salvar, ver
+        // comprimirImagem() em app.js) - 400000 caracteres é o mesmo teto
+        // usado no cliente, só de garantia contra alguém escrever direto
+        // sem passar pela UI.
+        && (!('foto' in request.resource.data)
+          || request.resource.data.foto == null
+          || (request.resource.data.foto is string && request.resource.data.foto.size() < 400000));
       allow update, delete: if isAdmin();
 
       // Comentários de cada tarefa: qualquer um lê e comenta,

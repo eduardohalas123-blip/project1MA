@@ -554,6 +554,13 @@
         <label for="taskLink">Link (opcional)</label>
         <input type="url" id="taskLink" name="link" placeholder="https://..." />
 
+        <label for="taskFoto">Foto (opcional)</label>
+        <input type="file" id="taskFoto" accept="image/*" capture="environment" />
+        <div id="taskFotoPreviewWrap" class="foto-preview-wrap" hidden>
+          <img id="taskFotoPreview" class="foto-preview" alt="Pré-visualização da foto da tarefa" />
+          <button type="button" id="taskFotoRemoverBtn" class="text-btn danger">Remover foto</button>
+        </div>
+
         <p id="taskError" class="form-error" hidden></p>
 
         <button id="taskSubmitBtn" type="submit" class="btn btn-primary btn-block">Adicionar tarefa</button>
@@ -580,6 +587,14 @@
 
         <button type="submit" class="btn btn-primary btn-block">Criar enquete</button>
       </form>
+    </div>
+  </div>
+
+  <!-- Modal: foto ampliada (reusado pela foto da tarefa e das opções de enquete) -->
+  <div id="fotoModal" class="modal-overlay" hidden>
+    <div class="modal foto-modal" role="dialog" aria-modal="true" aria-label="Foto ampliada">
+      <button class="modal-close foto-modal-close" data-close="fotoModal" aria-label="Fechar" type="button">&times;</button>
+      <img id="fotoModalImg" src="" alt="" />
     </div>
   </div>
 
